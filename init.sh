@@ -6,7 +6,7 @@ do
 	case $option in
 		c)
 			echo "Uninstalling configs..."
-			rm -rf $HOME/.vimrc $HOME/.config/nvim
+			rm -rf $HOME/.vimrc $HOME/.config/nvim $HOME/.vim
 			;;
         ?) 
 			mkdir -p $HOME/.config/nvim/{colors,plugged,spell}

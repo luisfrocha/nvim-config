@@ -137,6 +137,6 @@ let g:ale_fixers = {}
 let g:ale_fixers.javascript = ['eslint']
 let g:ale_fix_on_save = 1
 
-:lua require("nvim-web-devicons").setup()
-:lua require("nvim-tree").setup()
+":lua require("nvim-web-devicons").setup()
+":lua require("nvim-tree").setup()
 :source ~/.vimrc
