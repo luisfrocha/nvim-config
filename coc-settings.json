@@ -6,5 +6,6 @@
   "volar.codeLens.scriptSetupTools": true,
   "volar.autoCreateQuotes": true,
   "volar.autoClosingTags": true,
-  "volar.autoCompleteRefs": true
+  "volar.autoCompleteRefs": true,
+  "diagnostic.displayByAle": true
 }

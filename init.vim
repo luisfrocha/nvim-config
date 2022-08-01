@@ -1,16 +1,18 @@
 :source ~/.vimrc
+let g:ale_disable_lsp=1
+let g:airline#extensions#ale#enabled = 1
+let g:ale_completion_enabled = 1
 " Vundle setup
 set rtp+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'tpope/vim-fugitive'
 Plugin 'git://git.wincent.com/command-t.git'
-" Plugin 'https://github.com/kyazdani42/nvim-tree.lua.git'
 Plugin 'rstacruz/sparkup', {'rtp':'vim/'}
-Plugin 'w0rp/ale'
-Plugin 'Yazeed1s/minimal.vim'
 Plugin 'morhetz/gruvbox'
 Plugin 'frazrepo/vim-rainbow'
+Plugin 'posva/vim-vue'
+Plugin 'w0rp/ale'
 call vundle#end()
 
 "Plug-ins
@@ -21,7 +23,6 @@ call plug#begin('~/.config/nvim/plugged')
     Plug 'junegunn/limelight.vim'
     Plug 'neoclide/coc.nvim', {'branch': 'release'}
     Plug 'ctrlpvim/ctrlp.vim'
-    Plug 'posva/vim-vue'
     Plug 'rstacruz/sparkup', { 'rtp': 'vim/' }
     Plug 'brenoprata10/nvim-highlight-colors'
     Plug 'mhartington/oceanic-next'
@@ -36,19 +37,22 @@ call plug#begin('~/.config/nvim/plugged')
     Plug 'preservim/nerdtree'
     Plug 'ctrlpvim/ctrlp.vim'
     Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+    Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+    Plug 'junegunn/fzf.vim'
 " Syntax
     Plug 'tpope/vim-markdown'
-    Plug 'ap/vim-css-color' "Displays a preview of colors with CSS 
+    Plug 'ap/vim-css-color' "Displays a preview of colors with CSS
     Plug 'vim-scripts/fountain.vim'
 " Color-schemes
     Plug 'kristijanhusak/vim-hybrid-material'
     Plug 'NLKNguyen/papercolor-theme'
     Plug 'ajh17/Spacegray.vim'
     Plug 'chriskempson/base16-vim'
+    Plug 'Yazeed1s/minimal.nvim'
 "    Plug 'kyazdani42/nvim-web-devicons'
 "    Plug 'kyazdani42/nvim-tree.lua'
-call plug#end() 
- 
+call plug#end()
+
 "General Settings
 set encoding=UTF-8
 filetype plugin indent on  "Enabling Plugin & Indent
@@ -56,12 +60,12 @@ syntax on  "Turning Syntax on
 set autoread wildmode=longest,list,full
 set spell spelllang=en_us
 set backspace=indent,eol,start confirm
-set shiftwidth=4 autoindent smartindent tabstop=4 softtabstop=4 expandtab  
+set shiftwidth=4 autoindent smartindent tabstop=4 softtabstop=4 expandtab
 autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 set hls is ic
 set laststatus=2 cmdheight=1
 au BufRead,BufNewFile *.fountain set filetype=fountain
-set splitbelow splitright 
+set splitbelow splitright
 set nobackup nowritebackup
 
 "Status-line
@@ -89,7 +93,7 @@ nnoremap <C-g> :set spelllang=de_de<CR>
 nnoremap <C-l> :set background=light<CR>
 nnoremap <C-s> :source $HOME/.config/nvim/init.vim<CR>
 
-nnoremap <Up> :resize +2<CR> 
+nnoremap <Up> :resize +2<CR>
 nnoremap <Down> :resize -2<CR>
 nnoremap <Left> :vertical resize +2<CR>
 nnoremap <Right> :vertical resize -2<CR>
@@ -114,8 +118,8 @@ map <F5> :colorscheme spacegray<CR>
 colorscheme molokai
 set background=dark cursorline termguicolors
 
-hi! Normal ctermbg=NONE guibg=NONE 
-hi! NonText ctermbg=NONE guibg=NONE guifg=NONE ctermfg=NONE 
+hi! Normal ctermbg=NONE guibg=NONE
+hi! NonText ctermbg=NONE guibg=NONE guifg=NONE ctermfg=NONE
 
 let g:limelight_conceal_ctermfg = 'gray'
 let g:limelight_conceal_ctermfg = 240
@@ -140,7 +144,7 @@ function! s:goyo_leave()
 endfunction
 
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
-autocmd! User GoyoLeave nested call <SID>goyo_leave() 
+autocmd! User GoyoLeave nested call <SID>goyo_leave()
 
 "||\\ //||
 "|| \// || Mackenzie Criswell
@@ -336,3 +340,50 @@ let g:gitgutter_sign_removed_first_line = '-'
 let g:gitgutter_sign_modified_removed = '-'
 let g:airline_powerline_fonts = 1
 let g:VM_mouse_mappings = 1
+set rtp+=/opt/homebrew/opt/fzf
+nmap <C-P> :FZF<CR>
+let $FZF_DEFAULT_COMMAND = 'find .'
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>a :Ag<CR>
+" leader space to remove the hightlight after a search
+nnoremap <leader><space> :nohlsearch<CR>
+
+" easier movement between splits
+" Ctrl + j to move to the split below
+nnoremap <C-J> <C-W><C-J>
+" Ctrl + k to move to the split above
+nnoremap <C-K> <C-W><C-K>
+" Ctrl + l to move to the split to the right
+nnoremap <C-L> <C-W><C-L>
+" Ctrl + h to move to the split to the left
+nnoremap <C-H> <C-W><C-H>
+
+" . to repeat the last action to all the lines selected in visual mode
+vnoremap . :norm.<CR>
+
+" ctr + y to yank to the system clipboard
+vnoremap <C-Y> "+y
+fun! TrimWhitespace()
+    let l:save = winsaveview()
+    keeppatterns %s/\s\+$//e
+    call winrestview(l:save)
+endfun
+
+augroup MY_GROUP
+    autocmd!
+    autocmd BufWritePre * :call TrimWhitespace()
+augroup END
+" Use <TAB> to select the popup menu:
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<Tab>"
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+
+" gd to go to definition
+nmap <silent> gd <Plug>(coc-definition)
+" gr to go to reference
+nmap <silent> gr <Plug>(coc-references)
+if has('nvim')
+    inoremap <silent><expr><c-space> coc#refresh()
+else
+    inoremap <silent><expr><c-@> coc#refresh()
+endif

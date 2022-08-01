@@ -9,6 +9,7 @@ do
 			rm -rf $HOME/.vimrc $HOME/.config/nvim $HOME/.vim
 			;;
         ?) 
+            npm i -g eslint
 			mkdir -p $HOME/.config/nvim/{colors,plugged,spell}
             mkdir -p $HOME/.vim/bundle
             git clone https://github.com/morhetz/gruvbox.git ~/.vim/bundle/gruvbox
