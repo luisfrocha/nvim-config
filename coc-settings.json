@@ -1,4 +1,10 @@
 {
   "suggest.noselect": false,
-  "coc.preferences.extensionUpdateCheck": "daily"
+  "coc.preferences.extensionUpdateCheck": "daily",
+  "volar.takeOverMode.enabled": true,
+  "tsserver.enable": false,
+  "volar.codeLens.scriptSetupTools": true,
+  "volar.autoCreateQuotes": true,
+  "volar.autoClosingTags": true,
+  "volar.autoCompleteRefs": true
 }

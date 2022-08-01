@@ -100,7 +100,18 @@ filetype plugin indent on    " required
 "
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
-colorscheme molokai
+
 let g:ale_fixers = {}
 let g:ale_fixers.javascript = ['eslint']
 let g:ale_fix_on_save = 1
+" autocmd VimEnter,BufNewFile,BufNew,BufRead *.vue CocCommand volar.action.splitEditors
+autocmd VimEnter * NERDTree
+autocmd VimEnter * wincmd p
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+let g:gitgutter_sign_added = '✚'
+let g:gitgutter_sign_modified = '✹'
+let g:gitgutter_sign_removed = '-'
+let g:gitgutter_sign_removed_first_line = '-'
+let g:gitgutter_sign_modified_removed = '-'
+let g:airline_powerline_fonts = 1
+let g:VM_mouse_mappings = 1
