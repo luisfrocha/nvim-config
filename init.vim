@@ -1,3 +1,4 @@
+:source ~/.vimrc
 " Vundle setup
 set rtp+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -9,6 +10,7 @@ Plugin 'rstacruz/sparkup', {'rtp':'vim/'}
 Plugin 'w0rp/ale'
 Plugin 'Yazeed1s/minimal.vim'
 Plugin 'morhetz/gruvbox'
+Plugin 'frazrepo/vim-rainbow'
 call vundle#end()
 
 "Plug-ins
@@ -319,4 +321,18 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list.
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
-:source ~/.vimrc
+let g:rainbow_active = 1
+let g:ale_fixers = {}
+let g:ale_fixers.javascript = ['eslint']
+let g:ale_fix_on_save = 1
+autocmd VimEnter,BufNewFile,BufNew,BufRead *.vue CocCommand volar.action.splitEditors
+autocmd VimEnter * NERDTree
+autocmd VimEnter * wincmd p
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+let g:gitgutter_sign_added = '✚'
+let g:gitgutter_sign_modified = '✹'
+let g:gitgutter_sign_removed = '-'
+let g:gitgutter_sign_removed_first_line = '-'
+let g:gitgutter_sign_modified_removed = '-'
+let g:airline_powerline_fonts = 1
+let g:VM_mouse_mappings = 1
