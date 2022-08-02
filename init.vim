@@ -329,7 +329,7 @@ let g:rainbow_active = 1
 let g:ale_fixers = {}
 let g:ale_fixers.javascript = ['eslint']
 let g:ale_fix_on_save = 1
-autocmd VimEnter,BufNewFile,BufNew,BufRead *.vue CocCommand volar.action.splitEditors
+" autocmd VimEnter,BufNewFile,BufNew,BufRead *.vue CocCommand volar.action.splitEditors
 autocmd VimEnter * NERDTree
 autocmd VimEnter * wincmd p
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
