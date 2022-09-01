@@ -39,6 +39,7 @@ call plug#begin('~/.config/nvim/plugged')
     Plug 'mg979/vim-visual-multi', {'branch': 'master'}
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
     Plug 'junegunn/fzf.vim'
+    Plug 'numToStr/prettierrc.nvim'
 " Syntax
     Plug 'tpope/vim-markdown'
     Plug 'ap/vim-css-color' "Displays a preview of colors with CSS
