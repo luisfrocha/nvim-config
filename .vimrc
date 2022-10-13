@@ -61,3 +61,6 @@ set wildmode=list:longest
 set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx
 
 filetype plugin indent on    " required
+
+au Filetype html,xml,vue source ~/.config/nvim/scripts/wrapwithtag.vim
+
