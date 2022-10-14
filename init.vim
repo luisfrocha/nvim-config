@@ -142,11 +142,12 @@ colorscheme onedark
 hi Normal guibg=NONE ctermbg=NONE
 
 " Normal mode remappings
-nnoremap <C-q> :q!<CR>
-nnoremap <C-w> :q<CR>
+"  nnoremap <C-q> :q!<CR>
+"  nnoremap <C-w> :q<CR>
 nnoremap <F3> :NERDTreeToggle<CR>
-nnoremap <F4> :bd<CR>
+nnoremap <S-F4> :bd<CR>
 nnoremap <C-`> :sp<CR>:terminal<CR>
+nnoremap <C-s> :w<cr>
 
 " Tabs
 nnoremap <S-Tab> gT

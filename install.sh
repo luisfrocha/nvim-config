@@ -21,6 +21,7 @@ case $option in
   (-i)
     echo "Installing configs..."
     # npm i -g eslint
+    brew update && brew install watchman
     mkdir -p $HOME/.config/nvim/{colors,plugged,spell,scripts,bundle}
     sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     git clone https://github.com/ctrlpvim/ctrlp.vim.git $HOME/.config/nvim/bundle/ctrlp.vim
