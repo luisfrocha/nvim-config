@@ -24,17 +24,16 @@ case $option in
     mkdir -p $HOME/.config/nvim/{colors,plugged,spell,scripts,bundle}
     sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     git clone https://github.com/ctrlpvim/ctrlp.vim.git $HOME/.config/nvim/bundle/ctrlp.vim
-    git checkout https://github.com/ryanoasis/nerd-fonts.git && cd nerd-fonts && ./install.sh && cd .. && rm -rf nerd-fonts
+    git clone https://github.com/ryanoasis/nerd-fonts.git && cd nerd-fonts && ./install.sh VictorMono && cd .. && rm -rf nerd-fonts
     # mkdir -p $HOME/.vim/bundle
     # git clone https://github.com/morhetz/gruvbox.git ~/.vim/bundle/gruvbox
     # git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
-    # git clone https://github.com/tomasr/molokai.git $HOME/molokai
+    # git clone https://github.com/tomasr/molokai.git $HOME/molokai && mv $HOME/molokai/colors/molokai.vim $HOME/.config/nvim/colors/molokai.vim && rm -rf $HOME/molokai
+
     ln -s $CURR_DIR/init.vim $HOME/.config/nvim/init.vim
     ln -s $CURR_DIR/coc-settings.json $HOME/.config/nvim/coc-settings.json
     # ln -s $CURR_DIR/.vimrc $HOME/.vimrc
     # ln -s $CURR_DIR/wrapwithtag.vim $HOME/.config/nvim/scripts/wrapwithtag.vim
-    # mv $HOME/molokai/colors/molokai.vim $HOME/.config/nvim/colors/molokai.vim
-    # rm -rf $HOME/molokai
     # nvim --headless +PluginInstall 'morhetz/gruvbox' +qall
     # nvim --headless +PlugInstall 'Yazeed1s/minimal.nvim' +qall
     # nvim --headless +PluginInstall +qall
