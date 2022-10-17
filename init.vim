@@ -76,6 +76,8 @@ syntax on
 let &t_ZH="\e[3m"
 let &t_ZR="\e[23m"
 
+autocmd BufReadPost,BufNewFile *.vue setlocal filetype=vue
+
 call plug#begin()
   " Appearance
   Plug 'vim-airline/vim-airline'
@@ -88,16 +90,22 @@ call plug#begin()
   Plug 'ap/vim-css-color'
   Plug 'preservim/nerdtree'
   Plug 'godlygeek/tabular'
+  Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+  Plug 'junegunn/fzf.vim'
+  Plug 'mileszs/ack.vim'
   "  Plug 'git://git.wincent.com/command-t.git', { 'always_show_dot_files': 'true' }
 
   " Completion / linters / formatters
-  Plug 'neoclide/coc.nvim',  {'branch': 'master', 'do': 'yarn install'}
+  Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
   Plug 'plasticboy/vim-markdown'
   Plug 'yaegassy/coc-volar', {'do': 'yarn install --frozen-lockfile'}
   Plug 'yaegassy/coc-volar-tools', {'do': 'yarn install --frozen-lockfile'}
   Plug 'yaegassy/coc-intelephense'
   Plug 'iamcco/coc-tailwindcss',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
   Plug 'w0rp/ale'
+  Plug 'Galooshi/vim-import-js'
+  Plug 'mattn/emmet-vim'
+  Plug 'AndrewRadev/tagalong.vim'
 
   " Git
   Plug 'airblade/vim-gitgutter'
@@ -146,15 +154,13 @@ hi Normal guibg=NONE ctermbg=NONE
 "  nnoremap <C-w> :q<CR>
 nnoremap <F3> :NERDTreeToggle<CR>
 nnoremap <S-F4> :bd<CR>
-nnoremap <C-`> :sp<CR>:terminal<CR>
+nnoremap <C-`> :5sp<CR>:terminal<CR>
 nnoremap <C-s> :w<cr>
 
 " Tabs
 nnoremap <S-Tab> gT
 nnoremap <Tab> gt
 nnoremap <silent> <S-t> :tabnew<CR>
-
-nnoremap <C-o> :CommandT<CR>
 
 " Resize split windows using arrow keys by pressing:
 " CTRL+UP, CTRL+DOWN, CTRL+LEFT, or CTRL+RIGHT.
@@ -163,6 +169,8 @@ noremap <c-S-down> <c-w>-
 noremap <c-S-left> <c-w>>
 noremap <c-S-right> <c-w><
 
+noremap <C-S-F> :Ag
+
 " If GUI version of Vim is running set these options.
 if has('gui_running')
 
@@ -170,7 +178,7 @@ if has('gui_running')
     set background=dark
 
     " Set the color scheme.
-    colorscheme molokai
+    "  colorscheme molokai
 
     " Set a custom font you have installed on your computer.
     " Syntax: <font_name>\ <weight>\ <size>
@@ -219,4 +227,8 @@ nnoremap <C-/> mzI/* <esc>A */<esc>`z
 augroup auto_commands
   autocmd VimEnter * NERDTree
   autocmd FileType scss setlocal iskeyword+=@-@
+  autocmd BufReadPost,BufNewFile *.vue :CocCommand volar.action.splitEditors
 augroup END
+
+let meapleader = '`'
+:iabbrev </ </<C-X><C-O>

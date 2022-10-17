@@ -2,6 +2,7 @@
 let g:ale_disable_lsp=1
 let g:airline#extensions#ale#enabled = 1
 let g:ale_completion_enabled = 1
+autocmd BufReadPost,BufNewFile *.vue setlocal filetype=vue
 " Vundle setup
 set rtp+=$HOME/.vim/bundle/Vundle.vim
 call vundle#begin()
