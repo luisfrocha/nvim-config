@@ -40,7 +40,6 @@ set expandtab
 set shiftwidth=2
 set tabstop=2
 
-
 set t_Co=256
 
 " True color if available
@@ -82,7 +81,6 @@ call plug#begin()
   " Appearance
   Plug 'vim-airline/vim-airline'
   Plug 'joshdick/onedark.vim'
-  " Plug 'ryanoasis/vim-devicons'
 
   " Utilities
   Plug 'sheerun/vim-polyglot'
@@ -93,7 +91,6 @@ call plug#begin()
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
   Plug 'mileszs/ack.vim'
-  "  Plug 'git://git.wincent.com/command-t.git', { 'always_show_dot_files': 'true' }
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
@@ -108,15 +105,29 @@ call plug#begin()
   Plug 'Galooshi/vim-import-js'
   Plug 'mattn/emmet-vim'
   Plug 'AndrewRadev/tagalong.vim'
+  Plug 'leafOfTree/vim-vue-plugin'
 
   " Git
   Plug 'airblade/vim-gitgutter'
   Plug 'elvessousa/sobrio'
-  Plug 'preservim/nerdtree'
   Plug 'Xuyuanp/nerdtree-git-plugin'
-  Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+  Plug 'lambdalisue/nerdfont.vim'
   Plug 'ryanoasis/vim-devicons'
 call plug#end()
+
+let g:vim_vue_plugin_config = {
+      \'syntax': {
+      \   'template': ['html'],
+      \   'script': ['javascript'],
+      \   'style': ['css'],
+      \},
+      \'full_syntax': [],
+      \'initial_indent': [],
+      \'attribute': 0,
+      \'keyword': 0,
+      \'foldexpr': 0,
+      \'debug': 0,
+      \}
 
 " step 2: font configuration
 " These are the basic settings to get the font to work (required):
@@ -154,7 +165,6 @@ hi Normal guibg=NONE ctermbg=NONE
 " Normal mode remappings
 "  nnoremap <C-q> :q!<CR>
 "  nnoremap <C-w> :q<CR>
-nnoremap <F3> :NERDTreeToggle<CR>
 nnoremap <S-F4> :bd<CR>
 nnoremap <C-`> :5sp<CR>:terminal<CR>
 nnoremap <C-s> :w<cr>
@@ -231,6 +241,8 @@ augroup auto_commands
   autocmd FileType scss setlocal iskeyword+=@-@
   autocmd BufReadPost,BufNewFile *.vue :CocCommand volar.action.splitEditors
 augroup END
+
+nnoremap <C-e> :NERDTreeToggle<CR>
 
 let meapleader = '`'
 :iabbrev </ </<C-X><C-O>
