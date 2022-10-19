@@ -166,7 +166,7 @@ hi Normal guibg=NONE ctermbg=NONE
 "  nnoremap <C-q> :q!<CR>
 "  nnoremap <C-w> :q<CR>
 nnoremap <S-F4> :bd<CR>
-nnoremap <C-`> :5sp<CR>:terminal<CR>
+nnoremap <C-`> :10sp<CR>:terminal<CR>
 nnoremap <C-s> :w<cr>
 
 " Tabs
@@ -185,7 +185,7 @@ noremap <C-S-F> :Ag<cr>
 let g:ackprg = 'ag --vimgrep'
 set rtp+=/opt/homebrew/bin/fzf
 
-noremap <C-S-O> :CtrlP<cr>
+noremap <C-S-O> :CtrlPMixed<cr>
 
 " If GUI version of Vim is running set these options.
 if has('gui_running')
@@ -248,11 +248,10 @@ augroup auto_commands
   autocmd BufReadPost,BufNewFile *.vue :CocCommand volar.action.splitEditors
   " Exit Vim if NERDTree is the only window remaining in the only tab.
   autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+  autocmd BufEnter * if &modifiable && expand('%:p') != '' | NERDTreeFind | wincmd p | endif
   " If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
   autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
-    \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
-  " When opening a file, have NERDTree update with that buffer's path opened
-  autocmd BufEnter * if &modifiable | NERDTreeFind | wincmd p | endif
+   \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
 augroup END
 
 nnoremap <C-e> :NERDTreeToggle<CR>
