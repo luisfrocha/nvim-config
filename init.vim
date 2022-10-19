@@ -251,6 +251,8 @@ augroup auto_commands
   " If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
   autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
     \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
+  " When opening a file, have NERDTree update with that buffer's path opened
+  autocmd BufEnter * if &modifiable | NERDTreeFind | wincmd p | endif
 augroup END
 
 nnoremap <C-e> :NERDTreeToggle<CR>
