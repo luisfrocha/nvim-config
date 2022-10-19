@@ -30,5 +30,8 @@
   "emmet.includeLanguages": ["javascript", "javascriptreact", "typescript", "typescriptreact", "html", "vue"],
   "codeLens.enable": false,
   "volar.initializeTakeOverMode": true,
-  "volar.actions.splitEditors": true
+  "eslint.packageManager": "pnpm",
+  "eslint.alwaysShowStatus": true,
+  "eslint.format.enable": true,
+  "eslint.autoFixOnSave": true
 }

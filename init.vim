@@ -102,6 +102,8 @@ call plug#begin()
   Plug 'yaegassy/coc-volar-tools', {'do': 'yarn install --frozen-lockfile'}
   Plug 'yaegassy/coc-intelephense'
   Plug 'iamcco/coc-tailwindcss',  {'do': 'yarn install --frozen-lockfile && yarn run build'}
+  Plug 'neoclide/coc-eslint'
+  Plug 'posva/vim-vue'
   Plug 'w0rp/ale'
   Plug 'Galooshi/vim-import-js'
   Plug 'mattn/emmet-vim'
