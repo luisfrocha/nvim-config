@@ -181,7 +181,11 @@ noremap <c-S-down> <c-w>-
 noremap <c-S-left> <c-w>>
 noremap <c-S-right> <c-w><
 
-noremap <C-S-F> :Ag
+noremap <C-S-F> :Ag<cr>
+let g:ackprg = 'ag --vimgrep'
+set rtp+=/opt/homebrew/bin/fzf
+
+noremap <C-S-O> :CtrlP<cr>
 
 " If GUI version of Vim is running set these options.
 if has('gui_running')
