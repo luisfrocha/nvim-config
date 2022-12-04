@@ -81,6 +81,8 @@ call plug#begin()
   " Appearance
   Plug 'vim-airline/vim-airline'
   Plug 'joshdick/onedark.vim'
+  Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+  Plug 'eandrju/cellular-automaton.nvim'
 
   " Utilities
   Plug 'sheerun/vim-polyglot'
