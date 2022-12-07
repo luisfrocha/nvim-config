@@ -83,6 +83,8 @@ call plug#begin()
   Plug 'joshdick/onedark.vim'
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'eandrju/cellular-automaton.nvim'
+  Plug 'mxw/vim-jsx'
+  Plug 'pangloss/vim-javascript'
 
   " Utilities
   Plug 'sheerun/vim-polyglot'
@@ -258,5 +260,9 @@ augroup END
 
 nnoremap <C-e> :NERDTreeToggle<CR>
 
-let meapleader = '`'
+let mapleader = '`'
 :iabbrev </ </<C-X><C-O>
+let g:ale_linters = { 'javascript': ['eslint']}
+let g:ale_fixers = { 'javascript': ['prettier','eslint']}
+let g:ale_fix_on_save = 1
+nmap <leader>d <Plug>(ale_fix)
