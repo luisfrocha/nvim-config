@@ -28,7 +28,6 @@ set inccommand=split
 set mouse=a
 set number
 set nobackup
-set nowrap
 set scrolloff=10
 
 set splitbelow splitright
@@ -112,6 +111,7 @@ call plug#begin()
   Plug 'tc50cal/vim-terminal' " Vim Terminal
   Plug 'preservim/tagbar' " Tagbar for code navigation
   Plug 'mg979/vim-visual-multi', {'branch': 'master'} " Enable multi-cursors
+  Plug 'wfxr/minimap.vim'
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
@@ -131,7 +131,7 @@ call plug#begin()
   Plug 'tpope/vim-commentary' " For Commenting gcc & gc
   Plug 'terryma/vim-multiple-cursors'
   Plug 'nvim-lua/plenary.nvim'
-  Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.1' }
+  Plug 'nvim-telescope/telescope.nvim'
 
   " Git
   Plug 'airblade/vim-gitgutter'
@@ -360,3 +360,7 @@ EOF
 nmap <leader>o :Telescope find_files<CR>
 nmap <C-S-j> :move+1<CR>
 nmap <C-S-k> :move-2<CR>
+let g:ale_sign_column_always = 1
+let g:minimap_width = 3
+let g:minimap_auto_start = 1
+let g:minimap_auto_start_win_enter = 1
