@@ -92,7 +92,6 @@ call plug#begin()
   Plug 'nvim-tree/nvim-web-devicons'
   Plug 'romgrk/barbar.nvim'
   Plug 'kevinhwang91/promise-async'
-  Plug 'echasnovski/mini.nvim'
   Plug 'APZelos/blamer.nvim'
   Plug 'kevinhwang91/nvim-hlslens'
   " Plug 'kevinhwang91/nvim-ufo'
@@ -355,9 +354,9 @@ inoremap <expr> <Tab> pumvisible() ? coc#_select_confirm() : "<Tab>"
 
 lua <<EOF
 vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
+require('hlslens').setup()
 EOF
 
-" nmap <M-Alt-down> <VM_leader>j
-" nmap <M-Alt-up> <VM_leader>k
-
-nmap <leader>O :Telescope find_files<CR>
+nmap <leader>o :Telescope find_files<CR>
+nmap <C-S-j> :move+1<CR>
+nmap <C-S-k> :move-2<CR>
