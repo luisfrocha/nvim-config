@@ -36,7 +36,8 @@ case $option in
     git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
     git clone https://github.com/tomasr/molokai.git $HOME/molokai && mv $HOME/molokai/colors/molokai.vim $HOME/.config/nvim/colors/molokai.vim && rm -rf $HOME/molokai
 
-    ln -s $CURR_DIR/init.vim $HOME/.config/nvim/
+    ln -s $CURR_DIR/init.vim $HOME/.config/nvim/script.vim
+    ln -s $CURR_DIR/init.lua $HOME/.config/nvim/
     ln -s $CURR_DIR/coc-settings.json $HOME/.config/nvim/coc-settings.json
     # ln -s $CURR_DIR/.vimrc $HOME/.vimrc
     # ln -s $CURR_DIR/init.vim $HOME/.config/nvim/init.vim

@@ -31,7 +31,6 @@ set nobackup
 set nowrap
 set scrolloff=10
 
-"  set relativenumber
 set splitbelow splitright
 set title
 set ttimeoutlen=0
@@ -92,6 +91,14 @@ call plug#begin()
   Plug 'lewis6991/gitsigns.nvim'
   Plug 'nvim-tree/nvim-web-devicons'
   Plug 'romgrk/barbar.nvim'
+  Plug 'kevinhwang91/promise-async'
+  Plug 'echasnovski/mini.nvim'
+  Plug 'APZelos/blamer.nvim'
+  Plug 'kevinhwang91/nvim-hlslens'
+  " Plug 'kevinhwang91/nvim-ufo'
+  " Plug 'Xuyuanp/scrollbar.nvim'
+  " Plug 'kevinhwang91/nvim-hlslens'
+  " Plug 'petertriho/nvim-scrollbar'
 
   " Utilities
   Plug 'sheerun/vim-polyglot'
@@ -105,6 +112,7 @@ call plug#begin()
   Plug 'tpope/vim-surround' " Surrounding ysw)
   Plug 'tc50cal/vim-terminal' " Vim Terminal
   Plug 'preservim/tagbar' " Tagbar for code navigation
+  Plug 'mg979/vim-visual-multi', {'branch': 'master'} " Enable multi-cursors
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
@@ -123,6 +131,8 @@ call plug#begin()
   Plug 'preservim/nerdcommenter'
   Plug 'tpope/vim-commentary' " For Commenting gcc & gc
   Plug 'terryma/vim-multiple-cursors'
+  Plug 'nvim-lua/plenary.nvim'
+  Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.1' }
 
   " Git
   Plug 'airblade/vim-gitgutter'
@@ -130,7 +140,13 @@ call plug#begin()
   Plug 'Xuyuanp/nerdtree-git-plugin'
   Plug 'lambdalisue/nerdfont.vim'
   Plug 'ryanoasis/vim-devicons'
+  Plug 'Xuyuanp/scrollbar.nvim'
 call plug#end()
+
+let g:blamer_enabled = 1
+let g:blamer_delay = 300
+let g:blamer_relative_time = 1
+let g:blamer_date_format = '%m/%d/%Y %I:%M:%S 5p'
 
 let g:vim_vue_plugin_config = {
       \'syntax': {
@@ -336,3 +352,12 @@ let g:airline_symbols.readonly = ''
 let g:airline_symbols.linenr = ''
 
 inoremap <expr> <Tab> pumvisible() ? coc#_select_confirm() : "<Tab>"
+
+lua <<EOF
+vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
+EOF
+
+" nmap <M-Alt-down> <VM_leader>j
+" nmap <M-Alt-up> <VM_leader>k
+
+nmap <leader>O :Telescope find_files<CR>
