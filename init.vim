@@ -9,7 +9,9 @@ set incsearch
 set ignorecase
 set smartcase
 set showmode
+set smarttab
 set showcmd
+set autoindent
 set showmatch
 set hlsearch
 set history=1000
@@ -39,6 +41,7 @@ set wildmenu
 set expandtab
 set shiftwidth=2
 set tabstop=2
+set softtabstop=2
 
 set t_Co=256
 
@@ -80,11 +83,15 @@ autocmd BufReadPost,BufNewFile *.vue setlocal filetype=vue
 call plug#begin()
   " Appearance
   Plug 'vim-airline/vim-airline'
-  Plug 'joshdick/onedark.vim'
+  Plug 'navarasu/onedark.nvim'
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   Plug 'eandrju/cellular-automaton.nvim'
   Plug 'mxw/vim-jsx'
   Plug 'pangloss/vim-javascript'
+  Plug 'rafi/awesome-vim-colorschemes'
+  Plug 'lewis6991/gitsigns.nvim'
+  Plug 'nvim-tree/nvim-web-devicons'
+  Plug 'romgrk/barbar.nvim'
 
   " Utilities
   Plug 'sheerun/vim-polyglot'
@@ -95,6 +102,9 @@ call plug#begin()
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
   Plug 'mileszs/ack.vim'
+  Plug 'tpope/vim-surround' " Surrounding ysw)
+  Plug 'tc50cal/vim-terminal' " Vim Terminal
+  Plug 'preservim/tagbar' " Tagbar for code navigation
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
@@ -110,6 +120,9 @@ call plug#begin()
   Plug 'mattn/emmet-vim'
   Plug 'AndrewRadev/tagalong.vim'
   Plug 'leafOfTree/vim-vue-plugin'
+  Plug 'preservim/nerdcommenter'
+  Plug 'tpope/vim-commentary' " For Commenting gcc & gc
+  Plug 'terryma/vim-multiple-cursors'
 
   " Git
   Plug 'airblade/vim-gitgutter'
@@ -136,9 +149,8 @@ let g:vim_vue_plugin_config = {
 " step 2: font configuration
 " These are the basic settings to get the font to work (required):
 " required if using https://github.com/bling/vim-airline
-set guifont=Victor\ Mono\ Font:h16
+set guifont=Victor\ Mono\ Font:h16 " ,Hack\\ Nerd\\ Font\\ Mono\\ Font:h18
 set encoding=UTF-8
-let g:airline_powerline_fonts=1
 let g:NERDTreeGitStatusUseNerdFonts = 1
 let g:NERDTreeGitStatusShowIgnored = 1
 
@@ -163,6 +175,12 @@ let g:vim_markdown_fenced_languages = ['tsx=typescriptreact']
 
 " One Dark
 let g:onedark_terminal_italics = 1
+let g:onedark_config = {
+  \ 'style': 'darker',
+  \ 'transparent': v:true,
+  \ 'toggle_style_key': '<C-1>ts',
+  \ 'code_style': { 'keywords': 'bold' }
+\ }
 colorscheme onedark
 hi Normal guibg=NONE ctermbg=NONE
 
@@ -170,7 +188,7 @@ hi Normal guibg=NONE ctermbg=NONE
 "  nnoremap <C-q> :q!<CR>
 "  nnoremap <C-w> :q<CR>
 nnoremap <S-F4> :bd<CR>
-nnoremap <C-`> :10sp<CR>:terminal<CR>
+nnoremap <C-`> :5sp<CR>:terminal<CR>
 nnoremap <C-s> :w<cr>
 
 " Tabs
@@ -184,6 +202,8 @@ noremap <c-S-up> <c-w>+
 noremap <c-S-down> <c-w>-
 noremap <c-S-left> <c-w>>
 noremap <c-S-right> <c-w><
+noremap <C-left> <C-w>h
+noremap <C-right> <C-w>l
 
 noremap <C-S-F> :Ag<cr>
 let g:ackprg = 'ag --vimgrep'
@@ -241,15 +261,15 @@ endif
 
 nnoremap <C-d> Yp
 nnoremap <C-BS> "_dd
-nnoremap <C-/> mzI/* <esc>A */<esc>`z
-
+"nnoremap <C-/> mzI/* <esc>A */<esc>`z
+nnoremap <c-s-/> {count}<leader>ci
 " Auto Commands
 augroup auto_commands
   " Start NERDTree and put the cursor back in the other window, even if a file was specified.
   autocmd StdinReadPre * let s:std_in=1
   autocmd VimEnter * NERDTree | if argc() > 0 || exists("s:std_in") | endif | wincmd p
   autocmd FileType scss setlocal iskeyword+=@-@
-  autocmd BufReadPost,BufNewFile *.vue :CocCommand volar.action.splitEditors
+  " autocmd BufReadPost,BufNewFile *.vue :CocCommand volar.action.splitEditors
   " Exit Vim if NERDTree is the only window remaining in the only tab.
   autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
   autocmd BufEnter * if &modifiable && expand('%:p') != '' | NERDTreeFind | wincmd p | endif
@@ -258,7 +278,12 @@ augroup auto_commands
    \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
 augroup END
 
-nnoremap <C-e> :NERDTreeToggle<CR>
+nnoremap <C-t> :NERDTreeToggle<CR>
+nnoremap <C-l> :call CocActionAsync('jumpDefinition')<CR>
+
+nmap <F8> :TagbarToggle<CR>
+
+:set completeopt-=preview " For No Previews
 
 let mapleader = '`'
 :iabbrev </ </<C-X><C-O>
@@ -266,3 +291,48 @@ let g:ale_linters = { 'javascript': ['eslint']}
 let g:ale_fixers = { 'javascript': ['prettier','eslint']}
 let g:ale_fix_on_save = 1
 nmap <leader>d <Plug>(ale_fix)
+
+" Create default mappings
+let g:NERDCreateDefaultMappings = 1
+
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
+
+" Use compact syntax for prettified multi-line comments
+let g:NERDCompactSexyComs = 1
+
+" Align line-wise comment delimiters flush left instead of following code indentation
+let g:NERDDefaultAlign = 'left'
+
+" Set a language to use its alternate delimiters by default
+let g:NERDAltDelims_java = 1
+
+" Add your own custom formats or override the defaults
+let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
+
+" Allow commenting and inverting empty lines (useful when commenting a region)
+let g:NERDCommentEmptyLines = 1
+
+" Enable trimming of trailing whitespace when uncommenting
+let g:NERDTrimTrailingWhitespace = 1
+
+" Enable NERDCommenterToggle to check all selected lines is commented or not
+let g:NERDToggleCheckAllLines = 1
+
+" air-line
+let g:airline_powerline_fonts = 1
+
+if !exists('g:airline_symbols')
+    let g:airline_symbols = {}
+endif
+
+" airline symbols
+let g:airline_left_sep = ''
+let g:airline_left_alt_sep = ''
+let g:airline_right_sep = ''
+let g:airline_right_alt_sep = ''
+let g:airline_symbols.branch = ''
+let g:airline_symbols.readonly = ''
+let g:airline_symbols.linenr = ''
+
+inoremap <expr> <Tab> pumvisible() ? coc#_select_confirm() : "<Tab>"
