@@ -21,7 +21,17 @@ case $option in
   (-i)
     echo "Installing configs..."
     npm i -g import-js
-    brew update && brew upgrade && brew install neovim watchman fzf bat git-delta the_silver_searcher
+    brew update && \
+    brew upgrade && \
+    brew install \
+      neovim \
+      watchman \
+      fzf \
+      bat \
+      git-delta \
+      the_silver_searcher \
+      code-minimap
+
     $(brew --prefix)/opt/fzf/install
     mkdir -p $HOME/.config/nvim/{colors,plugged,spell,scripts,bundle}
     sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'

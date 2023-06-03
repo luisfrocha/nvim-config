@@ -93,10 +93,8 @@ call plug#begin()
   Plug 'kevinhwang91/promise-async'
   Plug 'APZelos/blamer.nvim'
   Plug 'kevinhwang91/nvim-hlslens'
-  " Plug 'kevinhwang91/nvim-ufo'
-  " Plug 'Xuyuanp/scrollbar.nvim'
-  " Plug 'kevinhwang91/nvim-hlslens'
-  " Plug 'petertriho/nvim-scrollbar'
+  Plug 'nvim-lua/plenary.nvim'
+  Plug 'nvim-lua/popup.nvim'
 
   " Utilities
   Plug 'sheerun/vim-polyglot'
@@ -111,7 +109,7 @@ call plug#begin()
   Plug 'tc50cal/vim-terminal' " Vim Terminal
   Plug 'preservim/tagbar' " Tagbar for code navigation
   Plug 'mg979/vim-visual-multi', {'branch': 'master'} " Enable multi-cursors
-  Plug 'wfxr/minimap.vim'
+  Plug 'echasnovski/mini.nvim'
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
@@ -130,8 +128,8 @@ call plug#begin()
   Plug 'preservim/nerdcommenter'
   Plug 'tpope/vim-commentary' " For Commenting gcc & gc
   Plug 'terryma/vim-multiple-cursors'
-  Plug 'nvim-lua/plenary.nvim'
   Plug 'nvim-telescope/telescope.nvim'
+  Plug 'folke/which-key.nvim'
 
   " Git
   Plug 'airblade/vim-gitgutter'
@@ -352,15 +350,78 @@ let g:airline_symbols.linenr = ''
 
 inoremap <expr> <Tab> pumvisible() ? coc#_select_confirm() : "<Tab>"
 
-lua <<EOF
-vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
-require('hlslens').setup()
-EOF
-
 nmap <leader>o :Telescope find_files<CR>
 nmap <C-S-j> :move+1<CR>
 nmap <C-S-k> :move-2<CR>
 let g:ale_sign_column_always = 1
-let g:minimap_width = 3
-let g:minimap_auto_start = 1
-let g:minimap_auto_start_win_enter = 1
+" let g:minimap_width = 2
+" let g:minimap_auto_start = 1
+" let g:minimap_auto_start_win_enter = 1
+" hi MinimapCurrentLine ctermfg=Green guifg=#50FA7B guibg=#32302f
+" let g:minimap_cursor_color = 'MinimapCurrentLine'
+
+lua <<EOF
+vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
+require('mini.map').setup()
+require('mini.pairs').setup()
+require('mini.indentscope').setup()
+require('mini.fuzzy').setup()
+require('mini.completion').setup()
+require('mini.comment').setup()
+require('mini.animate').setup()
+require('hlslens').setup()
+
+local kopts = {noremap = true, silent = true}
+
+vim.api.nvim_set_keymap('n', 'n',
+    [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]],
+    kopts)
+vim.api.nvim_set_keymap('n', 'N',
+    [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]],
+    kopts)
+vim.api.nvim_set_keymap('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+vim.api.nvim_set_keymap('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+vim.api.nvim_set_keymap('n', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+vim.api.nvim_set_keymap('n', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+
+vim.api.nvim_set_keymap('n', '<Leader>l', '<Cmd>noh<CR>', kopts)
+
+require 'nvim-treesitter.configs'.setup {
+    ensure_installed = {
+      'css',
+      'dockerfile',
+      'graphql',
+      'html',
+      'javascript',
+      'json',
+      'json5',
+      'lua',
+      'php',
+      'scss',
+      'sql',
+      'tsx',
+      'typescript',
+      'vim',
+      'vue',
+      'yaml'
+    },
+    highlight = {
+        enable = true
+    },
+    incremental_selection = {
+        enable = true,
+        keymaps = {
+            init_selection = "gnn",
+            node_incremental = "gj",
+            node_decremental = "gk",
+            scope_incremental = "gs",
+        },
+    },
+    textobjects = {
+        enable = true
+    },
+    indent = {
+        enable = true
+    },
+}
+EOF
