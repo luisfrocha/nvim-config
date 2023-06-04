@@ -95,6 +95,7 @@ call plug#begin()
   Plug 'kevinhwang91/nvim-hlslens'
   Plug 'nvim-lua/plenary.nvim'
   Plug 'nvim-lua/popup.nvim'
+  Plug 'HampusHauffman/bionic.nvim'
 
   " Utilities
   Plug 'sheerun/vim-polyglot'
