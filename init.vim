@@ -374,7 +374,7 @@ local animate = require('mini.animate')
 animate.setup({
   cursor = {
     -- Animate for 200 milliseconds with linear easing
-    timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
+    timing = animate.gen_timing.linear({ duration = 150, unit = 'total' }),
 
     -- Animate with shortest line for any cursor move
     path = animate.gen_path.line({
@@ -382,11 +382,7 @@ animate.setup({
     }),
   },
   scroll = {
-    -- Animate for 200 milliseconds with linear easing
-    timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
-
-    -- Animate equally but with at most 120 steps instead of default 60
-    subscroll = animate.gen_subscroll.equal({ max_output_steps = 30 }),
+    enable = false,
   },
   resize = {
     -- Animate for 200 milliseconds with linear easing
