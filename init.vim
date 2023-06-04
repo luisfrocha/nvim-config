@@ -221,7 +221,11 @@ let g:vim_markdown_fenced_languages = ['tsx=typescriptreact']
 " colorscheme monokai
 
 " Kanagawa
-colorscheme kanagawa-wave
+try
+  colorscheme kanagawa-wave
+catch /^Vim\%((\a\+)\)\=:E185/
+  echomsg "Could not load colorscheme"
+endtry
 
 hi Normal guibg=NONE ctermbg=NONE
 
@@ -391,7 +395,11 @@ let g:ale_sign_column_always = 1
 
 lua <<EOF
   vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
-  require('mini.map').setup()
+  if pcall(function()
+      require('mini.map').setup()
+  end) == false then
+    error("Could not load mini.map", 2)
+  end
   require('mini.pairs').setup()
   require('mini.indentscope').setup()
   require('mini.fuzzy').setup()

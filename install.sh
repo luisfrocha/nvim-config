@@ -42,21 +42,21 @@ case $option in
     brew tap homebrew/cask-fonts
     brew install font-hack-nerd-font
 
-    mkdir -p $HOME/.vim/bundle
-    git clone https://github.com/morhetz/gruvbox.git ~/.vim/bundle/gruvbox
-    git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
-    git clone https://github.com/tomasr/molokai.git $HOME/molokai && mv $HOME/molokai/colors/molokai.vim $HOME/.config/nvim/colors/molokai.vim && rm -rf $HOME/molokai
+    # mkdir -p $HOME/.vim/bundle
+    # git clone https://github.com/morhetz/gruvbox.git ~/.vim/bundle/gruvbox
+    # git clone https://github.com/VundleVim/Vundle.vim.git $HOME/.vim/bundle/Vundle.vim
+    # git clone https://github.com/tomasr/molokai.git $HOME/molokai && mv $HOME/molokai/colors/molokai.vim $HOME/.config/nvim/colors/molokai.vim && rm -rf $HOME/molokai
 
-    ln -s $CURR_DIR/init.vim $HOME/.config/nvim/script.vim
-    ln -s $CURR_DIR/init.lua $HOME/.config/nvim/
-    ln -s $CURR_DIR/coc-settings.json $HOME/.config/nvim/coc-settings.json
     # ln -s $CURR_DIR/.vimrc $HOME/.vimrc
-    # ln -s $CURR_DIR/init.vim $HOME/.config/nvim/init.vim
-    # ln -s $CURR_DIR/wrapwithtag.vim $HOME/.config/nvim/scripts/wrapwithtag.vim
-    nvim --headless +PluginInstall 'navarasu/onedark.nvim' +qall
+    # nvim --headless +PluginInstall 'navarasu/onedark.nvim' +qall
     # nvim --headless +PlugInstall 'Yazeed1s/minimal.nvim' +qall
     # nvim --headless +PluginInstall +qall
-    nvim --headless +PlugInstall +qall
+    nvim --headless --noplugin +PluginInstall 'rebelot/kanagawa.nvim' +qall
+    ln -s $CURR_DIR/init.vim $HOME/.config/nvim/script.vim
+    ln -s $CURR_DIR/init.lua $HOME/.config/nvim/
+    nvim --headless --noplugin +PlugInstall +qall
+    ln -s $CURR_DIR/wrapwithtag.vim $HOME/.config/nvim/scripts/wrapwithtag.vim
+    ln -s $CURR_DIR/coc-settings.json $HOME/.config/nvim/coc-settings.json
     cd ~/.local/share/nvim/plugged/coc.nvim && yarn install
 
     echo "Installation complete."
