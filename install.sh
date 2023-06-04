@@ -30,7 +30,8 @@ case $option in
       bat \
       git-delta \
       the_silver_searcher \
-      code-minimap
+      code-minimap \
+      yarn
 
     $(brew --prefix)/opt/fzf/install
     mkdir -p $HOME/.config/nvim/{colors,plugged,spell,scripts,bundle}
@@ -52,10 +53,11 @@ case $option in
     # ln -s $CURR_DIR/.vimrc $HOME/.vimrc
     # ln -s $CURR_DIR/init.vim $HOME/.config/nvim/init.vim
     # ln -s $CURR_DIR/wrapwithtag.vim $HOME/.config/nvim/scripts/wrapwithtag.vim
-    # nvim --headless +PluginInstall 'morhetz/gruvbox' +qall
+    nvim --headless +PluginInstall 'navarasu/onedark.nvim' +qall
     # nvim --headless +PlugInstall 'Yazeed1s/minimal.nvim' +qall
     # nvim --headless +PluginInstall +qall
     nvim --headless +PlugInstall +qall
+    cd ~/.local/share/nvim/plugged/coc.nvim && yarn install
 
     echo "Installation complete."
     ;;

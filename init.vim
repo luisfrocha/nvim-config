@@ -350,7 +350,7 @@ let g:airline_symbols.linenr = ''
 
 inoremap <expr> <Tab> pumvisible() ? coc#_select_confirm() : "<Tab>"
 
-nmap <leader>o :Telescope find_files<CR>
+nmap <leader>o :Telescope find_files hidden=true no_ignore=true<CR>
 nmap <C-S-j> :move+1<CR>
 nmap <C-S-k> :move-2<CR>
 let g:ale_sign_column_always = 1
@@ -368,7 +368,53 @@ require('mini.indentscope').setup()
 require('mini.fuzzy').setup()
 require('mini.completion').setup()
 require('mini.comment').setup()
-require('mini.animate').setup()
+local animate = require('mini.animate')
+animate.setup({
+  cursor = {
+    -- Animate for 200 milliseconds with linear easing
+    timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
+
+    -- Animate with shortest line for any cursor move
+    path = animate.gen_path.line({
+      predicate = function() return true end,
+    }),
+  },
+  scroll = {
+    -- Animate for 200 milliseconds with linear easing
+    timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
+
+    -- Animate equally but with at most 120 steps instead of default 60
+    subscroll = animate.gen_subscroll.equal({ max_output_steps = 30 }),
+  },
+  resize = {
+    -- Animate for 200 milliseconds with linear easing
+    timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
+
+    -- Animate only if there are at least 3 windows
+    subresize = animate.gen_subscroll.equal({ predicate = is_many_wins }),
+  },
+  open = {
+    -- Animate for 400 milliseconds with linear easing
+    timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
+
+    -- Animate with wiping from nearest edge instead of default static one
+    winconfig = animate.gen_winconfig.wipe({ direction = 'from_edge' }),
+
+    -- Make bigger windows more transparent
+    winblend = animate.gen_winblend.linear({ from = 80, to = 100 }),
+  },
+
+  close = {
+    -- Animate for 400 milliseconds with linear easing
+    timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
+
+    -- Animate with wiping to nearest edge instead of default static one
+    winconfig = animate.gen_winconfig.wipe({ direction = 'to_edge' }),
+
+    -- Make bigger windows more transparent
+    winblend = animate.gen_winblend.linear({ from = 100, to = 80 }),
+  },
+})
 require('hlslens').setup()
 
 local kopts = {noremap = true, silent = true}
