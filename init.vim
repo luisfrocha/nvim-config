@@ -320,7 +320,7 @@ nnoremap <c-s-/> {count}<leader>ci
 augroup auto_commands
   " Start NERDTree and put the cursor back in the other window, even if a file was specified.
   autocmd StdinReadPre * let s:std_in=1
-  autocmd VimEnter * NvimTreeOpen | if argc() > 0 || exists("s:std_in") | endif | wincmd p
+  autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NvimTreeFindFile | endif
   autocmd FileType scss setlocal iskeyword+=@-@
   " autocmd BufReadPost,BufNewFile *.vue :CocCommand volar.action.splitEditors
   " Exit Vim if NERDTree is the only window remaining in the only tab.
