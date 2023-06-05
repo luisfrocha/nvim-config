@@ -386,3 +386,11 @@ require("auto-session").setup {
 require('barbar').setup({
   -- auto_hide = true
 })
+
+require('telescope').setup {
+  defaults = {
+    file_ignore_patterns = {
+      "node%_modules/.*",  
+    },
+  }
+}

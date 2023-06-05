@@ -399,7 +399,7 @@ let g:airline_symbols.linenr = ''
 
 inoremap <expr> <Tab> pumvisible() ? coc#_select_confirm() : "<Tab>"
 
-nmap <leader>o :Telescope find_files hidden=true no_ignore=true<CR>
+nmap <leader>o :Telescope find_files hidden=true ignore=true<CR>
 nmap <C-S-j> :move+1<CR>
 nmap <C-S-k> :move-2<CR>
 let g:ale_sign_column_always = 1
