@@ -29,7 +29,6 @@ animate.setup({
   resize = {
     -- Animate for 200 milliseconds with linear easing
     timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
-
   },
   open = {
     -- Animate for 400 milliseconds with linear easing
@@ -390,7 +389,7 @@ require('barbar').setup({
 require('telescope').setup {
   defaults = {
     file_ignore_patterns = {
-      "node%_modules/.*",  
+      "node%_modules/.*",
     },
   }
 }
