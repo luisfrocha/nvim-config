@@ -119,6 +119,7 @@ call plug#begin()
   Plug 'rmagatti/auto-session'
   Plug 'rcarriga/nvim-notify'
   Plug 'glepnir/lspsaga.nvim'
+  Plug 'windwp/nvim-ts-autotag'
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
@@ -246,7 +247,6 @@ nnoremap <S-F4> :bd<CR>
 nnoremap <C-s> :w<cr>
 
 " nnoremap <C-`> :5sp<CR>:terminal<CR>
-nnoremap <C-`> :FloatermToggle<CR>
 " let g:floaterm_keymap_toggle = '<C-`>'
 
 " Tabs

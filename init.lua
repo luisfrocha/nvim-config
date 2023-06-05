@@ -368,6 +368,9 @@ end)
 vim.keymap.set("n", "<C-.>", function()
   vim.cmd([[BufferNext]])
 end)
+vim.keymap.set("n", "<C-`>", function()
+  vim.cmd([[FloatermToggle]])
+end)
 
 -- local possession = require("nvim-possession")
 -- vim.keymap.set("n", "<leader>sl", function()
@@ -460,3 +463,4 @@ codewindow.setup({
   width_multiplier = 10,
 })
 codewindow.apply_default_keybinds()
+require('nvim-ts-autotag').setup()
