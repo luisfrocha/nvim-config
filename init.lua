@@ -458,12 +458,9 @@ vim.api.nvim_create_autocmd("CursorHold", {
 
 require('nvim-treesitter').setup()
 
-local codewindow = require('codewindow')
-codewindow.setup({
-  auto_enable = true,
-  minimap_width = 2,
-  use_treesitter = false,
-  width_multiplier = 10,
-})
-codewindow.apply_default_keybinds()
 require('nvim-ts-autotag').setup()
+require('trouble').setup({
+    auto_open = true,
+    use_diagnostic_signs = true,
+ })
+vim.keymap.set("n","<leader>xx", [[LspTroubleToggle]])
