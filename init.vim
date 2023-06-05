@@ -116,8 +116,6 @@ call plug#begin()
   Plug 'nvim-tree/nvim-web-devicons'
   Plug 'MunifTanjim/nui.nvim'
   Plug 'nvim-neo-tree/neo-tree.nvim'
-  " Plug 'ibhagwan/fzf-lua'
-  " Plug 'gennaro-tedesco/nvim-possession'
   Plug 'rmagatti/auto-session'
   Plug 'rcarriga/nvim-notify'
   Plug 'glepnir/lspsaga.nvim'
@@ -142,6 +140,7 @@ call plug#begin()
   Plug 'nvim-telescope/telescope.nvim'
   Plug 'folke/which-key.nvim'
   Plug 'williamboman/mason.nvim', { 'do': ':MasonUpdate' }
+  Plug 'williamboman/mason-lspconfig.nvim'
 
   " Git
   Plug 'airblade/vim-gitgutter'
@@ -269,10 +268,6 @@ let g:ackprg = 'ag --vimgrep'
 set rtp+=/opt/homebrew/bin/fzf
 
 noremap <C-S-O> :CtrlPMixed<cr>
-
-" BarBar cycling through tabs
-nnoremap <silent>    <C-,> <Cmd>BufferPrevious<CR>
-nnoremap <silent>    <C-.> <Cmd>BufferNext<CR>
 
 " If GUI version of Vim is running set these options.
 if has('gui_running')

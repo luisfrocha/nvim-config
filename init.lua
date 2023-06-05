@@ -129,6 +129,7 @@ cmp.setup.cmdline(':', {
 -- }
 
 local lspconfig = require("lspconfig")
+require("mason-lspconfig").setup()
 
 lspconfig.tsserver.setup({
     -- Needed for inlayHints. Merge this table with your settings or copy
@@ -357,9 +358,17 @@ vim.keymap.set("n", "<F12>", function()
   vim.cmd([[Lspsaga peek_definition]])
 end)
 -- Close buffer
-vim.keymap.set("n", "<C-w>c", function()
+vim.keymap.set("n", "<C-S-w>", function()
   vim.cmd([[BufferClose]])
 end)
+-- BarBar cycling through tabs
+vim.keymap.set("n", "<C-,>", function()
+  vim.cmd([[BufferPrevious]])
+end)
+vim.keymap.set("n", "<C-.>", function()
+  vim.cmd([[BufferNext]])
+end)
+
 -- local possession = require("nvim-possession")
 -- vim.keymap.set("n", "<leader>sl", function()
 --     possession.list()
