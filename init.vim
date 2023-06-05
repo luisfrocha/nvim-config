@@ -82,30 +82,24 @@ call plug#begin()
   " Appearance
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
-  " Plug 'navarasu/onedark.nvim'
   Plug 'rebelot/kanagawa.nvim'
-  " Plug 'crusoexia/vim-monokai'
-  Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-  Plug 'eandrju/cellular-automaton.nvim'
   Plug 'mxw/vim-jsx'
   Plug 'pangloss/vim-javascript'
   Plug 'rafi/awesome-vim-colorschemes'
   Plug 'lewis6991/gitsigns.nvim'
   Plug 'nvim-tree/nvim-web-devicons'
+  Plug 'nvim-tree/nvim-tree.lua'
   Plug 'romgrk/barbar.nvim'
   Plug 'kevinhwang91/promise-async'
   Plug 'APZelos/blamer.nvim'
   Plug 'kevinhwang91/nvim-hlslens'
   Plug 'nvim-lua/plenary.nvim'
   Plug 'nvim-lua/popup.nvim'
-  Plug 'HampusHauffman/bionic.nvim'
 
   " Utilities
-  Plug 'williamboman/mason.nvim', { 'do': ':MasonUpdate' }
   Plug 'sheerun/vim-polyglot'
   Plug 'jiangmiao/auto-pairs'
   Plug 'ap/vim-css-color'
-  Plug 'preservim/nerdtree'
   Plug 'godlygeek/tabular'
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
@@ -117,6 +111,7 @@ call plug#begin()
   Plug 'echasnovski/mini.nvim'
   Plug 'jose-elias-alvarez/nvim-lsp-ts-utils'
   Plug 'jose-elias-alvarez/null-ls.nvim'
+  Plug 'voldikss/vim-floaterm'
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
@@ -141,7 +136,6 @@ call plug#begin()
   " Git
   Plug 'airblade/vim-gitgutter'
   Plug 'elvessousa/sobrio'
-  Plug 'Xuyuanp/nerdtree-git-plugin'
   Plug 'lambdalisue/nerdfont.vim'
   Plug 'ryanoasis/vim-devicons'
   Plug 'Xuyuanp/scrollbar.nvim'
@@ -158,6 +152,13 @@ call plug#begin()
   Plug 'hrsh7th/cmp-vsnip'
   Plug 'hrsh7th/vim-vsnip'
 call plug#end()
+
+" FloatTerm
+let g:floaterm_width = 0.9
+let g:floaterm_height = 0.9
+let g:floaterm_autoclose = 1
+let g:floaterm_titleposition = 'center'
+let g:floaterm_shell = 'zsh'
 
 let g:blamer_enabled = 1
 let g:blamer_delay = 300
@@ -183,14 +184,14 @@ let g:vim_vue_plugin_config = {
 " required if using https://github.com/bling/vim-airline
 set guifont=Victor\ Mono\ Font:h16 " ,Hack\\ Nerd\\ Font\\ Mono\\ Font:h18
 set encoding=UTF-8
-let g:NERDTreeGitStatusUseNerdFonts = 1
-let g:NERDTreeGitStatusShowIgnored = 1
+" let g:NERDTreeGitStatusUseNerdFonts = 1
+" let g:NERDTreeGitStatusShowIgnored = 1
 
 let g:airline_theme='molokai'
 let g:airline#extensions#tabline#enable = 1
-let NERDTreeShowHidden=1
+" let NERDTreeShowHidden=1
 "  let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
-let g:webdevicons_enable_nerdtree = 1
+" let g:webdevicons_enable_nerdtree = 1
 let g:webdevicons_enable_airline_tabline = 1
 let g:webdevicons_enable_airline_statusline = 1
 set runtimepath^=~/.config/nvim/bundle/ctrlp.vim
@@ -233,8 +234,11 @@ hi Normal guibg=NONE ctermbg=NONE
 "  nnoremap <C-q> :q!<CR>
 "  nnoremap <C-w> :q<CR>
 nnoremap <S-F4> :bd<CR>
-nnoremap <C-`> :5sp<CR>:terminal<CR>
 nnoremap <C-s> :w<cr>
+
+" nnoremap <C-`> :5sp<CR>:terminal<CR>
+nnoremap <C-`> :FloatermToggle<CR>
+" let g:floaterm_keymap_toggle = '<C-`>'
 
 " Tabs
 nnoremap <S-Tab> gT
@@ -255,6 +259,10 @@ let g:ackprg = 'ag --vimgrep'
 set rtp+=/opt/homebrew/bin/fzf
 
 noremap <C-S-O> :CtrlPMixed<cr>
+
+" BarBar cycling through tabs
+nnoremap <silent>    <C-,> <Cmd>BufferPrevious<CR>
+nnoremap <silent>    <C-.> <Cmd>BufferNext<CR>
 
 " If GUI version of Vim is running set these options.
 if has('gui_running')
@@ -312,19 +320,20 @@ nnoremap <c-s-/> {count}<leader>ci
 augroup auto_commands
   " Start NERDTree and put the cursor back in the other window, even if a file was specified.
   autocmd StdinReadPre * let s:std_in=1
-  autocmd VimEnter * NERDTree | if argc() > 0 || exists("s:std_in") | endif | wincmd p
+  autocmd VimEnter * NvimTreeOpen | if argc() > 0 || exists("s:std_in") | endif | wincmd p
   autocmd FileType scss setlocal iskeyword+=@-@
   " autocmd BufReadPost,BufNewFile *.vue :CocCommand volar.action.splitEditors
   " Exit Vim if NERDTree is the only window remaining in the only tab.
-  autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-  autocmd BufEnter * if &modifiable && expand('%:p') != '' | NERDTreeFind | wincmd p | endif
+  " autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+  " autocmd BufEnter * if &modifiable && expand('%:p') != '' | NvimTreeFindFile | wincmd p | endif
   " If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
-  autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
-   \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
-  autocmd BufEnter * BionicOn
+  " autocmd BufEnter * if bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
+  "  \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
+  " autocmd BufEnter * BionicOn
 augroup END
 
-nnoremap <C-t> :NERDTreeToggle<CR>
+" nnoremap <C-t> :NERDTreeToggle<CR>
+nnoremap <C-t> :NvimTreeToggle<CR>
 nnoremap <C-l> :call CocActionAsync('jumpDefinition')<CR>
 
 nmap <F8> :TagbarToggle<CR>
@@ -339,31 +348,31 @@ let g:ale_fix_on_save = 1
 nmap <leader>d <Plug>(ale_fix)
 
 " Create default mappings
-let g:NERDCreateDefaultMappings = 1
+" let g:NERDCreateDefaultMappings = 1
 
 " Add spaces after comment delimiters by default
-let g:NERDSpaceDelims = 1
+" let g:NERDSpaceDelims = 1
 
 " Use compact syntax for prettified multi-line comments
-let g:NERDCompactSexyComs = 1
+" let g:NERDCompactSexyComs = 1
 
 " Align line-wise comment delimiters flush left instead of following code indentation
-let g:NERDDefaultAlign = 'left'
+" let g:NERDDefaultAlign = 'left'
 
 " Set a language to use its alternate delimiters by default
-let g:NERDAltDelims_java = 1
+" let g:NERDAltDelims_java = 1
 
 " Add your own custom formats or override the defaults
-let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
+" let g:NERDCustomDelimiters = { 'c': { 'left': '/**','right': '*/' } }
 
 " Allow commenting and inverting empty lines (useful when commenting a region)
-let g:NERDCommentEmptyLines = 1
+" let g:NERDCommentEmptyLines = 1
 
 " Enable trimming of trailing whitespace when uncommenting
-let g:NERDTrimTrailingWhitespace = 1
+" let g:NERDTrimTrailingWhitespace = 1
 
 " Enable NERDCommenterToggle to check all selected lines is commented or not
-let g:NERDToggleCheckAllLines = 1
+" let g:NERDToggleCheckAllLines = 1
 
 " air-line
 let g:airline_powerline_fonts = 1
@@ -465,45 +474,44 @@ lua <<EOF
 
   vim.api.nvim_set_keymap('n', '<Leader>l', '<Cmd>noh<CR>', kopts)
 
-  require 'nvim-treesitter.configs'.setup {
-      ensure_installed = {
-        'css',
-        'dockerfile',
-        'graphql',
-        'html',
-        'javascript',
-        'json',
-        'json5',
-        'lua',
-        'php',
-        'scss',
-        'sql',
-        'tsx',
-        'typescript',
-        'vim',
-        'vue',
-        'yaml'
-      },
-      highlight = {
-          enable = true
-      },
-      incremental_selection = {
-          enable = true,
-          keymaps = {
-              init_selection = "gnn",
-              node_incremental = "gj",
-              node_decremental = "gk",
-              scope_incremental = "gs",
-          },
-      },
-      textobjects = {
-          enable = true
-      },
-      indent = {
-          enable = true
-      },
-  }
-  require("mason").setup()
+  -- require 'nvim-treesitter.configs'.setup {
+  --     ensure_installed = {
+  --       'css',
+  --       'dockerfile',
+  --       'graphql',
+  --       'html',
+  --       'javascript',
+  --       'json',
+  --       'json5',
+  --       'lua',
+  --       'php',
+  --       'scss',
+  --       'sql',
+  --       'tsx',
+  --       'typescript',
+  --       'vim',
+  --       'vue',
+  --       'yaml'
+  --     },
+  --     highlight = {
+  --         enable = true
+  --     },
+  --     incremental_selection = {
+  --         enable = true,
+  --         keymaps = {
+  --             init_selection = "gnn",
+  --             node_incremental = "gj",
+  --             node_decremental = "gk",
+  --             scope_incremental = "gs",
+  --         },
+  --     },
+  --     textobjects = {
+  --         enable = true
+  --     },
+  --     indent = {
+  --         enable = true
+  --     },
+  -- }
 
   -- Set up nvim-cmp.
   local cmp = require'cmp'
@@ -649,5 +657,73 @@ lua <<EOF
           null_ls.builtins.code_actions.eslint, -- eslint or eslint_d
           null_ls.builtins.formatting.prettier -- prettier, eslint, eslint_d, or prettierd
       },
+  })
+  -- disable netrw at the very start of your init.lua
+  vim.g.loaded_netrw = 1
+  vim.g.loaded_netrwPlugin = 1
+
+  -- set termguicolors to enable highlight groups
+  vim.opt.termguicolors = true
+
+  -- empty setup using defaults
+  -- require("nvim-tree").setup()
+
+  local function my_on_attach(bufnr)
+    local api = require "nvim-tree.api"
+
+    local function opts(desc)
+      return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+    end
+
+    -- default mappings
+    api.config.mappings.default_on_attach(bufnr)
+
+    -- custom mappings
+    -- vim.keymap.set('n', '<C-t>', api.tree.change_root_to_parent,        opts('Up'))
+    -- vim.keymap.set('n', '?',     api.tree.toggle_help,                  opts('Help'))
+  end
+  -- OR setup with some options
+  local HEIGHT_RATIO = 0.8  -- You can change this
+  local WIDTH_RATIO = 0.5   -- You can change this too
+
+  require("nvim-tree").setup({
+    live_filter = {
+      prefix = "[FILTER]: ",
+      always_show_folders = true, -- Turn into false from true by default
+    },
+    view = {
+      float = {
+        enable = true,
+        open_win_config = function()
+          local screen_w = vim.opt.columns:get()
+          local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
+          local window_w = screen_w * WIDTH_RATIO
+          local window_h = screen_h * HEIGHT_RATIO
+          local window_w_int = math.floor(window_w)
+          local window_h_int = math.floor(window_h)
+          local center_x = (screen_w - window_w) / 2
+          local center_y = ((vim.opt.lines:get() - window_h) / 2)
+                           - vim.opt.cmdheight:get()
+          return {
+            border = 'rounded',
+            relative = 'editor',
+            row = center_y,
+            col = center_x,
+            width = window_w_int,
+            height = window_h_int,
+          }
+          end,
+      },
+      width = function()
+        return math.floor(vim.opt.columns:get() * WIDTH_RATIO)
+      end,
+    },
+    renderer = {
+      group_empty = true,
+    },
+    filters = {
+      dotfiles = true,
+    },
+    on_attach = my_on_attach
   })
 EOF
