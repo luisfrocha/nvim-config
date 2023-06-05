@@ -87,8 +87,6 @@ call plug#begin()
   Plug 'pangloss/vim-javascript'
   Plug 'rafi/awesome-vim-colorschemes'
   Plug 'lewis6991/gitsigns.nvim'
-  Plug 'nvim-tree/nvim-web-devicons'
-  Plug 'nvim-tree/nvim-tree.lua'
   Plug 'romgrk/barbar.nvim'
   Plug 'kevinhwang91/promise-async'
   Plug 'APZelos/blamer.nvim'
@@ -112,6 +110,14 @@ call plug#begin()
   Plug 'jose-elias-alvarez/nvim-lsp-ts-utils'
   Plug 'jose-elias-alvarez/null-ls.nvim'
   Plug 'voldikss/vim-floaterm'
+  Plug 's1n7ax/nvim-window-picker'
+  Plug 'nvim-tree/nvim-web-devicons'
+  Plug 'MunifTanjim/nui.nvim'
+  Plug 'nvim-neo-tree/neo-tree.nvim'
+  " Plug 'ibhagwan/fzf-lua'
+  " Plug 'gennaro-tedesco/nvim-possession'
+  Plug 'rmagatti/auto-session'
+  Plug 'rcarriga/nvim-notify'
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
@@ -132,6 +138,7 @@ call plug#begin()
   Plug 'terryma/vim-multiple-cursors'
   Plug 'nvim-telescope/telescope.nvim'
   Plug 'folke/which-key.nvim'
+  Plug 'williamboman/mason.nvim', { 'do': ':MasonUpdate' }
 
   " Git
   Plug 'airblade/vim-gitgutter'
@@ -319,8 +326,8 @@ nnoremap <c-s-/> {count}<leader>ci
 " Auto Commands
 augroup auto_commands
   " Start NERDTree and put the cursor back in the other window, even if a file was specified.
-  autocmd StdinReadPre * let s:std_in=1
-  autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NvimTreeFindFile | endif
+  " autocmd StdinReadPre * let s:std_in=1
+  " autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | execute "Neotree toggle reveal_force_cwd" | endif
   autocmd FileType scss setlocal iskeyword+=@-@
   " autocmd BufReadPost,BufNewFile *.vue :CocCommand volar.action.splitEditors
   " Exit Vim if NERDTree is the only window remaining in the only tab.
@@ -333,7 +340,7 @@ augroup auto_commands
 augroup END
 
 " nnoremap <C-t> :NERDTreeToggle<CR>
-nnoremap <C-t> :NvimTreeToggle<CR>
+nnoremap <C-t> :Neotree toggle reveal_force_cwd<CR>
 nnoremap <C-l> :call CocActionAsync('jumpDefinition')<CR>
 
 nmap <F8> :TagbarToggle<CR>
@@ -402,328 +409,4 @@ let g:ale_sign_column_always = 1
 " hi MinimapCurrentLine ctermfg=Green guifg=#50FA7B guibg=#32302f
 " let g:minimap_cursor_color = 'MinimapCurrentLine'
 
-lua <<EOF
-  vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
-  if pcall(function()
-      require('mini.map').setup()
-  end) == false then
-    error("Could not load mini.map", 2)
-  end
-  require('mini.pairs').setup()
-  require('mini.indentscope').setup()
-  require('mini.fuzzy').setup()
-  require('mini.completion').setup()
-  require('mini.comment').setup()
-  local animate = require('mini.animate')
-  animate.setup({
-    cursor = {
-      -- Animate for 200 milliseconds with linear easing
-      timing = animate.gen_timing.linear({ duration = 150, unit = 'total' }),
-
-      -- Animate with shortest line for any cursor move
-      path = animate.gen_path.line({
-        predicate = function() return true end,
-      }),
-    },
-    scroll = {
-      enable = false,
-    },
-    resize = {
-      -- Animate for 200 milliseconds with linear easing
-      timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
-
-      -- Animate only if there are at least 3 windows
-      subresize = animate.gen_subscroll.equal({ predicate = is_many_wins }),
-    },
-    open = {
-      -- Animate for 400 milliseconds with linear easing
-      timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
-
-      -- Animate with wiping from nearest edge instead of default static one
-      winconfig = animate.gen_winconfig.wipe({ direction = 'from_edge' }),
-
-      -- Make bigger windows more transparent
-      winblend = animate.gen_winblend.linear({ from = 80, to = 100 }),
-    },
-
-    close = {
-      -- Animate for 400 milliseconds with linear easing
-      timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
-
-      -- Animate with wiping to nearest edge instead of default static one
-      winconfig = animate.gen_winconfig.wipe({ direction = 'to_edge' }),
-
-      -- Make bigger windows more transparent
-      winblend = animate.gen_winblend.linear({ from = 100, to = 80 }),
-    },
-  })
-  require('hlslens').setup()
-
-  local kopts = {noremap = true, silent = true}
-
-  vim.api.nvim_set_keymap('n', 'n',
-      [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]],
-      kopts)
-  vim.api.nvim_set_keymap('n', 'N',
-      [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]],
-      kopts)
-  vim.api.nvim_set_keymap('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
-  vim.api.nvim_set_keymap('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
-  vim.api.nvim_set_keymap('n', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
-  vim.api.nvim_set_keymap('n', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
-
-  vim.api.nvim_set_keymap('n', '<Leader>l', '<Cmd>noh<CR>', kopts)
-
-  -- require 'nvim-treesitter.configs'.setup {
-  --     ensure_installed = {
-  --       'css',
-  --       'dockerfile',
-  --       'graphql',
-  --       'html',
-  --       'javascript',
-  --       'json',
-  --       'json5',
-  --       'lua',
-  --       'php',
-  --       'scss',
-  --       'sql',
-  --       'tsx',
-  --       'typescript',
-  --       'vim',
-  --       'vue',
-  --       'yaml'
-  --     },
-  --     highlight = {
-  --         enable = true
-  --     },
-  --     incremental_selection = {
-  --         enable = true,
-  --         keymaps = {
-  --             init_selection = "gnn",
-  --             node_incremental = "gj",
-  --             node_decremental = "gk",
-  --             scope_incremental = "gs",
-  --         },
-  --     },
-  --     textobjects = {
-  --         enable = true
-  --     },
-  --     indent = {
-  --         enable = true
-  --     },
-  -- }
-
-  -- Set up nvim-cmp.
-  local cmp = require'cmp'
-
-  cmp.setup({
-    snippet = {
-      -- REQUIRED - you must specify a snippet engine
-      expand = function(args)
-        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-        -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-        -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-      end,
-    },
-    window = {
-      -- completion = cmp.config.window.bordered(),
-      -- documentation = cmp.config.window.bordered(),
-    },
-    mapping = cmp.mapping.preset.insert({
-      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
-      ['<C-Space>'] = cmp.mapping.complete(),
-      ['<C-e>'] = cmp.mapping.abort(),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-    }),
-    sources = cmp.config.sources({
-      { name = 'nvim_lsp' },
-      { name = 'vsnip' }, -- For vsnip users.
-      -- { name = 'luasnip' }, -- For luasnip users.
-      -- { name = 'ultisnips' }, -- For ultisnips users.
-      -- { name = 'snippy' }, -- For snippy users.
-    }, {
-      { name = 'buffer' },
-    })
-  })
-
-  -- Set configuration for specific filetype.
-  cmp.setup.filetype('gitcommit', {
-    sources = cmp.config.sources({
-      { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
-    }, {
-      { name = 'buffer' },
-    })
-  })
-
-  -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-  cmp.setup.cmdline({ '/', '?' }, {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {
-      { name = 'buffer' }
-    }
-  })
-
-  -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-  cmp.setup.cmdline(':', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = cmp.config.sources({
-      { name = 'path' }
-    }, {
-      { name = 'cmdline' }
-    })
-  })
-
-  -- Set up lspconfig.
-  -- local capabilities = require('cmp_nvim_lsp').default_capabilities()
-  -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
-  -- require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
-  --   capabilities = capabilities
-  -- }
-
-  local lspconfig = require("lspconfig")
-
-  lspconfig.tsserver.setup({
-      -- Needed for inlayHints. Merge this table with your settings or copy
-      -- it from the source if you want to add your own init_options.
-      init_options = require("nvim-lsp-ts-utils").init_options,
-      --
-      on_attach = function(client, bufnr)
-          local ts_utils = require("nvim-lsp-ts-utils")
-
-          -- defaults
-          ts_utils.setup({
-              debug = false,
-              disable_commands = false,
-              enable_import_on_completion = false,
-
-              -- import all
-              import_all_timeout = 5000, -- ms
-              -- lower numbers = higher priority
-              import_all_priorities = {
-                  same_file = 1, -- add to existing import statement
-                  local_files = 2, -- git files or files with relative path markers
-                  buffer_content = 3, -- loaded buffer content
-                  buffers = 4, -- loaded buffer names
-              },
-              import_all_scan_buffers = 100,
-              import_all_select_source = false,
-              -- if false will avoid organizing imports
-              always_organize_imports = true,
-
-              -- filter diagnostics
-              filter_out_diagnostics_by_severity = {},
-              filter_out_diagnostics_by_code = {},
-
-              -- inlay hints
-              auto_inlay_hints = true,
-              inlay_hints_highlight = "Comment",
-              inlay_hints_priority = 200, -- priority of the hint extmarks
-              inlay_hints_throttle = 150, -- throttle the inlay hint request
-              inlay_hints_format = { -- format options for individual hint kind
-                  Type = {},
-                  Parameter = {},
-                  Enum = {},
-                  -- Example format customization for `Type` kind:
-                  -- Type = {
-                  --     highlight = "Comment",
-                  --     text = function(text)
-                  --         return "->" .. text:sub(2)
-                  --     end,
-                  -- },
-              },
-
-              -- update imports on file move
-              update_imports_on_move = false,
-              require_confirmation_on_move = false,
-              watch_dir = nil,
-          })
-
-          -- required to fix code action ranges and filter diagnostics
-          ts_utils.setup_client(client)
-
-          -- no default maps, so you may want to define some here
-          local opts = { silent = true }
-          vim.api.nvim_buf_set_keymap(bufnr, "n", "gs", ":TSLspOrganize<CR>", opts)
-          vim.api.nvim_buf_set_keymap(bufnr, "n", "gr", ":TSLspRenameFile<CR>", opts)
-          vim.api.nvim_buf_set_keymap(bufnr, "n", "gi", ":TSLspImportAll<CR>", opts)
-      end,
-  })
-  local null_ls = require("null-ls")
-  null_ls.setup({
-      sources = {
-          null_ls.builtins.diagnostics.eslint, -- eslint or eslint_d
-          null_ls.builtins.code_actions.eslint, -- eslint or eslint_d
-          null_ls.builtins.formatting.prettier -- prettier, eslint, eslint_d, or prettierd
-      },
-  })
-  -- disable netrw at the very start of your init.lua
-  vim.g.loaded_netrw = 1
-  vim.g.loaded_netrwPlugin = 1
-
-  -- set termguicolors to enable highlight groups
-  vim.opt.termguicolors = true
-
-  -- empty setup using defaults
-  -- require("nvim-tree").setup()
-
-  local function my_on_attach(bufnr)
-    local api = require "nvim-tree.api"
-
-    local function opts(desc)
-      return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-    end
-
-    -- default mappings
-    api.config.mappings.default_on_attach(bufnr)
-
-    -- custom mappings
-    -- vim.keymap.set('n', '<C-t>', api.tree.change_root_to_parent,        opts('Up'))
-    -- vim.keymap.set('n', '?',     api.tree.toggle_help,                  opts('Help'))
-  end
-  -- OR setup with some options
-  local HEIGHT_RATIO = 0.8  -- You can change this
-  local WIDTH_RATIO = 0.5   -- You can change this too
-
-  require("nvim-tree").setup({
-    live_filter = {
-      prefix = "[FILTER]: ",
-      always_show_folders = true, -- Turn into false from true by default
-    },
-    view = {
-      float = {
-        enable = true,
-        open_win_config = function()
-          local screen_w = vim.opt.columns:get()
-          local screen_h = vim.opt.lines:get() - vim.opt.cmdheight:get()
-          local window_w = screen_w * WIDTH_RATIO
-          local window_h = screen_h * HEIGHT_RATIO
-          local window_w_int = math.floor(window_w)
-          local window_h_int = math.floor(window_h)
-          local center_x = (screen_w - window_w) / 2
-          local center_y = ((vim.opt.lines:get() - window_h) / 2)
-                           - vim.opt.cmdheight:get()
-          return {
-            border = 'rounded',
-            relative = 'editor',
-            row = center_y,
-            col = center_x,
-            width = window_w_int,
-            height = window_h_int,
-          }
-          end,
-      },
-      width = function()
-        return math.floor(vim.opt.columns:get() * WIDTH_RATIO)
-      end,
-    },
-    renderer = {
-      group_empty = true,
-    },
-    filters = {
-      dotfiles = true,
-    },
-    on_attach = my_on_attach
-  })
-EOF
+set sessionoptions+=winpos,terminal,folds
