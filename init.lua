@@ -136,66 +136,92 @@ lspconfig.tsserver.setup({
     init_options = require("nvim-lsp-ts-utils").init_options,
     --
     on_attach = function(client, bufnr)
-        local ts_utils = require("nvim-lsp-ts-utils")
+      local ts_utils = require("nvim-lsp-ts-utils")
 
-        -- defaults
-        ts_utils.setup({
-            debug = false,
-            disable_commands = false,
-            enable_import_on_completion = false,
+      -- defaults
+      ts_utils.setup({
+        debug = false,
+        disable_commands = false,
+        enable_import_on_completion = false,
 
-            -- import all
-            import_all_timeout = 5000, -- ms
-            -- lower numbers = higher priority
-            import_all_priorities = {
-                same_file = 1, -- add to existing import statement
-                local_files = 2, -- git files or files with relative path markers
-                buffer_content = 3, -- loaded buffer content
-                buffers = 4, -- loaded buffer names
-            },
-            import_all_scan_buffers = 100,
-            import_all_select_source = false,
-            -- if false will avoid organizing imports
-            always_organize_imports = true,
+        -- import all
+        import_all_timeout = 5000, -- ms
+        -- lower numbers = higher priority
+        import_all_priorities = {
+          same_file = 1, -- add to existing import statement
+          local_files = 2, -- git files or files with relative path markers
+          buffer_content = 3, -- loaded buffer content
+          buffers = 4, -- loaded buffer names
+        },
+        import_all_scan_buffers = 100,
+        import_all_select_source = false,
+        -- if false will avoid organizing imports
+        always_organize_imports = true,
 
-            -- filter diagnostics
-            filter_out_diagnostics_by_severity = {},
-            filter_out_diagnostics_by_code = {},
+        -- filter diagnostics
+        filter_out_diagnostics_by_severity = {},
+        filter_out_diagnostics_by_code = {},
 
-            -- inlay hints
-            auto_inlay_hints = true,
-            inlay_hints_highlight = "Comment",
-            inlay_hints_priority = 200, -- priority of the hint extmarks
-            inlay_hints_throttle = 150, -- throttle the inlay hint request
-            inlay_hints_format = { -- format options for individual hint kind
-                Type = {},
-                Parameter = {},
-                Enum = {},
-                -- Example format customization for `Type` kind:
-                -- Type = {
-                --     highlight = "Comment",
-                --     text = function(text)
-                --         return "->" .. text:sub(2)
-                --     end,
-                -- },
-            },
+        -- inlay hints
+        auto_inlay_hints = true,
+        inlay_hints_highlight = "Comment",
+        inlay_hints_priority = 200, -- priority of the hint extmarks
+        inlay_hints_throttle = 150, -- throttle the inlay hint request
+        inlay_hints_format = { -- format options for individual hint kind
+          Type = {},
+          Parameter = {},
+          Enum = {},
+          -- Example format customization for `Type` kind:
+          -- Type = {
+          --     highlight = "Comment",
+          --     text = function(text)
+          --         return "->" .. text:sub(2)
+          --     end,
+          -- },
+        },
 
-            -- update imports on file move
-            update_imports_on_move = false,
-            require_confirmation_on_move = false,
-            watch_dir = nil,
+        -- update imports on file move
+        update_imports_on_move = false,
+        require_confirmation_on_move = false,
+        watch_dir = nil,
+      })
+
+      -- required to fix code action ranges and filter diagnostics
+      ts_utils.setup_client(client)
+
+      -- no default maps, so you may want to define some here
+      local opts = { silent = true }
+      vim.api.nvim_buf_set_keymap(bufnr, "n", "gs", ":TSLspOrganize<CR>", opts)
+      vim.api.nvim_buf_set_keymap(bufnr, "n", "gr", ":TSLspRenameFile<CR>", opts)
+      vim.api.nvim_buf_set_keymap(bufnr, "n", "gi", ":TSLspImportAll<CR>", opts)
+
+      if client.resolved_capabilities.document_highlight then
+        vim.cmd [[
+          hi! LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
+          hi! LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
+          hi! LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
+        ]]
+        vim.api.nvim_create_augroup('lsp_document_highlight', {
+          clear = false
         })
-
-        -- required to fix code action ranges and filter diagnostics
-        ts_utils.setup_client(client)
-
-        -- no default maps, so you may want to define some here
-        local opts = { silent = true }
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "gs", ":TSLspOrganize<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "gr", ":TSLspRenameFile<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "gi", ":TSLspImportAll<CR>", opts)
+        vim.api.nvim_clear_autocmds({
+          buffer = bufnr,
+          group = 'lsp_document_highlight',
+        })
+        vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+          group = 'lsp_document_highlight',
+          buffer = bufnr,
+          callback = vim.lsp.buf.document_highlight,
+        })
+        vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+          group = 'lsp_document_highlight',
+          buffer = bufnr,
+          callback = vim.lsp.buf.clear_references,
+        })
+      end
     end,
-})
+  })
+  require("lspsaga").setup({})
 local null_ls = require("null-ls")
 null_ls.setup({
     sources = {
@@ -327,7 +353,13 @@ require("neo-tree").setup({
 })
 
 vim.cmd([[nnoremap \ :Neotree reveal<cr>]])
-
+vim.keymap.set("n", "<F12>", function()
+  vim.cmd([[Lspsaga peek_definition]])
+end)
+-- Close buffer
+vim.keymap.set("n", "<C-w>c", function()
+  vim.cmd([[BufferClose]])
+end)
 -- local possession = require("nvim-possession")
 -- vim.keymap.set("n", "<leader>sl", function()
 --     possession.list()
@@ -393,3 +425,29 @@ require('telescope').setup {
     },
   }
 }
+
+vim.api.nvim_create_autocmd("CursorHold", {
+  buffer = bufnr,
+  callback = function()
+    local opts = {
+      focusable = false,
+      close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+      border = 'rounded',
+      source = 'always',
+      prefix = ' ',
+      scope = 'cursor',
+    }
+    vim.diagnostic.open_float(nil, opts)
+  end
+})
+
+require('nvim-treesitter').setup()
+
+local codewindow = require('codewindow')
+codewindow.setup({
+  auto_enable = true,
+  minimap_width = 2,
+  use_treesitter = false,
+  width_multiplier = 10,
+})
+codewindow.apply_default_keybinds()

@@ -93,6 +93,8 @@ call plug#begin()
   Plug 'kevinhwang91/nvim-hlslens'
   Plug 'nvim-lua/plenary.nvim'
   Plug 'nvim-lua/popup.nvim'
+  Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+  Plug 'gorbit99/codewindow.nvim'
 
   " Utilities
   Plug 'sheerun/vim-polyglot'
@@ -118,6 +120,7 @@ call plug#begin()
   " Plug 'gennaro-tedesco/nvim-possession'
   Plug 'rmagatti/auto-session'
   Plug 'rcarriga/nvim-notify'
+  Plug 'glepnir/lspsaga.nvim'
 
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
