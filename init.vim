@@ -120,7 +120,7 @@ call plug#begin()
   Plug 'glepnir/lspsaga.nvim'
   Plug 'windwp/nvim-ts-autotag'
   Plug 'folke/lsp-trouble.nvim'
-
+  Plug 'numToStr/Comment.nvim'
   " Completion / linters / formatters
   Plug 'neoclide/coc.nvim',  {'branch': 'release', 'do': 'yarn install --frozen-lockfile'}
   Plug 'plasticboy/vim-markdown'
@@ -170,6 +170,7 @@ call plug#begin()
   Plug 'rmagatti/goto-preview'
   Plug 'nvim-pack/nvim-spectre'
   Plug 'folke/todo-comments.nvim'
+  Plug 'ctrlpvim/ctrlp.vim'
 call plug#end()
 
 " FloatTerm

@@ -23,6 +23,7 @@ case $option in
     npm i -g import-js
     brew update && \
     brew upgrade && \
+    brew tap homebrew/cask-fonts
     brew install \
       neovim \
       watchman \
@@ -31,16 +32,14 @@ case $option in
       git-delta \
       the_silver_searcher \
       code-minimap \
-      yarn
+      yarn \
+      font-hack-nerd-font \
+      ripgrep \
+      gnu-sed
 
     $(brew --prefix)/opt/fzf/install
     mkdir -p $HOME/.config/nvim/{colors,plugged,spell,scripts,bundle}
     sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-    git clone https://github.com/ctrlpvim/ctrlp.vim.git $HOME/.config/nvim/bundle/ctrlp.vim
-
-    # Install Nerd Fonts
-    brew tap homebrew/cask-fonts
-    brew install font-hack-nerd-font
 
     # mkdir -p $HOME/.vim/bundle
     # git clone https://github.com/morhetz/gruvbox.git ~/.vim/bundle/gruvbox
@@ -51,6 +50,8 @@ case $option in
     # nvim --headless +PluginInstall 'navarasu/onedark.nvim' +qall
     # nvim --headless +PlugInstall 'Yazeed1s/minimal.nvim' +qall
     # nvim --headless +PluginInstall +qall
+    nvim --headless --noplugin +PluginInstall 'williamboman/mason.nvim' +qall
+    nvim --headless --noplugin +PluginInstall 'williamboman/mason-lspconfig.nvim' +qall
     nvim --headless --noplugin +PluginInstall 'rebelot/kanagawa.nvim' +qall
     ln -s $CURR_DIR/init.vim $HOME/.config/nvim/script.vim
     ln -s $CURR_DIR/init.lua $HOME/.config/nvim/
