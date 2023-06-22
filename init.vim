@@ -166,6 +166,7 @@ call plug#begin()
   Plug 'utilyre/barbecue.nvim'
   Plug 'lukas-reineke/indent-blankline.nvim'
   Plug 'RRethy/vim-illuminate'
+  Plug 'simrat39/symbols-outline.nvim'
 call plug#end()
 
 " FloatTerm
