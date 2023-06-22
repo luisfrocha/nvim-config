@@ -951,4 +951,8 @@ require("indent_blankline").setup {
     show_current_context_start = true,
 }
 
-require("symbols-outline").setup()
+require("symbols-outline").setup({
+    auto_preview = true
+  })
+
+require('goto-preview').setup {}

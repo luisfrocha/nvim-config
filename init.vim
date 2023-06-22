@@ -167,6 +167,7 @@ call plug#begin()
   Plug 'lukas-reineke/indent-blankline.nvim'
   Plug 'RRethy/vim-illuminate'
   Plug 'simrat39/symbols-outline.nvim'
+  Plug 'rmagatti/goto-preview'
 call plug#end()
 
 " FloatTerm
