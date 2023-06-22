@@ -161,6 +161,9 @@ call plug#begin()
   " For vsnip users.
   Plug 'hrsh7th/cmp-vsnip'
   Plug 'hrsh7th/vim-vsnip'
+  Plug 'neovim/nvim-lspconfig'
+  Plug 'SmiteshP/nvim-navic'
+  Plug 'utilyre/barbecue.nvim'
 call plug#end()
 
 " FloatTerm
