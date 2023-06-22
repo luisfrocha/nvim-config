@@ -165,6 +165,7 @@ call plug#begin()
   Plug 'SmiteshP/nvim-navic'
   Plug 'utilyre/barbecue.nvim'
   Plug 'lukas-reineke/indent-blankline.nvim'
+  Plug 'RRethy/vim-illuminate'
 call plug#end()
 
 " FloatTerm
