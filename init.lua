@@ -956,3 +956,8 @@ require("symbols-outline").setup({
   })
 
 require('goto-preview').setup {}
+
+require('spectre').setup()
+
+require("todo-comments").setup()
+

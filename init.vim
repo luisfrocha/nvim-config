@@ -168,6 +168,8 @@ call plug#begin()
   Plug 'RRethy/vim-illuminate'
   Plug 'simrat39/symbols-outline.nvim'
   Plug 'rmagatti/goto-preview'
+  Plug 'nvim-pack/nvim-spectre'
+  Plug 'folke/todo-comments.nvim'
 call plug#end()
 
 " FloatTerm
