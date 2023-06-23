@@ -13,6 +13,10 @@ vim.cmd('source ~/.config/nvim/script.vim')
 -- vim.opt.rtp:prepend(lazypath)
 -- require("lazy").setup({}, {})
 require('mason').setup()
+require('mason-tool-installer').setup {
+  ensure_installed = {},
+  auto_update = true,
+}
 
 vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
 if pcall(function()

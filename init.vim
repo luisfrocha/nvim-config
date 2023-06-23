@@ -142,6 +142,7 @@ call plug#begin()
   Plug 'folke/which-key.nvim'
   Plug 'williamboman/mason.nvim', { 'do': ':MasonUpdate' }
   Plug 'williamboman/mason-lspconfig.nvim'
+  Plug 'WhoIsSethDaniel/mason-tool-installer.nvim'
 
   " Git
   Plug 'airblade/vim-gitgutter'
