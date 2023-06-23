@@ -18,6 +18,7 @@
     "json",
     "javascript",
     "javascriptreact",
+    "php",
     "typescript",
     "typescriptreact",
     "python",
@@ -30,6 +31,7 @@
   "emmet.includeLanguages": [
     "javascript",
     "javascriptreact",
+    "php",
     "typescript",
     "typescriptreact",
     "html",
