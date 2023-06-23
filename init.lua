@@ -373,6 +373,10 @@ vim.keymap.set("n", "<F12>", function()
   vim.cmd([[Lspsaga peek_definition]])
 end)
 -- Save buffer
+vim.keymap.set('n', '<C-s>', function()
+  vim.cmd([[:w]])
+end)
+-- Save all buffers
 vim.keymap.set('n', '<C-S-s>', function()
   vim.cmd([[:wa]])
 end)
