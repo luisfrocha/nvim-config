@@ -374,7 +374,7 @@ vim.keymap.set("n", "<F12>", function()
 end)
 -- Save buffer
 vim.keymap.set('n', '<C-S-s>', function()
-  vim.cmd([[:w]])
+  vim.cmd([[:wa]])
 end)
 -- Close buffer
 vim.keymap.set("n", "<C-S-w>", function()
