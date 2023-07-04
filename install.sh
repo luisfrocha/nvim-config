@@ -50,11 +50,11 @@ case $option in
     # nvim --headless +PluginInstall 'navarasu/onedark.nvim' +qall
     # nvim --headless +PlugInstall 'Yazeed1s/minimal.nvim' +qall
     # nvim --headless +PluginInstall +qall
-    ln -s $CURR_DIR/init.vim $HOME/.config/nvim/script.vim
-    ln -s $CURR_DIR/init.lua $HOME/.config/nvim/
     nvim --headless --noplugin +PluginInstall 'williamboman/mason.nvim' +qall
     nvim --headless --noplugin +PluginInstall 'williamboman/mason-lspconfig.nvim' +qall
     nvim --headless --noplugin +PluginInstall 'rebelot/kanagawa.nvim' +qall
+    ln -s $CURR_DIR/init.vim $HOME/.config/nvim/script.vim
+    ln -s $CURR_DIR/init.lua $HOME/.config/nvim/
     nvim --headless --noplugin +PlugInstall +qall
     nvim --headless --noplugin +CocInstall 'coc-eslint' +qall
     nvim --headless --noplugin +CocInstall '@yaegassy/coc-intelephense' +qall
