@@ -3,7 +3,4 @@ return {
   dependencies = {
     "ludovicchabant/vim-gutentags",
   },
-  config = function()
-    vim.fn.system("npm install")
-  end,
 }
