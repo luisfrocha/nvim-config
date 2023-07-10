@@ -24,10 +24,12 @@ case $option in
 	brew update &&
 		brew upgrade &&
 		brew tap homebrew/cask-fonts
+	brew tap jesseduffield/lazygit
 	brew install \
 		neovim \
 		font-hack-nerd-font \
-		ctags
+		ctags \
+		lazygit
 	mkdir -p $HOME/.config
 	ln -s $CURR_DIR $HOME/.config/nvim
 	echo "Installation complete."
