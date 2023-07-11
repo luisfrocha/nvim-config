@@ -32,6 +32,7 @@ case $option in
 		lazygit
 	mkdir -p $HOME/.config
 	ln -s $CURR_DIR $HOME/.config/nvim
+	export XDG_CONFIG_HOME="$HOME/.config/nvim"
 	echo "Installation complete."
 	;;
 *) usage ;;
