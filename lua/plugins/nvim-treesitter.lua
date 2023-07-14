@@ -21,6 +21,13 @@ return {
     { "<c-space>", desc = "Increment selection" },
     { "<bs>", desc = "Decrement selection", mode = "x" },
   },
+  config = function()
+    require("ufo").setup({
+      provider_selector = function(bufnr, filetype, buftype)
+        return { "treesitter", "indent" }
+      end,
+    })
+  end,
   opts = function(_, opts)
     vim.list_extend(opts.ensure_installed, {
       "astro",
