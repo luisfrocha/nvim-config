@@ -7,8 +7,9 @@ vim.node_host_prog = "/Users/luisrocha/.nvm/versions/node/v18.16.0/bin:node"
 
 -- Enable mouse movements
 vim.opt.mousemoveevent = true
+
+-- Wrap lines and indent
 vim.opt.linebreak = true
 vim.opt.wrap = true
 vim.opt.showbreak = "↳ "
-vim.opt.cpo = "n"
 vim.opt.breakindent = true
