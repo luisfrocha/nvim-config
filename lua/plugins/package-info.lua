@@ -2,9 +2,14 @@ return {
   {
     {
       "vuki656/package-info.nvim",
-      dependencies = { "MunifTanjim/nui.nvim" },
+      event = "VeryLazy",
+      dependencies = { "nvim-tree/nvim-web-devicons", "MunifTanjim/nui.nvim" },
       opts = {
         package_manager = "pnpm",
+        autostart = true,
+        icons = {
+          enable = true,
+        },
       },
       keys = {
         {
