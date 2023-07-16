@@ -7,13 +7,14 @@ return {
   },
   opts = {
     options = {
+      diagnostics = false,
       separator_style = "slant",
       indicator = {
         style = "underline",
       },
       hover = {
         enabled = true,
-        delay = 200,
+        delay = 100,
         reveal = { "close" },
       },
       always_show_bufferline = true,
