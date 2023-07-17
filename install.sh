@@ -15,14 +15,14 @@ EOF
 CURR_DIR=$(pwd)
 case $option in
 -c)
-  echo "Uninstalling configs..."
-  rm -rf $HOME/.config/nvim
-  LAZYGIT_VAR="CONFIG_DIR"
-  LINE_NUMBER=$(cat ~/.zshrc | grep -n "${LAZYGIT_VAR}" | cut -d : -f 1)
-  if [ -n "${LINE_NUMBER+1}" ]; then
-    sed -i.bkp "${LINE_NUMBER}d" ~/.zshrc
-  fi
-  ;;
+	echo "Uninstalling configs..."
+	rm -rf $HOME/.config/nvim
+	LAZYGIT_VAR="CONFIG_DIR"
+	LINE_NUMBER=$(cat ~/.zshrc | grep -n "${LAZYGIT_VAR}" | cut -d : -f 1)
+	if [ -n "${LINE_NUMBER+1}" ]; then
+		sed -i.bkp "${LINE_NUMBER}d" ~/.zshrc
+	fi
+	;;
 -i)
 	echo "Installing configs..."
 	pnpm add -g neovim
@@ -34,6 +34,7 @@ case $option in
 		neovim \
 		font-hack-nerd-font \
 		ctags \
+		git-flow-avh \
 		lazygit
 	mkdir -p $HOME/.config
 	ln -s $CURR_DIR $HOME/.config/nvim
