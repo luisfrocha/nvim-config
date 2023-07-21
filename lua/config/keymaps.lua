@@ -36,3 +36,7 @@ map({ "n", "v" }, "<leader>bB", ":ls<cr>:buffer<space>", { desc = "Go to Buffer"
 map({ "n", "v" }, "<C-tab>", ":ls<cr>:buffer<space>", { desc = "Go to Buffer" })
 map({ "n", "v", "x" }, "<C-BS>", '"_dd', { desc = "Delete line (not cut)" })
 map({ "i" }, "<C-BS>", '<C-o>"_dd', { desc = "Delete line (not cut)" })
+map({ "n" }, "<C-.>", ":Lspsaga code_action<cr>", { desc = "Show code actions menu" })
+map({ "n", "i" }, "<C-S-d>", ":Lspsaga goto_definition<cr>", { desc = "Go to Definition" })
+map({ "n" }, "<C-S-p>", ":Lspsaga peek_definition<cr>", { desc = "Peek Definition" })
+map({ "x" }, "<BS>", '"_c', { desc = "Delete selected text" })
