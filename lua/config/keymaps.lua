@@ -40,3 +40,5 @@ map({ "n" }, "<C-.>", ":Lspsaga code_action<cr>", { desc = "Show code actions me
 map({ "n", "i" }, "<C-S-d>", ":Lspsaga goto_definition<cr>", { desc = "Go to Definition" })
 map({ "n" }, "<C-S-p>", ":Lspsaga peek_definition<cr>", { desc = "Peek Definition" })
 map({ "x" }, "<BS>", '"_c', { desc = "Delete selected text" })
+map({ "x" }, "<C-p>", '"0p', { desc = "Paste text without copying selection" })
+map({ "n" }, "<leader>ba", ":%bd|e#|bd#<cr>|'\"", { desc = "Delete all buffers except current" })
