@@ -18,12 +18,9 @@ return {
         reveal = { "close" },
       },
       always_show_bufferline = true,
-      -- highlights = {
-      --   tab_separator = {
-      --     bg = "none",
-      --     fg = "none",
-      --   },
-      -- },
+      highlights = {
+        tab_separator = { fg = "000000" },
+      },
     },
   },
 }
