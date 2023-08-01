@@ -1,9 +1,9 @@
 return {
-  { "rebelot/kanagawa.nvim" },
+  { "catppuccin" },
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "kanagawa",
+      colorscheme = "catppuccin-mocha",
     },
   },
 }

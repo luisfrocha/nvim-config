@@ -16,3 +16,7 @@ opt.breakindent = true
 
 opt.winbar = "%=%m %f"
 opt.relativenumber = false
+opt.foldmethod = "indent"
+opt.foldnestmax = 10
+opt.foldenable = false
+opt.foldlevel = 2
