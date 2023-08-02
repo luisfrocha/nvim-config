@@ -35,7 +35,10 @@ case $option in
 		font-hack-nerd-font \
 		ctags \
 		git-flow-avh \
-		lazygit
+		lazygit \
+		fd \
+		fzf
+	$(brew --prefix)/opt/fzf/install
 	mkdir -p $HOME/.config
 	ln -s $CURR_DIR $HOME/.config/nvim
 	export CONFIG_DIR="$HOME/.config/nvim/lazygit"

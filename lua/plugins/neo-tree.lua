@@ -9,6 +9,7 @@ return {
   },
   config = function()
     require("neo-tree").setup({
+      reveal_force_cwd = true,
       popup_border_style = "rounded",
       sort_case_insensitive = true,
       source_selector = {
@@ -45,7 +46,7 @@ return {
             ".git",
           },
         },
-        follow_current_file = true,
+        follow_current_file = { enabled = true },
       },
     })
   end,

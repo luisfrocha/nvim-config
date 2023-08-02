@@ -3,24 +3,56 @@ return {
     "jay-babu/mason-nvim-dap.nvim",
     dependencies = "mason.nvim",
     cmd = { "DapInstall", "DapUninstall" },
-    opts = {
-      -- Makes a best effort to setup the various debuggers with
-      -- reasonable debug configurations
-      automatic_installation = true,
-
-      -- You can provide additional configuration to the handlers,
-      -- see mason-nvim-dap README for more information
-      handlers = {},
-
-      -- You'll need to check that you have the required things installed
-      -- online, please don't ask me how to install them :)
-      ensure_installed = {
-        -- Update this to ensure that you have the debuggers for the langs you want
-        "tailwindcss-language-server",
-        "vue-language-server",
-        "prettierd",
+    opts = function(_, opts)
+      table.insert(opts.ensure_installed, {
+        "bash-language-server",
+        "cssmodules-language-server",
+        "dockerfile-language-server",
+        "docker-compose-language-service",
+        "emmet-language-server",
+        "eslint_d",
+        "eslint-lsp",
+        "fixjson",
+        "graphql-language-service-cli",
+        "htmlbeautifier",
+        "html-lsp",
         "intelephense",
-      },
-    },
+        "isort",
+        "jsonlint",
+        "json-lsp",
+        "js-debug-adapter",
+        "luau-lsp",
+        "lua-language-server",
+        "markdownlint",
+        "phpcbf",
+        "phpcs",
+        "phpstan",
+        "php-cs-fixer",
+        "php-debug-adapter",
+        "prettier",
+        "prettierd",
+        "quick-lint-js",
+        "rome",
+        "shfmt",
+        "sonarlint-language-server",
+        "sql-formatter",
+        "standardjs",
+        "stylelint",
+        "stylelint-lsp",
+        "stylua",
+        "tailwindcss-language-server",
+        "typescript-language-server",
+        "ts-standard",
+        "vetur-vls",
+        "vtsls",
+        "vue-language-server",
+        "yamlfix",
+        "yamlfmt",
+        "yamllint",
+        "yaml-language-server",
+        "yq",
+      })
+      opts.automatic_installation = true
+    end,
   },
 }
