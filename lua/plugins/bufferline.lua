@@ -8,7 +8,7 @@ return {
   opts = {
     options = {
       diagnostics = false,
-      separator_style = "slant",
+      separator_style = "thin", -- slant, padded_slant, slope, padded_slope, thick, thin, or custom list
       indicator = {
         style = "underline",
       },
