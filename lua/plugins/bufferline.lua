@@ -14,12 +14,12 @@ return {
       },
       hover = {
         enabled = true,
-        delay = 100,
+        delay = 50,
         reveal = { "close" },
       },
       always_show_bufferline = true,
       highlights = {
-        tab_separator = { fg = "000000" },
+        tab_separator = { fg = "#000000" },
       },
     },
   },
