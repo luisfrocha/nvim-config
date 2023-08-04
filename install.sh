@@ -25,7 +25,7 @@ case $option in
 	;;
 -i)
 	echo "Installing configs..."
-	pnpm add -g neovim
+	pnpm add -g neovim prettier
 	brew update &&
 		brew upgrade &&
 		brew tap homebrew/cask-fonts
@@ -37,7 +37,8 @@ case $option in
 		git-flow-avh \
 		lazygit \
 		fd \
-		fzf
+		fzf \
+		gh
 	$(brew --prefix)/opt/fzf/install
 	mkdir -p $HOME/.config
 	ln -s $CURR_DIR $HOME/.config/nvim
