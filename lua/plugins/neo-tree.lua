@@ -29,6 +29,7 @@ return {
             height = "90%",
             width = "90%",
           },
+          winblend = 40,
         },
       },
       filesystem = {

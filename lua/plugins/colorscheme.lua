@@ -10,6 +10,7 @@ return {
     "cosmicthemethhead/ultradark.nvim",
     "rebelot/kanagawa.nvim",
     "rafamadriz/themes.nvim",
+    { "tersetears/maani.nvim", dependencies = { "rktjmp/lush.nvim" } },
   },
   {
     "LazyVim/LazyVim",
