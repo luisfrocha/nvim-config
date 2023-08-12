@@ -53,3 +53,4 @@ map(
   "<esc>:SearchBoxReplace show_matches=true confirm=menu<cr>",
   { desc = "Search & Replace in Buffer" }
 )
+map({ "i", "v", "n", "s" }, "<C-s>", "<cmd>wa<cr><esc>", { desc = "Save modified files" })
