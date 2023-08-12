@@ -1,6 +1,6 @@
 return {
   {
-    { "catppuccin/nvim", name = "catppuccin", priority = 1000 },
+    { "catppuccin/nvim", name = "catppuccin", priority = 1000, lazy = false },
     "patstockwell/vim-monokai-tasty",
     "oxfist/night-owl.nvim",
     "hachy/eva01.vim",
@@ -11,11 +11,17 @@ return {
     "rebelot/kanagawa.nvim",
     "rafamadriz/themes.nvim",
     { "tersetears/maani.nvim", dependencies = { "rktjmp/lush.nvim" } },
+    {
+      "folke/tokyonight.nvim",
+      lazy = false,
+      priority = 1000,
+      opts = {},
+    },
   },
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "tokyodark",
+      colorscheme = "tokyonight-night",
     },
   },
 }
