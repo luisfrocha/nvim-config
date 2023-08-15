@@ -21,7 +21,6 @@ return {
     { "<c-space>", desc = "Increment selection" },
     { "<bs>", desc = "Decrement selection", mode = "x" },
   },
-  config = function() end,
   opts = function(_, opts)
     vim.list_extend(opts.ensure_installed, {
       "astro",
