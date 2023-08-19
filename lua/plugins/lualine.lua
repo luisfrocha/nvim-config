@@ -1,12 +1,12 @@
 return {
   {
     "nvim-lualine/lualine.nvim",
-    dependencies = { { "fabius/molokai.nvim", lazy = false }, "nvim-tree/nvim-web-devicons" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     event = "VeryLazy",
     opts = {
       options = {
         icons_enabled = true,
-        theme = "onedark",
+        theme = "molokai",
       },
       sections = {
         lualine_x = {
