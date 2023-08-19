@@ -5,7 +5,6 @@ vim.node_host_prog = "/Users/luisrocha/.nvm/versions/node/v18.16.0/bin:node"
 
 -- Set terminal background to transparent
 vim.cmd([[hi Normal guibg=NONE ctermbg=NONE]])
-vim.cmd("colorscheme molokai")
 
 -- Set folds and open on file/buffer open
 -- vim.opt.foldmethod = "expr"
