@@ -15,13 +15,19 @@ return {
       "folke/tokyonight.nvim",
       lazy = false,
       priority = 1000,
-      opts = {},
+    },
+    {
+      "fabius/molokai.nvim",
+      name = "molokai",
+      dependencies = { "rktjmp/lush.nvim" },
+      lazy = false,
+      priority = 1000,
     },
   },
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "tokyonight-night",
+      colorscheme = "molokai",
     },
   },
 }
