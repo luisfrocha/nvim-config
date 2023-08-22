@@ -54,3 +54,4 @@ map(
   { desc = "Search & Replace in Buffer" }
 )
 map({ "i", "v", "n", "s" }, "<C-s>", "<cmd>wa<cr><esc>", { desc = "Save modified files" })
+map({ "i", "v", "n", "s" }, "<C-d>", "<esc>Yp", { desc = "Copy line down" })
