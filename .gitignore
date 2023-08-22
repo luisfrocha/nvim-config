@@ -8,4 +8,4 @@ foo.*
 *.log
 data
 tags*
-lazygit/state.yml
+/lazygit/state.yml
