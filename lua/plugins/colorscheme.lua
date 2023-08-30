@@ -29,11 +29,12 @@ return {
         })
       end,
     },
+    { "lunarvim/Onedarker.nvim" },
   },
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "molokai",
+      colorscheme = "kanagawa",
     },
   },
 }
