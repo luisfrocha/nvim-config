@@ -55,3 +55,4 @@ map(
 )
 map({ "i", "v", "n", "s" }, "<C-s>", "<cmd>wa<cr><esc>", { desc = "Save modified files" })
 map({ "i", "v", "n", "s" }, "<C-d>", "<esc>Yp", { desc = "Copy line down" })
+map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true })
