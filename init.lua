@@ -5,30 +5,27 @@ vim.node_host_prog = "/Users/luisrocha/.nvm/versions/node/v18.16.0/bin:node"
 
 -- Set terminal background to transparent
 vim.cmd([[hi Normal guibg=NONE ctermbg=NONE]])
+if vim.g.neovide then
+  vim.o.guifont = "VictorMono Nerd Font,Hack Nerd Font:h16"
+  vim.opt.linespace = -5
 
--- Set folds and open on file/buffer open
--- vim.opt.foldmethod = "expr"
--- vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
--- local M = {}
--- -- function to create a list of commands and convert them to autocommands
--- -------- This function is taken from https://github.com/norcalli/nvim_utils
--- function M.nvim_create_augroups(definitions)
---   for group_name, definition in pairs(definitions) do
---     api.nvim_command("augroup " .. group_name)
---     api.nvim_command("autocmd!")
---     for _, def in ipairs(definition) do
---       local command = table.concat(vim.tbl_flatten({ "autocmd", def }), " ")
---       api.nvim_command(command)
---     end
---     api.nvim_command("augroup END")
---   end
--- end
---
--- local autoCommands = {
---   -- other autocommands
---   open_folds = {
---     { "BufReadPost,FileReadPost", "*", "normal zR" },
---   },
--- }
---
--- M.nvim_create_augroups(autoCommands)
+  -- Helper function for transparency formatting
+  local alpha = function()
+    return string.format("%x", math.floor(255 * vim.g.transparency or 0.5))
+  end
+  -- g:neovide_transparency should be 0 if you want to unify transparency of content and title bar.
+  vim.g.neovide_transparency = 0.0
+  vim.g.transparency = 0.9
+  vim.g.neovide_background_color = "#0f1117" .. alpha()
+
+  vim.g.neovide_hide_mouse_when_typing = true
+
+  vim.g.neovide_underline_automatic_scaling = true
+  vim.g.neovide_remember_window_size = true
+  vim.g.neovide_input_macos_alt_is_meta = true
+  -- vim.g.neovide_cursor_animation_length = 0.75
+  -- vim.g.neovide_cursor_trail_size = 0.75
+  vim.g.neovide_cursor_vfx_mode = "pixiedust"
+  vim.g.neovide_cursor_vfx_particle_lifetime = 3
+  vim.g.neovide_cursor_vfx_particle_density = 35.0
+end
