@@ -6,7 +6,7 @@ return {
         ensure_installed = {
           "vue-language-server",
           "prettierd",
-          "prettier",
+          -- "prettier",
           "lua-language-server",
           "eslint-lsp",
           "js-debug-adapter",
@@ -17,6 +17,7 @@ return {
           "typescript-language-server",
           "intelephense",
           "php-cs-fixer",
+          "stylelint",
         },
         auto_update = true,
       })
