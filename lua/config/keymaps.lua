@@ -47,7 +47,7 @@ map({ "i" }, "<C-S-F>", "<esc>:Spectre :initial_mode='insert'<cr>", { desc = "Gl
 map({ "n" }, "<C-F>", ":SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
 map({ "x" }, "<C-f>", "<esc>:SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
 map({ "n" }, "<C-r>", ":SearchBoxReplace show_matches=true confirm=menu<cr>", { desc = "Search & Replace in Buffer" })
-map({ "n", "i", "v", "s" }, "<C-S-D>", ":Noice dismiss<cr>", { desc = "Dismiss all notifications" })
+map({ "n", "i", "v", "s" }, "<leader>bD", ":Noice dismiss<cr>", { desc = "Dismiss all notifications" })
 map(
   { "x" },
   "<C-r>",
