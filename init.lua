@@ -1,22 +1,20 @@
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
 
-vim.node_host_prog = "/Users/luisrocha/.nvm/versions/node/v18.16.0/bin:node"
-
 -- Set terminal background to transparent
 vim.cmd([[hi Normal guibg=NONE ctermbg=NONE]])
+vim.o.guifont = "VictorMono Nerd Font,Hack Nerd Font:h16"
 if vim.g.neovide then
-  vim.o.guifont = "VictorMono Nerd Font,Hack Nerd Font:h16"
-  vim.opt.linespace = -5
-
   -- Helper function for transparency formatting
   local alpha = function()
-    return string.format("%x", math.floor(255 * vim.g.transparency or 0.5))
+    return string.format("%x", math.floor(255 * vim.g.transparency or 0.125))
   end
   -- g:neovide_transparency should be 0 if you want to unify transparency of content and title bar.
-  vim.g.neovide_transparency = 0.0
+  vim.g.neovide_transparency = 0
   vim.g.transparency = 0.9
-  vim.g.neovide_background_color = "#0f1117" .. alpha()
+  vim.g.neovide_background_color = "#0f0f0f" .. alpha()
+
+  vim.opt.linespace = -5
 
   vim.g.neovide_hide_mouse_when_typing = true
 
@@ -29,3 +27,5 @@ if vim.g.neovide then
   vim.g.neovide_cursor_vfx_particle_lifetime = 3
   vim.g.neovide_cursor_vfx_particle_density = 35.0
 end
+
+vim.node_host_prog = "/Users/luisrocha/.nvm/versions/node/v18.16.0/bin:node"

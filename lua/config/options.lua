@@ -33,3 +33,5 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   command = "silent! EslintFixAll",
   group = vim.api.nvim_create_augroup("MyAutocmdsJavaScripFormatting", {}),
 })
+opt.title = true
+-- opt.titlestring = [[%f %h%m%r%w %{v:progname} (%{tabpagenr()} of %{tabpagenr('$')})]]
