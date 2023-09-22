@@ -9,3 +9,4 @@ foo.*
 data
 tags*
 /lazygit/state.yml
+.DS_Store
