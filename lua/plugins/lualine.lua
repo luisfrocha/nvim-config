@@ -14,7 +14,7 @@ return {
             return require("package-info").get_status()
           end,
           "encoding",
-          "fileformat",
+          { "fileformat", symbols = { unix = "" } },
           "filetype",
         },
       },
