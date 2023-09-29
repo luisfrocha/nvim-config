@@ -1,3 +1,9 @@
+local icon
+if vim.fn.has("macunix") then
+  icon = ""
+else
+  icon = ""
+end
 return {
   {
     "nvim-lualine/lualine.nvim",
@@ -14,7 +20,7 @@ return {
             return require("package-info").get_status()
           end,
           "encoding",
-          { "fileformat", symbols = { unix = "" } },
+          { "fileformat", symbols = { unix = icon } },
           "filetype",
         },
       },

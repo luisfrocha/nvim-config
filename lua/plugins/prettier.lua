@@ -1,3 +1,3 @@
 return {
-  { "MunifTanjim/prettier.nvim", dependencies = { "neovim/nvim-lspconfig", "jose-elias-alvarez/null-ls.nvim" } },
+  { "MunifTanjim/prettier.nvim", dependencies = { "neovim/nvim-lspconfig", "nvimtools/none-ls.nvim" } },
 }
