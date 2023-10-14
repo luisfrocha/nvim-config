@@ -42,8 +42,8 @@ map({ "n" }, "<C-S-p>", ":Lspsaga peek_definition<cr>", { desc = "Peek Definitio
 map({ "x" }, "<BS>", '"_c', { desc = "Delete selected text" })
 map({ "x" }, "<C-p>", '"0p', { desc = "Paste text without copying selection" })
 map({ "n" }, "<leader>ba", ":%bd|e#|bd#<cr>|'\"", { desc = "Delete all buffers except current" })
-map({ "n" }, "<C-S-F>", ":Spectre<cr>", { desc = "Global search" })
-map({ "i" }, "<C-S-F>", "<esc>:Spectre :initial_mode='insert'<cr>", { desc = "Global search" })
+-- map({ "n" }, "<C-S-F>", ":Spectre<cr>", { desc = "Global search" })
+-- map({ "i" }, "<C-S-F>", "<esc>:Spectre :initial_mode='insert'<cr>", { desc = "Global search" })
 map({ "n" }, "<C-F>", ":SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
 map({ "x" }, "<C-f>", "<esc>:SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
 map({ "n" }, "<C-r>", ":SearchBoxReplace show_matches=true confirm=menu<cr>", { desc = "Search & Replace in Buffer" })
@@ -57,7 +57,11 @@ map(
 map({ "i", "v", "n", "s" }, "<C-s>", "<cmd>wa<cr><esc>", { desc = "Save modified files" })
 map({ "i", "v", "n", "s" }, "<C-d>", "<esc>Yp", { desc = "Copy line down" })
 map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true })
-
+map(
+  { "i", "v", "n", "s" },
+  "<C-S-F>",
+  "<cmd>lua require('telescope.builtin').grep_string({ search = vim.fn.input('Grep For > ')})<cr>"
+)
 -- Buffman enhancements
 function removePathFromFullPath(fullPath, pathToRemove)
   -- Replace backslashes with forward slashes for platform independence
