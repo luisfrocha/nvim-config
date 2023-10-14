@@ -1,6 +1,7 @@
 return {
   {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
+    dependencies = { "stephpy/vim-php-cs-fixer" },
     config = function()
       require("mason-tool-installer").setup({
         ensure_installed = {
