@@ -144,15 +144,15 @@ function OpenBufferListWindow()
 end
 
 -- Set the keybinding to toggle the buffer list window
--- vim.api.nvim_set_keymap(
---   "n",
---   "<C-Tab>",
---   "<Cmd>lua OpenBufferListWindow()<CR>",
---   { noremap = true, silent = true, desc = "Open Buffer List Window" }
--- )
-map(
-  { "n", "i" },
+vim.api.nvim_set_keymap(
+  "n",
   "<C-Tab>",
-  "<cmd>lua OpenBufferListWindow()<cr>",
+  "<Cmd>lua OpenBufferListWindow()<CR>",
+  { noremap = true, silent = true, desc = "Open Buffer List Window" }
+)
+map(
+  { "i" },
+  "<C-Tab>",
+  "<esc><cmd>lua OpenBufferListWindow()<cr>",
   { noremap = true, silent = true, desc = "Open Buffer List Window" }
 )
