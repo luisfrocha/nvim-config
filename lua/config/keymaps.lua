@@ -42,7 +42,7 @@ map({ "n" }, "<C-S-p>", ":Lspsaga peek_definition<cr>", { desc = "Peek Definitio
 map({ "x" }, "<BS>", '"_c', { desc = "Delete selected text" })
 map({ "x" }, "<C-p>", '"0p', { desc = "Paste text without copying selection" })
 map({ "n" }, "<leader>ba", ":%bd|e#|bd#<cr>|'\"", { desc = "Delete all buffers except current" })
-map({ "n" }, "<C-S-F>", ":Spectre<cr>", { desc = "Global search" })
+map({ "n" }, "<C-S-F>", ":Spectre :initial_mode='insert'<cr>", { desc = "Global search" })
 map({ "i" }, "<C-S-F>", "<esc>:Spectre :initial_mode='insert'<cr>", { desc = "Global search" })
 map({ "n" }, "<C-F>", ":SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
 map({ "x" }, "<C-f>", "<esc>:SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
