@@ -120,6 +120,7 @@ function OpenBufferListWindow()
   local buffer_names = {}
   for _, line in ipairs(buf_names) do
     local name = line:match('"([^"]+)"')
+    local buf_number = line:match("([%d]+)")
     if name then
       local myname = name:gsub("%~", vim.fn.expand("$HOME")):gsub("\\", "/")
 
@@ -130,7 +131,7 @@ function OpenBufferListWindow()
       local remainingPath = removePathFromFullPath(path2, path1)
       -- print(remainingPath)
 
-      table.insert(buffer_names, remainingPath)
+      table.insert(buffer_names, buf_number .. "\t " .. remainingPath)
     end
   end
 
@@ -138,7 +139,8 @@ function OpenBufferListWindow()
     prompt = "Navigate to a Buffer",
   }, function(selected)
     if selected ~= "" and selected ~= nil then
-      vim.cmd("buffer " .. selected)
+      local buf_number = selected:match("([%d]+)")
+      vim.cmd("buffer " .. buf_number)
     end
   end)
 end
