@@ -14,6 +14,7 @@ return {
     defaults = {
       layout_strategy = "flex",
       winblend = 40,
+      hidden = true,
     },
   },
 }

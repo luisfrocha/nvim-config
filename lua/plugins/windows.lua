@@ -1,15 +1,25 @@
 return {
   {
     "anuvyklack/windows.nvim",
+    event = "VeryLazy",
     dependencies = {
       "anuvyklack/middleclass",
       "anuvyklack/animation.nvim",
     },
-    config = function()
-      vim.o.winwidth = 10
-      vim.o.winminwidth = 10
-      vim.o.equalalways = false
-      require("windows").setup()
+    init = function()
+      require("windows").setup({
+        autowidth = {
+          winminwidth = 0.25,
+          winwidth = 100,
+          equalalways = false,
+        },
+      })
     end,
+    keys = {
+      { "<c-w>z", "<cmd>WindowsMaximize<cr>", mode = "n", desc = "Maximize window" },
+      { "<c-w>_", "<cmd>WindowsMaximizeVertically<cr>", mode = "n", desc = "Maximize window vertically" },
+      { "<c-w>|", "<cmd>WindowsMaximizeHorizontally<cr>", mode = "n", desc = "Maximize window horizontally" },
+      { "<c-w>=", "<cmd>WindowsEqualize<cr>", mode = "n", desc = "Equalize window" },
+    },
   },
 }

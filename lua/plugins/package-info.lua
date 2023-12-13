@@ -13,7 +13,7 @@ return {
       },
       keys = {
         {
-          "<leader>ns",
+          "<leader>ps",
           function()
             require("package-info").show()
           end,
@@ -23,7 +23,7 @@ return {
           noremap = true,
         },
         {
-          "<leader>nc",
+          "<leader>pc",
           function()
             require("package-info").hide()
           end,
@@ -33,7 +33,7 @@ return {
           noremap = true,
         },
         {
-          "<leader>nt",
+          "<leader>pt",
           function()
             require("package-info").toggle()
           end,
@@ -43,7 +43,7 @@ return {
           noremap = true,
         },
         {
-          "<leader>nu",
+          "<leader>pu",
           function()
             require("package-info").update()
           end,
@@ -53,7 +53,7 @@ return {
           noremap = true,
         },
         {
-          "<leader>nd",
+          "<leader>pd",
           function()
             require("package-info").delete()
           end,
@@ -63,7 +63,7 @@ return {
           noremap = true,
         },
         {
-          "<leader>ni",
+          "<leader>pi",
           function()
             require("package-info").install()
           end,
@@ -73,7 +73,7 @@ return {
           noremap = true,
         },
         {
-          "<leader>np",
+          "<leader>pp",
           function()
             require("package-info").change_version()
           end,
