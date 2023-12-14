@@ -12,6 +12,7 @@ return {
       "<C-r>",
       ":SearchBoxReplace show_matches=true confirm=menu<cr>",
       desc = "Search & Replace in Buffer",
+      mode = "n",
     },
   },
 }
