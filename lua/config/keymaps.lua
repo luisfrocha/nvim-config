@@ -29,8 +29,8 @@ map("i", "<C-S-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move up" })
 map("v", "<C-S-j>", ":m '>+1<cr>gv=gv", { desc = "Move down" })
 map("v", "<C-S-k>", ":m '<-2<cr>gv=gv", { desc = "Move up" })
 
-map({ "n", "v", "x" }, "<C-BS>", '"_dd', { desc = "Delete line (not cut)" })
-map({ "i" }, "<C-BS>", '<C-o>"_dd', { desc = "Delete line (not cut)" })
+map({ "n", "v", "x" }, "<C-BS>", '"_dd<esc>', { desc = "Delete line (not cut)" })
+map({ "i" }, "<C-BS>", '<C-o>"_dd<esc>', { desc = "Delete line (not cut)" })
 -- map({ "n" }, "<C-.>", ":Lspsaga code_action<cr>", { desc = "Show code actions menu" })
 map({ "i", "n", "x" }, "<Alt-BS>", '"_c', { desc = "Delete selected text" })
 map({ "x" }, "<C-p>", '"0p', { desc = "Paste text without copying selection" })
@@ -38,9 +38,9 @@ map({ "x" }, "<C-p>", '"0p', { desc = "Paste text without copying selection" })
 -- map({ "n" }, "<C-S-F>", ":Spectre :initial_mode='insert'<cr>", { desc = "Global search" })
 -- map({ "i" }, "<C-S-F>", "<esc>:Spectre :initial_mode='insert'<cr>", { desc = "Global search" })
 
--- map({ "n" }, "<C-F>", ":SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
--- map({ "x" }, "<C-f>", "<esc>:SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
--- map({ "n" }, "<C-r>", ":SearchBoxReplace show_matches=true confirm=menu<cr>", { desc = "Search & Replace in Buffer" })
+map({ "n" }, "<C-F>", ":SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
+map({ "x" }, "<C-f>", "<esc>:SearchBoxMatchAll show_matches=true<cr>", { desc = "Search in Buffer" })
+map({ "n" }, "<C-r>", ":SearchBoxReplace show_matches=true confirm=menu<cr>", { desc = "Search & Replace in Buffer" })
 -- map(
 --   { "x" },
 --   "<C-r>",
