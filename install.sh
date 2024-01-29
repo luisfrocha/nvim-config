@@ -43,7 +43,7 @@ case $option in
 	$(brew --prefix)/opt/fzf/install
 	mkdir -p $HOME/.config
 	ln -s $CURR_DIR $HOME/.config/nvim
-	cp -r $CURR_DIR/NeovideLauncher.app ~/Applications/
+	# cp -r $CURR_DIR/NeovideLauncher.app ~/Applications/
 	export CONFIG_DIR="$HOME/.config/nvim/lazygit"
 	echo 'export CONFIG_DIR="$HOME/.config/nvim/lazygit"' >>~/.zshrc
 	echo "Installation complete."
