@@ -1,6 +1,7 @@
 return {
   {
     "00sapo/visual.nvim",
+    enabled = false,
     opts = {
       commands = {
         move_up_then_normal = { amend = true },
