@@ -28,4 +28,4 @@ if vim.g.neovide then
   vim.g.neovide_cursor_vfx_particle_density = 35.0
 end
 
-vim.node_host_prog = "/Users/luisrocha/.nvm/versions/node/v18.16.0/bin:node"
+vim.node_host_prog = "/Users/luisrocha/.nvm/versions/node/v20.6.0/bin:node"

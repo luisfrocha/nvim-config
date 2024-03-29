@@ -23,6 +23,7 @@ return {
         "prettier", -- prettier formatter
         "stylua", -- lua formatter
         "eslint-lsp", -- js linter
+        "yaml-language-server", -- handle yaml files
       },
     })
   end,
