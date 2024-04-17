@@ -50,6 +50,7 @@ map({ "n" }, "<C-r>", ":SearchBoxReplace show_matches=true confirm=menu<cr>", { 
 map({ "i", "v", "n", "s" }, "<C-s>", "<cmd>wa<cr><esc>", { desc = "Save modified files" })
 map({ "i", "v", "n", "s" }, "<C-d>", "<esc>Yp", { desc = "Copy line down" })
 map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true })
+map("x", "p", "P", { silent = true, noremap = true })
 
 -- Buffman enhancements
 function removePathFromFullPath(fullPath, pathToRemove)
@@ -138,12 +139,12 @@ end
 vim.api.nvim_set_keymap(
   "n",
   "<C-Tab>",
-  "<Cmd>lua OpenBufferListWindow()<CR>",
+  ":lua require('telescope.builtin').buffers({sort_lastused=true,ignore_current_buffer=true})<cr>",
   { noremap = true, silent = true, desc = "Open Buffer List Window" }
 )
 map(
   { "i" },
   "<C-Tab>",
-  "<esc><cmd>lua OpenBufferListWindow()<cr>",
+  ":lua require('telescope.builtin').buffers({sort_lastused=true,ignore_current_buffer=true})<cr>",
   { noremap = true, silent = true, desc = "Open Buffer List Window" }
 )
