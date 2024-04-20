@@ -1,1 +1,7 @@
-return { "lukas-reineke/indent-blankline.nvim", enabled = false, main = "ibl", opts = {} }
+return {
+  "lukas-reineke/indent-blankline.nvim",
+  main = "ibl",
+  opts = {
+    indent = { char = "┊" },
+  },
+}

@@ -1,4 +1,7 @@
--- bootstrap lazy.nvim, LazyVim and your plugins
+require("config.keymaps")
+require("config.options")
+require("config.autocmds")
+require("config.abbreviations")
 require("config.lazy")
 
 -- Set terminal background to transparent
@@ -27,5 +30,3 @@ if vim.g.neovide then
   vim.g.neovide_cursor_vfx_particle_lifetime = 3
   vim.g.neovide_cursor_vfx_particle_density = 35.0
 end
-
-vim.node_host_prog = "/Users/luisrocha/.nvm/versions/node/v20.6.0/bin:node"
