@@ -104,13 +104,14 @@ map("v", "<C-S-k>", ":m '<-2<cr>gv=gv", { desc = "Move up", noremap = true, sile
 
 map({ "n", "v", "x" }, "<C-BS>", '"_dd<esc>', { desc = "Delete line (not cut)", noremap = true, silent = true })
 map({ "i" }, "<C-BS>", '<C-o>"_dd<esc>', { desc = "Delete line (not cut)", noremap = true, silent = true })
--- map({ "n" }, "<C-.>", ":Lspsaga code_action<cr>", { desc = "Show code actions menu" })
 map({ "i", "n", "x" }, "<Alt-BS>", '"_c', { desc = "Delete selected text", noremap = true, silent = true })
 map({ "x" }, "<C-p>", '"0p', { desc = "Paste text without copying selection", noremap = true, silent = true })
+map({ "n" }, "<C-.>", vim.lsp.buf.code_action, { desc = "Show code actions menu", noremap = true, silent = true })
+map({ "i", "v", "n", "s" }, "<C-d>", "<esc>Yp", { desc = "Copy line down" })
 map(
   { "n", "i" },
   "<C-Tab>",
-  ":lua require('telescope.builtin').buffers({sort_lastused=true,ignore_current_buffer=true})<cr>",
+  ":lua require('telescope.builtin').buffers({sort_lastused=true,ignore_current_buffer=true})<cr>a",
   { desc = "Open Buffer", noremap = true, silent = true }
 )
 map({ "n", "i" }, "<C-S-F>", "<cmd>Telescope live_grep<cr>", { desc = "Global search", noremap = true, silent = true })
@@ -121,4 +122,4 @@ map(
   { desc = "Save modified files", noremap = true, silent = true }
 )
 map({ "n" }, "<Leader>bd", "<cmd>bd<cr>", { desc = "Close buffer", noremap = true, silent = true })
-map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true })
+map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true, silent = true })

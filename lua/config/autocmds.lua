@@ -37,6 +37,9 @@ api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
+-- Set file type for Vue files
+vim.api.nvim_command("autocmd BufReadPost,BufNewFile *.vue setlocal filetype=vue")
+
 -- auto close brackets
 -- this
 api.nvim_create_autocmd("FileType", { pattern = "man", command = [[nnoremap <buffer><silent> q :quit<CR>]] })

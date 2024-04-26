@@ -147,4 +147,5 @@ return {
   t = {
     name = "+Tests",
   },
+  p = { name = "Package Manager" },
 }

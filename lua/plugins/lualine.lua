@@ -47,7 +47,7 @@ return {
             symbols = {
               modified = "  ",
               -- readonly = "  ",
-              -- unnamed = "  ",
+              unnamed = "  ",
             },
           },
           { "fancy_diagnostics", sources = { "nvim_lsp" }, symbols = { error = " ", warn = " ", info = " " } },

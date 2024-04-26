@@ -13,6 +13,9 @@ end
 vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
 
 require("lazy").setup({ import = "plugins" }, {
+  ui = {
+    border = "rounded",
+  },
   install = {
     missing = true,
     colorscheme = { "kanagawa" },
@@ -24,9 +27,6 @@ require("lazy").setup({ import = "plugins" }, {
   change_detection = {
     enabled = true,
     notify = false,
-  },
-  ui = {
-    border = "rounded",
   },
   performance = {
     rtp = {

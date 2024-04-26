@@ -39,9 +39,9 @@ return {
           },
         },
         signcolumn = true,
-        numhl = false,
-        linehl = false,
-        word_diff = false,
+        numhl = true,
+        linehl = true,
+        word_diff = true,
         watch_gitdir = {
           interval = 1000,
           follow_files = true,
