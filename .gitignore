@@ -10,3 +10,4 @@ data
 tags*
 /lazygit/state.yml
 .DS_Store
+/lazy-lock.json
