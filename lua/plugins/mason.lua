@@ -24,6 +24,7 @@ return {
         "stylua", -- lua formatter
         "eslint-lsp", -- js linter
         "yaml-language-server", -- handle yaml files
+        "stylelint",
       },
     })
   end,
