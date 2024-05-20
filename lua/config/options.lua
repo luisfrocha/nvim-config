@@ -4,6 +4,7 @@ vim.g.mapleader = " " -- change leader to a space
 vim.g.maplocalleader = " " -- change localleader to a space
 vim.g.loaded_netrw = 1 -- disable netrw
 vim.g.loaded_netrwPlugin = 1 --  disable netrw
+vim.g.transparent_enabled = true -- enable transparency globally
 
 opt.mousemoveevent = true -- Enable mouse movem
 opt.linebreak = true -- wrap lines and in
@@ -56,17 +57,10 @@ opt.fillchars = { eob = " " } -- change the character at the end of buffer
 opt.winblend = 30
 opt.pumblend = 30
 opt.winbar = "%=%m %f"
-opt.termguicolors = true
 opt.guicursor =
   "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175"
 vim.filetype.add({
   extension = {
     postcss = "css",
   },
-})
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = { "*.tsx", "*.ts", "*.jsx", "*.js" },
-  command = "silent! EslintFixAll",
-  group = vim.api.nvim_create_augroup("MyAutocmdsJavaScripFormatting", {}),
 })

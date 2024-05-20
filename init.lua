@@ -7,6 +7,7 @@ require("config.lazy")
 -- Set terminal background to transparent
 vim.cmd([[hi Normal guibg=NONE ctermbg=NONE]])
 vim.o.guifont = "VictorMono Nerd Font,Hack Nerd Font:h16"
+vim.g.transparent_enabled = true
 if vim.g.neovide then
   -- Helper function for transparency formatting
   local alpha = function()

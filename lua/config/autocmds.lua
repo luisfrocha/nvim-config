@@ -1,7 +1,5 @@
 local api = vim.api
 
--- api.nvim_command("autocmd BufReadPost,BufNewFile *.vue setlocal filetype=vue")
-
 -- don't auto comment new line
 api.nvim_create_autocmd("BufEnter", { command = [[set formatoptions-=cro]] })
 
@@ -38,7 +36,10 @@ api.nvim_create_autocmd("BufReadPost", {
 })
 
 -- Set file type for Vue files
-vim.api.nvim_command("autocmd BufReadPost,BufNewFile *.vue setlocal filetype=vue")
+api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  pattern = "*.vue",
+  command = "setlocal filetype=vue",
+})
 
 -- auto close brackets
 -- this
@@ -66,7 +67,7 @@ api.nvim_create_autocmd(
     pattern = { "*.txt", "*.md", "*.tex" },
     callback = function()
       vim.opt.spell = true
-      vim.opt.spelllang = "en,de"
+      vim.opt.spelllang = "en,es"
     end,
   }
 )
@@ -133,13 +134,13 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_command("autocmd VimResized * wincmd =")
 
 -- fix terraform and hcl comment string
-vim.api.nvim_create_autocmd("FileType", {
-  group = vim.api.nvim_create_augroup("FixTerraformCommentString", { clear = true }),
-  callback = function(ev)
-    vim.bo[ev.buf].commentstring = "# %s"
-  end,
-  pattern = { "terraform", "hcl" },
-})
+-- vim.api.nvim_create_autocmd("FileType", {
+--   group = vim.api.nvim_create_augroup("FixTerraformCommentString", { clear = true }),
+--   callback = function(ev)
+--     vim.bo[ev.buf].commentstring = "# %s"
+--   end,
+--   pattern = { "terraform", "hcl" },
+-- })
 
 -- -- Golang format on save
 -- local goformat_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
@@ -152,11 +153,18 @@ vim.api.nvim_create_autocmd("FileType", {
 -- })
 --
 -- Run gofmt + goimport on save
-local goimport_sync_grp = vim.api.nvim_create_augroup("GoImport", {})
+-- local goimport_sync_grp = vim.api.nvim_create_augroup("GoImport", {})
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+--   pattern = "*.go",
+--   callback = function()
+--     require("go.format").goimport()
+--   end,
+--   group = goimport_sync_grp,
+-- })
+
+-- Lint Javascript files
 vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = "*.go",
-  callback = function()
-    require("go.format").goimport()
-  end,
-  group = goimport_sync_grp,
+  pattern = { "*.tsx", "*.ts", "*.jsx", "*.js" },
+  command = "silent! EslintFixAll",
+  group = vim.api.nvim_create_augroup("MyAutocmdsJavaScripFormatting", {}),
 })

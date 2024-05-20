@@ -84,6 +84,7 @@ return {
         "List Folders",
       },
     },
+    z = { "<cmd>Lazy<cr>", "Lazy Package Manager" },
   },
   s = {
     name = "+Search",
@@ -101,6 +102,7 @@ return {
     c = { "<cmd>Telescope git_commits<cr>", "Git commits" },
     B = { "<cmd>Telescope git_branches<cr>", "Git branches" },
     m = { "<cmd>Telescope git_status<cr>", "Git status" },
+    s = { "<cmd>Telescope current_buffer_fuzzy_find<cr>", "Search in buffer" },
     S = { "<cmd>Telescope git_stash<cr>", "Git stash" },
     e = { "<cmd>Telescope frecency<cr>", "Frecency" },
     b = { "<cmd>Telescope buffers<cr>", "Buffers" },

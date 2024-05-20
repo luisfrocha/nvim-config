@@ -3,7 +3,7 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   opts = {
     formatters_by_ft = {
-      javascript = { "prettier" },
+      javascript = { "eslint_d", "prettier" },
       typescript = { "prettier" },
       javascriptreact = { "prettier" },
       typescriptreact = { "prettier" },
@@ -14,7 +14,6 @@ return {
       yaml = { "prettier" },
       markdown = { "prettier" },
       graphql = { "prettier" },
-      liquid = { "prettier" },
       lua = { "stylua" },
       vue = { "prettier" },
     },
