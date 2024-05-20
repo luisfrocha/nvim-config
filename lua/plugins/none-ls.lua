@@ -19,7 +19,7 @@ return {
 
       mason_null_ls.setup({
         ensure_installed = {
-          "prettier", -- prettier formatter
+          "prettierd", -- prettier formatter
           "stylua", -- lua formatter
           "eslint_d", -- js linter
           "shellcheck", -- shell linter
@@ -30,6 +30,7 @@ return {
           "pretty_php", -- php formatter
           "rustywind", -- TailwindCSS organizer
           -- "spell", -- spell checker
+          "vue-language-server", -- Vue formatter
         },
       })
 
@@ -44,7 +45,7 @@ return {
 
         sources = {
           formatting.stylua,
-          formatting.prettier,
+          formatting.prettierd,
           -- formatting.gofumpt,
           formatting.buf,
           formatting.shfmt,
