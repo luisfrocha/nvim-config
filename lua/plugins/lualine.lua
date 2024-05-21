@@ -61,7 +61,7 @@ return {
           "encoding",
           { "fileformat", symbols = { unix = icon } },
           "filetype",
-          "fancy_lsp_servers",
+          -- "fancy_lsp_servers",
           "fancy_diff",
           "progress",
         },

@@ -107,7 +107,7 @@ map({ "i" }, "<C-BS>", '<C-o>"_dd<esc>', { desc = "Delete line (not cut)", norem
 map({ "i", "n", "x" }, "<Alt-BS>", '"_c', { desc = "Delete selected text", noremap = true, silent = true })
 map({ "x" }, "<C-p>", '"0p', { desc = "Paste text without copying selection", noremap = true, silent = true })
 map({ "n" }, "<C-.>", vim.lsp.buf.code_action, { desc = "Show code actions menu", noremap = true, silent = true })
-map({ "n", "i", "v", "n", "s" }, "<C-d>", "<esc>Yp", { desc = "Copy line down" })
+map({ "n", "i", "v", "s" }, "<C-d>", "<esc>Yp", { desc = "Copy line down" })
 map(
   { "n", "i" },
   "<C-Tab>",
