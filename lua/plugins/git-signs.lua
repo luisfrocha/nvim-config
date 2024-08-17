@@ -8,34 +8,22 @@ return {
       require("gitsigns").setup({
         signs = {
           add = {
-            hl = "GitSignsAdd",
             text = icons.ui.BoldLineLeft,
-            numhl = "GitSignsAddNr",
-            linehl = "GitSignsAddLn",
           },
           change = {
-            hl = "GitSignsChange",
             text = icons.ui.BoldLineLeft,
-            numhl = "GitSignsChangeNr",
-            linehl = "GitSignsChangeLn",
           },
           delete = {
-            hl = "GitSignsDelete",
             text = icons.ui.TriangleShortArrowRight,
-            numhl = "GitSignsDeleteNr",
-            linehl = "GitSignsDeleteLn",
           },
           topdelete = {
-            hl = "GitSignsDelete",
             text = icons.ui.TriangleShortArrowRight,
-            numhl = "GitSignsDeleteNr",
-            linehl = "GitSignsDeleteLn",
           },
           changedelete = {
-            hl = "GitSignsChange",
             text = icons.ui.BoldLineLeft,
-            numhl = "GitSignsChangeNr",
-            linehl = "GitSignsChangeLn",
+          },
+          untracked = {
+            text = icons.ui.LineMiddle,
           },
         },
         signcolumn = true,
@@ -46,6 +34,7 @@ return {
           interval = 1000,
           follow_files = true,
         },
+        auto_attach = true,
         attach_to_untracked = true,
         current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
         current_line_blame_opts = {
@@ -53,11 +42,12 @@ return {
           virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
           delay = 400,
           ignore_whitespace = false,
+          virt_text_priority = 100,
         },
         current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> - <summary>",
         sign_priority = 6,
+        update_debounce = 100,
         status_formatter = nil,
-        update_debounce = 200,
         max_file_length = 40000,
         preview_config = {
           border = "rounded",
@@ -66,7 +56,7 @@ return {
           row = 0,
           col = 1,
         },
-        yadm = { enable = false },
+        -- yadm = { enable = false },
 
         on_attach = function(bufnr)
           vim.keymap.set(

@@ -49,6 +49,7 @@ opt.guifont = "VictorMono Nerd Font,Hack Nerd Font:h16" -- the font used in grap
 opt.title = true -- set the title of window to the value of the titlestring
 opt.confirm = true -- confirm to save changes before exiting modified buffer
 opt.fillchars = { eob = " " } -- change the character at the end of buffer
+-- opt.inccommand = "nosplit" -- change all matches as you type
 
 -- vim.opt.cursorlineopt = "number"              -- set the cursorline
 -- vim.opt.tabstop = 2                           -- insert 2 spaces for a tab

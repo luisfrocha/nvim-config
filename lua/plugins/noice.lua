@@ -1,5 +1,5 @@
 return {
-    enabled = true,
+  enabled = true,
   "folke/noice.nvim",
   event = "VeryLazy",
   opts = {
@@ -36,4 +36,14 @@ return {
       -- },
     })
   end,
+  keys = {
+    {
+      "<leader>nd",
+      function()
+        require("notify").dismiss({ silent = true, pending = true })
+      end,
+      mode = { "n", "i", "v" },
+      { desc = "Clear all notifications" },
+    },
+  },
 }
