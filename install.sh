@@ -39,7 +39,12 @@ case $option in
 		fd \
 		fzf \
 		gh \
-		neovide
+		neovide \
+		hg \
+		wget \
+		luarocks \
+		php \
+		composer
 	$(brew --prefix)/opt/fzf/install
 	mkdir -p $HOME/.config
 	ln -s $CURR_DIR $HOME/.config/nvim

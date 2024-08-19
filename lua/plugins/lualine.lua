@@ -16,11 +16,8 @@ return {
     -- local icons = require("config.icons")
     require("lualine").setup({
       options = {
-        theme = "auto",
-        -- theme = "catppuccin",
-        globalstatus = true,
         icons_enabled = true,
-        -- component_separators = { left = "│", right = "│" },
+        theme = "auto",
         component_separators = { left = "|", right = "|" },
         section_separators = { left = "", right = "" },
         disabled_filetypes = {
@@ -34,6 +31,8 @@ return {
           },
           winbar = {},
         },
+        -- theme = "catppuccin",
+        globalstatus = true,
       },
       sections = {
         lualine_a = {},
@@ -52,7 +51,7 @@ return {
           },
           { "fancy_diagnostics", sources = { "nvim_lsp" }, symbols = { error = " ", warn = " ", info = " " } },
           { "fancy_searchcount" },
-          { require("auto-session.lib").current_session_name },
+          -- { require("auto-session.lib").current_session_name },
         },
         lualine_x = {
           function()
@@ -61,7 +60,7 @@ return {
           "encoding",
           { "fileformat", symbols = { unix = icon } },
           "filetype",
-          -- "fancy_lsp_servers",
+          "fancy_lsp_servers",
           "fancy_diff",
           "progress",
         },

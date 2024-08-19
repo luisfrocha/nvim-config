@@ -1,5 +1,6 @@
 return {
   "folke/which-key.nvim",
+  dependencies = { { "echasnovski/mini.icons", version = false } },
   event = "VeryLazy",
   lazy = true,
   opts = {
@@ -22,17 +23,17 @@ return {
         g = false, -- bindings for prefixed with g
       },
     },
-    operators = { gc = "Comments" }, -- show the currently pressed key and its label as a message in the command line
+    defer = { gc = "Comments" }, -- show the currently pressed key and its label as a message in the command line
     icons = {
       breadcrumb = "»", -- symbol used in the command line area that shows your active key combo
       separator = require("config.icons").ui.BoldArrowRight, -- symbol used between a key and it's label
       group = "+", -- symbol prepended to a group
     },
-    popup_mappings = {
+    keys = {
       scroll_down = "<c-d>", -- binding to scroll down inside the popup
       scroll_up = "<c-u>", -- binding to scroll up inside the popup
     },
-    window = {
+    win = {
       border = "single", -- none, single, double, shadow
       position = "bottom", -- bottom, top
       margin = { 2, 0, 2, 0 }, -- extra window margin [top, right, bottom, left]
@@ -46,14 +47,13 @@ return {
       spacing = 3, -- spacing between columns
       align = "left", -- align columns left, center or right
     },
-    ignore_missing = false, -- enable this to hide mappings for which you didn't specify a label
-    hidden = { "<silent>", "<cmd>", "<Cmd>", "<CR>", "call", "lua", "^:", "^ " }, -- hide mapping boilerplate
+    -- filter = false, -- enable this to hide mappings for which you didn't specify a label
+    -- hidden = { "<silent>", "<cmd>", "<Cmd>", "<CR>", "call", "lua", "^:", "^ " }, -- hide mapping boilerplate
     show_help = true, -- show help message on the command line when the popup is visible
     show_keys = true,
-    triggers = "auto", -- automatically setup triggers
-    triggers_blacklist = {
-      i = { "j", "k" },
-      v = { "j", "k" },
+    triggers = {
+      -- i = { "j", "k" },
+      -- v = { "j", "k" },
     },
     -- Disabled by default for Telescope
     disable = {
@@ -64,11 +64,11 @@ return {
   config = function(_, opts)
     local which_key = require("which-key")
     which_key.setup(opts)
-    which_key.register(require("config.which-key.defaults"), {
+    which_key.add(require("config.which-key.defaults"), {
       mode = "n",
       prefix = "<leader>",
     })
 
-    which_key.register(require("config.which-key.non_leader"))
+    which_key.add(require("config.which-key.non_leader"))
   end,
 }
