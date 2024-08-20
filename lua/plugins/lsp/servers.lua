@@ -38,7 +38,6 @@ return {
   },
   tsserver = {},
   volar = {},
-  vue = {},
 
   solidity_ls_nomicfoundation = {},
   yamlls = {
