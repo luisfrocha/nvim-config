@@ -123,3 +123,4 @@ map(
 )
 map({ "n" }, "<Leader>bd", "<cmd>bd<cr>", { desc = "Close buffer", noremap = true, silent = true })
 map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true, silent = true })
+-- map({ "n", "v" }, "<space>", "za<CR>", { desc = "Toggle fold", noremap = true, silent = true })

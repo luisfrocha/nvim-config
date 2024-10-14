@@ -76,6 +76,7 @@ return {
     end,
     desc = "List Folders",
   },
+  { "<leader>lg", "<cmd>lazygit<cr>", desc = "Lazy Git" },
 
   { "<leader>s", group = "+Search" },
   { "<leader>sf", "<cmd>Telescope find_files<cr>", desc = "Find File (CWD)" },
