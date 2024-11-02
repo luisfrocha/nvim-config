@@ -223,9 +223,22 @@ return {
     "sainnhe/sonokai",
     priority = 1000,
     lazy = false,
+    -- config = function()
+    -- require("sonokai").setup()
+    -- vim.cmd.colorscheme("sonokai")
+    -- end,
+  },
+  {
+    "ray-x/aurora",
+    priority = 1000,
+    lazy = false,
+    init = function()
+      vim.g.aurora_italic = 1
+      vim.g.aurora_transparent = 1
+      vim.g.aurora_bold = 1
+    end,
     config = function()
-      require("sonokai").setup()
-      vim.cmd.colorscheme("sonokai")
+      vim.cmd.colorscheme("aurora")
     end,
   },
 }
