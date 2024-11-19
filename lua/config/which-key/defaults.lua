@@ -25,6 +25,13 @@ return {
   { "<leader>u", group = "UI" },
   { "<leader>uv", require("config.utils").toggle_set_color_column, desc = "Toggle Color Line" },
   { "<leader>uc", require("config.utils").toggle_cursor_line, desc = "Toggle Cursor Line" },
+  {
+    '<leader>uh',
+    function()
+      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({0},{0}))
+    end,
+    desc = 'Toggle Inlay Hints'
+  },
 
   { "<leader>i", group = "Sessions" },
   { "<leader>is", "<cmd>lua require('persistence').load()<cr>", desc = "Load Session" },

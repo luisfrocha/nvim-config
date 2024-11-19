@@ -65,3 +65,5 @@ vim.filetype.add({
     postcss = "css",
   },
 })
+
+vim.lsp.inlay_hint.enable(false)
