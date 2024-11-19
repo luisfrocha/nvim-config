@@ -14,6 +14,7 @@
   "grug-far.nvim": { "branch": "main", "commit": "9a2f78219390b47d67795ab09390d7f092e23976" },
   "hydra.nvim": { "branch": "master", "commit": "55de54543d673824435930ecf533256eea2e565b" },
   "keymap-amend.nvim": { "branch": "master", "commit": "b8bf9d820878d5497fdd11d6de55dea82872d98e" },
+  "language-tools": { "branch": "master", "commit": "cf70eda2c40c33e2458b09d6dcac0c5f3615067d" },
   "lazy.nvim": { "branch": "main", "commit": "7967abe55752aa90532e6bb4bd4663fe27a264cb" },
   "lazydev.nvim": { "branch": "main", "commit": "d5800897d9180cea800023f2429bce0a94ed6064" },
   "lspsaga.nvim": { "branch": "main", "commit": "d027f8b9c7c55e26cf4030c8657a2fc8222ed762" },
