@@ -1,24 +1,24 @@
 return {
-  -- {
-  --   "rebelot/kanagawa.nvim",
-  --   lazy = false,
-  --   priority = 1000,
-  --   config = function()
-  --     require("kanagawa").setup({
-  --       transparent = true,
-  --       dimInactive = true,
-  --       terminalColors = true,
-  --       overrides = function(colors)
-  --         return {
-  --           IlluminatedWordText = { bg = colors.palette.fujiGray },
-  --           IlluminatedWordRead = { bg = colors.palette.fujiGray },
-  --           IlluminatedWordWrite = { bg = colors.palette.fujiGray },
-  --         }
-  --       end,
-  --     })
-  --     -- vim.cmd.colorscheme("kanagawa")
-  --   end,
-  -- },
+  {
+    "rebelot/kanagawa.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require("kanagawa").setup({
+        transparent = true,
+        dimInactive = true,
+        terminalColors = true,
+        overrides = function(colors)
+          return {
+            IlluminatedWordText = { bg = colors.palette.fujiGray },
+            IlluminatedWordRead = { bg = colors.palette.fujiGray },
+            IlluminatedWordWrite = { bg = colors.palette.fujiGray },
+          }
+        end,
+      })
+      vim.cmd.colorscheme("kanagawa")
+    end,
+  },
   -- {
   --   "oxfist/night-owl.nvim",
   --   lazy = false, -- make sure we load this during startup if it is your main colorscheme
@@ -210,15 +210,15 @@ return {
   --     -- vim.cmd.colorscheme "monokai-pro"
   --   end,
   -- },
-  {
-    "cpea2506/one_monokai.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      require("one_monokai").setup({ transparent = true })
-      vim.cmd.colorscheme("one_monokai")
-    end,
-  },
+  -- {
+  --   "cpea2506/one_monokai.nvim",
+  --   lazy = false,
+  --   priority = 1000,
+  --   config = function()
+  --     require("one_monokai").setup({ transparent = true })
+  --     vim.cmd.colorscheme("one_monokai")
+  --   end,
+  -- },
   -- {
   --   "sainnhe/sonokai",
   --   priority = 1000,
