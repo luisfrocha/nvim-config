@@ -118,7 +118,7 @@ return {
     --   lazy = false,
     --   priority = 1000,
     --   config = function()
-    --     -- vim.cmd.colorscheme 'yorumi'
+    --     vim.cmd.colorscheme 'yorumi'
     --   end,
     -- },
     -- {
@@ -130,9 +130,16 @@ return {
     --       palette = "astrodark",
     --       style = { transparent = true },
     --     })
-    --     -- vim.cmd.colorscheme 'astrotheme'
+    --     vim.cmd.colorscheme("astrotheme")
     --   end,
     -- },
+    {
+      "nuvic/flexoki-nvim",
+      config = function()
+        require("flexoki").setup()
+        vim.cmd.colorscheme("flexoki")
+      end,
+    },
     -- {
     --   "lunarvim/Onedarker.nvim",
     --   lazy = false,
@@ -211,15 +218,15 @@ return {
     --     -- vim.cmd.colorscheme "monokai-pro"
     --   end,
     -- },
-    {
-      "cpea2506/one_monokai.nvim",
-      lazy = false,
-      priority = 1000,
-      config = function()
-        require("one_monokai").setup({ transparent = true })
-        -- vim.cmd.colorscheme("one_monokai")
-      end,
-    },
+    -- {
+    --   "cpea2506/one_monokai.nvim",
+    --   lazy = false,
+    --   priority = 1000,
+    --   config = function()
+    --     require("one_monokai").setup({ transparent = true })
+    --     -- vim.cmd.colorscheme("one_monokai")
+    --   end,
+    -- },
     -- {
     --   "sainnhe/sonokai",
     --   priority = 1000,
