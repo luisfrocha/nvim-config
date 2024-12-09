@@ -52,3 +52,4 @@ vim.filetype.add({
     postcss = "css",
   },
 })
+
