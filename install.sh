@@ -25,6 +25,7 @@ case $option in
 	;;
 -i)
 	echo "Installing configs..."
+	npm add -g pnpm
 	pnpm add -g neovim prettier
 	brew update &&
 		brew upgrade &&

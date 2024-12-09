@@ -2,27 +2,15 @@ return {
   {
     "nvim-telescope/telescope.nvim",
     cmd = "Telescope",
-    version = false,
-    lazy = true,
+    tag='0.1.8',
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-tree/nvim-web-devicons",
-      {
-        "nvim-telescope/telescope-fzf-native.nvim",
-        build = "make",
-        config = function()
-          require("telescope").load_extension("fzf")
-        end,
-      },
       "nvim-telescope/telescope-ui-select.nvim",
-      "telescope-dap.nvim",
-      "kkharji/sqlite.lua",
-      "nvim-telescope/telescope-frecency.nvim",
     },
     config = function()
       local telescope = require("telescope")
       local actions = require("telescope.actions")
-      local trouble = require("trouble.providers.telescope")
       local icons = require("config.icons")
 
       vim.api.nvim_create_autocmd("FileType", {
@@ -51,10 +39,10 @@ return {
           mappings = {
             i = {
               ["<esc>"] = actions.close,
-              ["<C-t>"] = require("trouble.sources.telescope").open,
+              -- ["<C-t>"] = require("trouble.sources.telescope").open,
             },
 
-            n = { ["<C-t>"] = require("trouble.sources.telescope").open },
+            -- n = { ["<C-t>"] = require("trouble.sources.telescope").open },
           },
           previewer = false,
           prompt_prefix = " " .. icons.ui.Telescope .. " ",
@@ -169,25 +157,10 @@ return {
               },
             }),
           },
-          frecency = {
-            default_workspace = "CWD",
-            show_scores = false,
-            show_unindexed = true,
-            disable_devicons = false,
-            ignore_patterns = {
-              "*.git/*",
-              "*/tmp/*",
-              "*/lua-language-server/*",
-            },
-          },
         },
       })
       telescope.load_extension("fzf")
       telescope.load_extension("ui-select")
-      -- telescope.load_extension("refactoring")
-      telescope.load_extension("dap")
-      telescope.load_extension("frecency")
-      telescope.load_extension("notify")
     end,
   },
 }

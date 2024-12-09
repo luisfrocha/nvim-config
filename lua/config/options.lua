@@ -1,12 +1,10 @@
 local vim = vim
 local opt = vim.opt
 vim.g.mapleader = " " -- change leader to a space
-vim.g.maplocalleader = " " -- change localleader to a space
+-- vim.g.maplocalleader = " " -- change localleader to a space
 vim.g.loaded_netrw = 1 -- disable netrw
 vim.g.loaded_netrwPlugin = 1 --  disable netrw
 vim.g.transparent_enabled = true -- enable transparency globally
-
-opt.mousemoveevent = true -- Enable mouse movem
 opt.linebreak = true -- wrap lines and in
 opt.incsearch = true -- make search act like search in modern brow
 opt.backup = false -- creates a backup
@@ -17,7 +15,6 @@ opt.conceallevel = 0 -- so that `` is visible in markdown files
 opt.fileencoding = "utf-8" -- the encoding written to a file
 opt.hlsearch = true -- highlight all matches on previous search pattern
 opt.ignorecase = true -- ignore case in search patterns
-opt.mouse = "a" -- allow the mouse to be used in neovim
 opt.pumheight = 10 -- pop up menu height
 opt.showmode = false -- we don't need to see things like -- INSERT -- anymore
 opt.showtabline = 0 -- always show tabs
@@ -33,28 +30,18 @@ opt.updatetime = 100 -- faster completion (4000ms default)
 opt.writebackup = false -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
 opt.expandtab = true -- convert tabs to spaces
 opt.shiftwidth = 2 -- the number of spaces inserted for each indentation
-opt.cursorline = false -- highlight the current line
-opt.number = true -- set numbered lines
 opt.breakindent = true -- wrap lines with indent
-opt.relativenumber = false -- set relative numbered lines
-opt.numberwidth = 4 -- set number column width to 2 {default 4}
+opt.relativenumber = true -- set relative numbered lines
 opt.signcolumn = "yes" -- always show the sign column, otherwise it would shift the text each time
-opt.wrap = true -- display lines as one long line
-opt.scrolloff = 8 -- Makes sure there are always eight lines of context
+opt.scrolloff = 4 -- Makes sure there are always eight lines of context
 opt.showbreak = "↳ "
-opt.sidescrolloff = 8 -- Makes sure there are always eight lines of context
+opt.sidescrolloff = 4 -- Makes sure there are always eight lines of context
 opt.showcmd = false -- Don't show the command in the last line
 opt.ruler = false -- Don't show the ruler
 opt.guifont = "VictorMono Nerd Font,Hack Nerd Font:h16" -- the font used in graphical neovim applications
 opt.title = true -- set the title of window to the value of the titlestring
 opt.confirm = true -- confirm to save changes before exiting modified buffer
 opt.fillchars = { eob = " " } -- change the character at the end of buffer
--- opt.inccommand = "nosplit" -- change all matches as you type
-
--- vim.opt.cursorlineopt = "number"              -- set the cursorline
--- vim.opt.tabstop = 2                           -- insert 2 spaces for a tab
--- vim.opt.laststatus = 0                          -- Always display the status line
-
 opt.winblend = 30
 opt.pumblend = 30
 opt.winbar = "%=%m %f"
