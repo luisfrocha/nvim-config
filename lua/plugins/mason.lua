@@ -1,7 +1,11 @@
 return {
   {
+    'williamboman/mason.nvim',
     "jay-babu/mason-nvim-dap.nvim",
-    dependencies = {"williamboman/mason.nvim",config = function() require('mason').setup() end},
+    dependencies = {
+      "williamboman/mason.nvim",
+      config = function() require('mason').setup() end
+    },
     cmd = { "DapInstall", "DapUninstall" },
     opts = function(_, opts)
       table.insert(opts.ensure_installed, {
