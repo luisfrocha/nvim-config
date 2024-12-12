@@ -26,7 +26,7 @@ case $option in
 -i)
 	echo "Installing configs..."
 	npm add -g pnpm
-	pnpm add -g neovim prettier
+	pnpm add -g neovim prettier @vtsls/language-server
 	brew update &&
 		brew upgrade &&
 		brew tap homebrew/cask-fonts
