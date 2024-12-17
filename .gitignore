@@ -1,4 +1,3 @@
-nerd-fonts
 tt.*
 .tests
 doc/tags
@@ -7,6 +6,3 @@ debug
 foo.*
 *.log
 data
-tags*
-/lazygit/state.yml
-.DS_Store
