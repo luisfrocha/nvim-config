@@ -29,6 +29,7 @@ return {
         "stylelint",
         "lua-language-server",
         "rustywind",
+        "hadolint",
         "shfmt",
         "vue-language-server",
       },
