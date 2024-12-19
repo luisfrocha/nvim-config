@@ -26,7 +26,19 @@ map("n", "<CR>", "ciw", opts)
 map("n", "<BS>", "ci", opts)
 
 -- search current buffer
-map("n", "<C-f>", "<Leader>ss", opts)
+-- map("n", "<C-f>", "<Leader>ss", opts)
+map("n", "<C-S-F>", function()
+  require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>") } })
+end, { desc = "Global search current word" })
+map("n", "<C-F>", function()
+  require("grug-far").open({ prefills = { search = vim.fn.expand("<cword>"), paths = vim.fn.expand("%") } })
+end, { desc = "Search current word current file" })
+map("v", "<C-S-F>", function()
+  require("grug-far").with_visual_selection()
+end, { desc = "Search current selection" })
+map("v", "<C-F>", function()
+  require("grug-far").with_visual_selection({ prefills = { paths = vim.fn.expand("%") } })
+end, { desc = "Search current selection" })
 
 map("n", "<Esc>", ":nohlsearch<CR>", opts)
 
@@ -53,12 +65,12 @@ map(
   ":lua require('telescope.builtin').buffers({sort_lastused=true,ignore_current_buffer=true})<cr>a",
   { desc = "Open Buffer", noremap = true, silent = true }
 )
-map({ "n", "i" }, "<C-S-F>", "<cmd>Telescope live_grep<cr>", { desc = "Global search", noremap = true, silent = true })
+-- map({ "n", "i" }, "<C-S-F>", "<leader>sr", { desc = "Global search", noremap = true, silent = true })
 map(
   { "i", "v", "n", "s" },
   "<C-s>",
   "<cmd>wa<cr><esc>",
   { desc = "Save modified files", noremap = true, silent = true }
 )
-map({ "n" }, "<Leader>bd", "<cmd>bd<cr>", { desc = "Close buffer", noremap = true, silent = true })
+-- map({ "n" }, "<Leader>bd", "<cmd>bd<cr>", { desc = "Close buffer", noremap = true, silent = true })
 map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true, silent = true })
