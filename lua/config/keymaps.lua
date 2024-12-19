@@ -59,12 +59,7 @@ map({ "i", "n", "x" }, "<Alt-BS>", '"_c', { desc = "Delete selected text", norem
 map({ "x" }, "<C-p>", '"0p', { desc = "Paste text without copying selection", noremap = true, silent = true })
 map({ "n" }, "<C-.>", vim.lsp.buf.code_action, { desc = "Show code actions menu", noremap = true, silent = true })
 map({ "n", "i", "v", "s" }, "<C-d>", "<esc>Yp", { desc = "Copy line down" })
-map(
-  { "n", "i" },
-  "<C-Tab>",
-  ":lua require('telescope.builtin').buffers({sort_lastused=true,ignore_current_buffer=true})<cr>a",
-  { desc = "Open Buffer", noremap = true, silent = true }
-)
+map({ "n", "i" }, "<C-Tab>", "<cmd>Neotree buffers<cr>", { desc = "Open Buffer", noremap = true, silent = true })
 -- map({ "n", "i" }, "<C-S-F>", "<leader>sr", { desc = "Global search", noremap = true, silent = true })
 map(
   { "i", "v", "n", "s" },
