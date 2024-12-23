@@ -69,6 +69,7 @@ return {
           client.server_capabilities.renameProvider = false
         end, "angularls")
       end,
+      emmet_ls = {},
       eslint = function()
         require("lazyvim.util").lsp.on_attach(function(client)
           if client.name == "eslint" then
