@@ -1,5 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
+  ft = { "html", "htmldjango", "css" },
   dependencies = {
     "jose-elias-alvarez/typescript.nvim",
     init = function()
@@ -11,6 +12,31 @@ return {
   },
   opts = {
     servers = {
+      html = {
+        filetypes = {
+          "html",
+          "htmldjango",
+          "elixir",
+          "heex",
+          "eruby",
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+          "rust",
+          "svelte",
+        },
+        settings = {
+          html = {
+            format = {
+              templating = true,
+              wrapLineLength = 120,
+              wrapAttributes = "auto",
+            },
+          },
+        },
+      },
+      cssls = { settings = { css = { lint = { unknownAtRules = "ignore" } } } },
       dockerls = {},
       docker_compose_language_service = {},
       elixirls = {

@@ -11,11 +11,15 @@ return {
       css = { "prettierd" },
       html = { "prettierd" },
       json = { "prettierd" },
+      jsonc = { "prettierd" },
       yaml = { "prettierd" },
       markdown = { "prettierd" },
       graphql = { "prettierd" },
       lua = { "stylua" },
       python = { "isort", "black" },
+      elixir = { "rustywind", "mix" },
+      heex = { "rustywind", "htmlbeautifier", "mix" },
+      ["*"] = { "trim_newlines", "trim_whitespace" },
     })
     if LazyVim.has_extra("formatting.prettierd") then
       opts.formatters_by_ft = opts.formatters_by_ft or {}
