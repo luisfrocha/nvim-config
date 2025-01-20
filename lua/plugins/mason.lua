@@ -38,7 +38,6 @@ return {
         "elixir-ls",
         "curlylint",
         "htmlbeautifier",
-        "rustfmt",
         "black",
         "isort",
         "ruff",
