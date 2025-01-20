@@ -23,7 +23,6 @@ return {
     })
     if LazyVim.has_extra("formatting.prettierd") then
       opts.formatters_by_ft = opts.formatters_by_ft or {}
-      opts.formatters_by_ft.htmlangular = { "prettierd" }
     end
     -- format_on_save = {
     --   lsp_fallback = true,

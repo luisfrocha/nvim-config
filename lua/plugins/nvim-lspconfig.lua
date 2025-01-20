@@ -66,7 +66,6 @@ return {
         },
       },
       eslint = {},
-      angularls = {},
       volar = {
         init_options = {
           vue = { hybridMode = true },
@@ -76,25 +75,13 @@ return {
         settings = {
           vtsls = {
             tsserver = {
-              globalPlugins = {
-                {
-                  name = "@angular/language-server",
-                  location = LazyVim.get_pkg_path("angular-language-server", "/node_modules/@angular/language-server"),
-                  enableForWorkspaceTypeScriptVersions = false,
-                },
-              },
+              globalPlugins = {},
             },
           },
         },
       },
     },
     setup = {
-      angularls = function()
-        LazyVim.lsp.on_attach(function(client)
-          --HACK: disable angular renaming capability due to duplicate rename popping up
-          client.server_capabilities.renameProvider = false
-        end, "angularls")
-      end,
       emmet_ls = {},
       eslint = function()
         require("lazyvim.util").lsp.on_attach(function(client)

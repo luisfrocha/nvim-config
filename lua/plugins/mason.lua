@@ -20,29 +20,45 @@ return {
     local mason_tool_installer = require("mason-tool-installer")
     mason_tool_installer.setup({
       ensure_installed = {
-        "prettierd", -- prettier formatter
-        "stylua", -- lua formatter
-        "eslint-lsp", -- js linter
-        "intelephense", -- PHP formatter
-        "pretty-php", --- PHP
-        "yaml-language-server", -- handle yaml files
-        "stylelint",
-        "lua-language-server",
-        "rustywind",
-        "hadolint",
-        "shfmt",
-        "vue-language-server",
-        "trivy",
-        "nextls",
-        "lexical",
-        "elixir-ls",
-        "curlylint",
-        "htmlbeautifier",
+        "bashls",
         "black",
+        "cssls",
+        "cssmodules_ls",
+        "curlylint",
+        "diagnosticls",
+        "docker_compose_language_service",
+        "dockerls",
+        "elixir-ls",
+        "emmet_ls",
+        "eslint",
+        "eslint-lsp", -- js linter
+        "html",
+        "htmlbeautifier",
+        "intelephense", -- PHP formatter
         "isort",
-        "ruff",
+        "jsonls",
+        "lexical",
+        "lua_ls",
+        "lua-language-server",
+        "marksman",
+        "nextls",
         "prettier",
+        "prettierd", -- prettier formatter
+        "pretty-php", --- PHP
+        "ruff",
+        "shfmt",
+        "sqlls",
+        "stylelint",
+        "stylua", -- lua formatter
+        "tailwindcss",
+        "trivy",
+        -- "tsserver",
+        "volar",
+        "vue-language-server",
+        "yaml-language-server", -- handle yaml files
+        "yamlls",
       },
+      automatic_installation = true,
     })
   end,
 }
