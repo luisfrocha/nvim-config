@@ -72,17 +72,11 @@ return {
         },
       },
       vtsls = {
-        settings = {
-          vtsls = {
-            tsserver = {
-              globalPlugins = {},
-            },
-          },
-        },
+        settings = {},
       },
     },
     setup = {
-      emmet_ls = {},
+      emmet_ls = function() end,
       eslint = function()
         require("lazyvim.util").lsp.on_attach(function(client)
           if client.name == "eslint" then
