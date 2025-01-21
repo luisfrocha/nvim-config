@@ -15,16 +15,13 @@ return {
       html = {
         filetypes = {
           "html",
-          "htmldjango",
           "elixir",
           "heex",
-          "eruby",
           "javascript",
           "javascriptreact",
           "typescript",
           "typescriptreact",
-          "rust",
-          "svelte",
+          "vue",
         },
         settings = {
           html = {

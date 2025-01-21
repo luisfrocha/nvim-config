@@ -1,11 +1,7 @@
 local opts = {
   ensure_installed = {
-    "bashls",
     "cssls",
     "cssmodules_ls",
-    "diagnosticls",
-    "docker_compose_language_service",
-    "dockerls",
     "emmet_ls",
     "eslint",
     "html",
