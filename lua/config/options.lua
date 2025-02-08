@@ -3,6 +3,7 @@
 -- Add any additional options here
 local vim = vim
 local opt = vim.opt
+local diagnostic = vim.diagnostic
 
 vim.g.lazyvim_php_lsp = "intelephense"
 
@@ -44,7 +45,8 @@ opt.number = true -- set numbered lines
 opt.breakindent = true -- wrap lines with indent
 opt.relativenumber = true -- set relative numbered lines
 opt.numberwidth = 4 -- set number column width to 2 {default 4}
-opt.signcolumn = "yes" -- always show the sign column, otherwise it would shift the text each time
+opt.signcolumn = "yes:1" -- always show the sign column, otherwise it would shift the text each time
+opt.statuscolumn = "%l%s"
 opt.wrap = true -- display lines as one long line
 opt.scrolloff = 8 -- Makes sure there are always eight lines of context
 opt.showbreak = "↳ "
@@ -69,5 +71,22 @@ opt.guicursor =
 vim.filetype.add({
   extension = {
     postcss = "css",
+  },
+})
+
+diagnostic.config({
+  signs = {
+    text = {
+      [vim.diagnostic.severity.ERROR] = "",
+      [vim.diagnostic.severity.WARN] = "",
+      [vim.diagnostic.severity.INFO] = "",
+      [vim.diagnostic.severity.HINT] = "",
+    },
+    numhl = {
+      [vim.diagnostic.severity.WARN] = "WarningMsg",
+      [vim.diagnostic.severity.ERROR] = "ErrorMsg",
+      [vim.diagnostic.severity.INFO] = "DiagnosticInfo",
+      [vim.diagnostic.severity.HINT] = "DiagnosticHint",
+    },
   },
 })
