@@ -46,7 +46,7 @@ opt.breakindent = true -- wrap lines with indent
 opt.relativenumber = true -- set relative numbered lines
 opt.numberwidth = 4 -- set number column width to 2 {default 4}
 opt.signcolumn = "yes:1" -- always show the sign column, otherwise it would shift the text each time
-opt.statuscolumn = "%l%s"
+opt.statuscolumn = "%@SignCb@%s%=%T%{v:relnum?v:relnum:v:lnum}│%T "
 opt.wrap = true -- display lines as one long line
 opt.scrolloff = 8 -- Makes sure there are always eight lines of context
 opt.showbreak = "↳ "
