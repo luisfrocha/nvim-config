@@ -1,6 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
-  ft = { "html", "htmldjango", "css" },
+  ft = { "html", "htmldjango", "css", "vue", "javascript" },
   dependencies = {
     "jose-elias-alvarez/typescript.nvim",
     init = function()
