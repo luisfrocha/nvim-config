@@ -240,5 +240,6 @@ return {
       local colors = get_palette("oled")
       config_lualine(colors)
       vim.o.laststatus = vim.g.lualine_laststatus
-    end
-  } }
+    end,
+  },
+}

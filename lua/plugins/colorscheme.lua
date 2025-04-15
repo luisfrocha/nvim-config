@@ -37,7 +37,6 @@ return {
   { "ChristianChiarulli/onedark.nvim", lazy = false },
   { "MannyFay/mannydark.nvim", lazy = false },
   { "antonyz89/electron-vue.nvim", lazy = false, dependencies = { "rktjmp/lush.nvim" } },
-  { "cosmicthemethhead/ultradark.nvim", lazy = false },
   -- { "rafamadriz/themes.nvim", lazy = false },
   { "tersetears/maani.nvim", lazy = false, dependencies = { "rktjmp/lush.nvim" } },
   { "UtkarshVerma/molokai.nvim", lazy = false, priority = 1000 },
@@ -54,6 +53,31 @@ return {
     -- end,
   },
   { "lunarvim/Onedarker.nvim" },
+  {
+    "fnune/standard",
+    lazy = false,
+    priority = 1000,
+  },
+  {
+    "patstockwell/vim-monokai-tasty",
+    dependencies = {
+      "HerringtonDarkholme/yats.vim",
+      "pangloss/vim-javascript",
+      "MaxMEllon/vim-jsx-pretty",
+      "elzr/vim-json",
+      "styled-components/vim-styled-components",
+      "itchyny/lightline.vim",
+      "vim-airline/vim-airline",
+    },
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.g.vim_monokai_tasty_italic = 1
+      vim.g.vim_monokai_tasty_machine_tint = 1
+      vim.g.vim_monokai_tasty_highlight_active_window = 1
+    end,
+  },
+  { "cpea2506/one_monokai.nvim", lazy = false, priority = 1000 },
   {
     "LazyVim/LazyVim",
     opts = {
