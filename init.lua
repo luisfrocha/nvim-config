@@ -8,5 +8,5 @@ vim.cmd([[
   highlight Normal ctermbg=none
   highlight NonText ctermbg=none
 ]])
-vim.o.guifont = "VictorMono Nerd Font,Hack Nerd Font:h16"
+vim.o.guifont = "Victor Mono,Hack Nerd Font:h16:i"
 vim.g.transparent_enabled = true
