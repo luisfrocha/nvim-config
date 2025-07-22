@@ -2,7 +2,7 @@ local opts = {
   ensure_installed = {
     "cssls",
     "cssmodules_ls",
-    "emmet_ls",
+    -- "emmet_ls",
     "eslint",
     "html",
     "jsonls",
@@ -20,6 +20,7 @@ local opts = {
 return {
   "williamboman/mason-lspconfig.nvim",
   opts = opts,
+  enabled = false,
   event = "BufReadPre",
   dependencies = "williamboman/mason.nvim",
 }

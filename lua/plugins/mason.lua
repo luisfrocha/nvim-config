@@ -1,5 +1,7 @@
 return {
   "williamboman/mason.nvim",
+  url = "https://github.com/iguanacucumber/mason.nvim",
+  branch = "next",
   dependencies = {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
   },
@@ -41,11 +43,12 @@ return {
         "stylua", -- lua formatter
         "tailwindcss",
         "volar",
-        "vue-language-server",
+        -- "vue-language-server",
         "yaml-language-server", -- handle yaml files
         "yamlls",
       },
-      automatic_installation = true,
+      auto_update = true,
+      run_on_start = true,
     })
   end,
 }

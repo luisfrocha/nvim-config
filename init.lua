@@ -21,6 +21,6 @@ if vim.g.neovide then
   vim.g.neovide_cursor_trail_size = 1
   vim.g.neovide_cursor_smooth_blink = true
   vim.g.neovide_cursor_vfx_mode = "pixiedust"
-  vim.g.neovide_cursor_vfx_particle_lifetime = 2
+  vim.g.neovide_cursor_vfx_particle_lifetime = 1
   vim.g.neovide_cursor_vfx_particle_density = 19.0
 end
