@@ -1,5 +1,6 @@
 return {
   "wwnbb/tailwind-classes-fold",
+  enabled = false,
   config = function()
     local tcf = require("tailwind-classes-fold")
     tcf.setup()

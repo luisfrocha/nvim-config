@@ -73,7 +73,7 @@ return {
       },
     },
     setup = {
-      -- emmet_ls = function() end,
+      emmet_ls = function() end,
       eslint = function()
         require("lazyvim.util").lsp.on_attach(function(client)
           if client.name == "eslint" then

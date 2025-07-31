@@ -2,7 +2,7 @@ local opts = {
   ensure_installed = {
     "cssls",
     "cssmodules_ls",
-    -- "emmet_ls",
+    "emmet_ls",
     "eslint",
     "html",
     "jsonls",
@@ -10,7 +10,7 @@ local opts = {
     "marksman",
     "sqlls",
     "tailwindcss",
-    -- "tsserver",
+    "tsserver",
     "volar",
     "yamlls",
   },

@@ -43,7 +43,7 @@ return {
         "stylua", -- lua formatter
         "tailwindcss",
         "volar",
-        -- "vue-language-server",
+        "vue-language-server",
         "yaml-language-server", -- handle yaml files
         "yamlls",
       },
