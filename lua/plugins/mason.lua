@@ -1,5 +1,5 @@
 return {
-  "williamboman/mason.nvim",
+  "mason-org/mason.nvim",
   url = "https://github.com/iguanacucumber/mason.nvim",
   branch = "next",
   dependencies = {

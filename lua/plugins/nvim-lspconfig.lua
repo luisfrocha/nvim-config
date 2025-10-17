@@ -2,6 +2,11 @@ return {
   "neovim/nvim-lspconfig",
   ft = { "html", "htmldjango", "css", "vue", "javascript" },
   dependencies = {
+    {
+      "folke/neoconf.nvim",
+      cmd = "Neoconf",
+      opts = {},
+    },
     "jose-elias-alvarez/typescript.nvim",
     init = function()
       require("lazyvim.util").lsp.on_attach(function(_, buffer)
@@ -64,8 +69,14 @@ return {
       },
       eslint = {},
       volar = {
+        filetypes = { "vue", "javascript", "typescript", "javascriptreact", "typescriptreact" },
         init_options = {
-          vue = { hybridMode = true },
+          vue = {
+            hybridMode = false,
+          },
+          typescript = {
+            tsdk = "/Users/luis_rocha/Library/pnpm/global/5/node_modules/typescript/lib",
+          },
         },
       },
       vtsls = {

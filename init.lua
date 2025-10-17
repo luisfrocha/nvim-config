@@ -1,6 +1,5 @@
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
-
 -- Set terminal background to transparent
 vim.cmd([[
   highlight Normal guibg=none
