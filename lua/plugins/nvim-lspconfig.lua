@@ -1,6 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
-  ft = { "html", "htmldjango", "css", "vue", "javascript" },
+  ft = { "html", "htmldjango", "css", "javascript" },
   dependencies = {
     {
       "folke/neoconf.nvim",
@@ -17,7 +17,7 @@ return {
   },
   opts = {
     servers = {
-      html = {
+      ["html-lsp"] = {
         filetypes = {
           "html",
           "elixir",
@@ -38,7 +38,7 @@ return {
           },
         },
       },
-      cssls = { settings = { css = { lint = { unknownAtRules = "ignore" } } } },
+      ["css-lsp"] = { settings = { css = { lint = { unknownAtRules = "ignore" } } } },
       dockerls = {},
       docker_compose_language_service = {},
       elixirls = {
@@ -67,27 +67,16 @@ return {
           },
         },
       },
-      eslint = {},
-      volar = {
-        filetypes = { "vue", "javascript", "typescript", "javascriptreact", "typescriptreact" },
-        init_options = {
-          vue = {
-            hybridMode = false,
-          },
-          typescript = {
-            tsdk = "/Users/luis_rocha/Library/pnpm/global/5/node_modules/typescript/lib",
-          },
-        },
-      },
+      ["eslint-lsp"] = {},
       vtsls = {
         settings = {},
       },
     },
     setup = {
-      emmet_ls = function() end,
-      eslint = function()
+      ["emmet-ls"] = function() end,
+      ["eslint-lsp"] = function()
         require("lazyvim.util").lsp.on_attach(function(client)
-          if client.name == "eslint" then
+          if client.name == "eslint-lsp" then
             client.server_capabilities.documentFormattingProvider = true
           elseif client.name == "tsserver" then
             client.server_capabilities.documentFormattingProvider = false

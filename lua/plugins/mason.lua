@@ -1,15 +1,10 @@
 return {
   "mason-org/mason.nvim",
-  url = "https://github.com/iguanacucumber/mason.nvim",
-  branch = "next",
   dependencies = {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
   },
   config = function()
-    -- import mason
     local mason = require("mason")
-
-    -- enable mason and configure icons
     mason.setup({
       ui = {
         icons = {
@@ -19,36 +14,46 @@ return {
         },
       },
     })
+    
+    -- Hook into Mason's install process for vue-language-server
+    vim.defer_fn(function()
+      local mason_registry = require("mason-registry")
+      if mason_registry.has_package("vue-language-server") then
+        local vue_ls_pkg = mason_registry.get_package("vue-language-server")
+        local original_install = vue_ls_pkg.install
+        
+        vue_ls_pkg.install = function(self, ...)
+          -- Store original registry
+          local original_registry = vim.env.npm_config_registry
+          
+          -- Temporarily set npm registry to official npm for vue-language-server
+          vim.env.npm_config_registry = "https://registry.npmjs.org"
+          
+          local result = original_install(self, ...)
+          
+          -- Restore original registry
+          vim.env.npm_config_registry = original_registry
+          
+          return result
+        end
+      end
+    end, 100)
+    
     local mason_tool_installer = require("mason-tool-installer")
     mason_tool_installer.setup({
       ensure_installed = {
-        "cssls",
-        "cssmodules_ls",
-        "diagnosticls",
+        "css-lsp",
+        "cssmodules-language-server",
         "elixir-ls",
-        "emmet_ls",
-        "eslint",
-        "eslint-lsp", -- js linter
-        "html",
-        "htmlbeautifier",
-        "intelephense", -- PHP formatter
-        "jsonls",
-        "lexical",
-        "lua_ls",
+        "emmet-ls",
+        "eslint-lsp",
+        "html-lsp",
+        "json-lsp",
         "lua-language-server",
-        "marksman",
-        "prettier",
-        "prettierd", -- prettier formatter
-        "stylelint",
-        "stylua", -- lua formatter
-        "tailwindcss",
-        "volar",
+        "tailwindcss-language-server",
         "vue-language-server",
-        "yaml-language-server", -- handle yaml files
-        "yamlls",
+        "yaml-language-server",
       },
-      auto_update = true,
-      run_on_start = true,
     })
   end,
 }

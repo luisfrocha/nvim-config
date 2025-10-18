@@ -8,7 +8,3 @@ api.nvim_create_autocmd("BufWritePre", {
 })
 
 -- Set file type for Vue files
-api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-  pattern = "*.vue",
-  command = "setlocal filetype=vue",
-})

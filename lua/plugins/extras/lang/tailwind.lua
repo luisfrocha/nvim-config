@@ -14,7 +14,7 @@ return {
     "neovim/nvim-lspconfig",
     opts = {
       servers = {
-        tailwindcss = {
+        ["tailwindcss-language-server"] = {
           filetypes = {
             "css",
             "jinja",
