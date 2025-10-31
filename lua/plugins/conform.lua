@@ -17,18 +17,20 @@ return {
       graphql = { "prettierd" },
       lua = { "stylua" },
       python = { "isort", "black" },
-      elixir = { "rustywind", "mix" },
+      elixir = { "mix" },
       heex = { "rustywind", "htmlbeautifier", "mix" },
       ["*"] = { "trim_newlines", "trim_whitespace" },
     })
     if LazyVim.has_extra("formatting.prettierd") then
       opts.formatters_by_ft = opts.formatters_by_ft or {}
     end
-    -- format_on_save = {
-    --   lsp_fallback = true,
-    --   async = false,
-    --   timeout_ms = 1000,
-    -- },
+
+    -- Enable format on save for better development experience
+    opts.format_on_save = {
+      lsp_fallback = true,
+      async = false,
+      timeout_ms = 1000,
+    }
   end,
   keys = {
     {
