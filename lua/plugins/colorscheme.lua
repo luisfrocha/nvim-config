@@ -8,7 +8,7 @@ return {
     -- { "MannyFay/mannydark.nvim", lazy = false },
     -- { "antonyz89/electron-vue.nvim", lazy = false, dependencies = { "rktjmp/lush.nvim" } },
     -- { "cosmicthemethhead/ultradark.nvim", lazy = false },
-    { "rebelot/kanagawa.nvim", lazy = false },
+    -- { "rebelot/kanagawa.nvim", lazy = false },
     -- { "rafamadriz/themes.nvim", lazy = false },
     -- { "tersetears/maani.nvim", lazy = false, dependencies = { "rktjmp/lush.nvim" } },
     -- {
@@ -33,8 +33,8 @@ return {
   },
   {
     "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "kanagawa",
-    },
+    -- opts = {
+    --   colorscheme = "kanagawa",
+    -- },
   },
 }
