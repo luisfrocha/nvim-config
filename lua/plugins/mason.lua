@@ -42,30 +42,27 @@ return {
     local mason_tool_installer = require("mason-tool-installer")
     mason_tool_installer.setup({
       ensure_installed = {
-        -- Language Servers
-        "css-lsp",
-        "cssmodules-language-server",
-        "elixir-ls",
-        "emmet-ls",
-        "eslint-lsp",
-        "html-lsp",
-        "json-lsp",
-        "lua-language-server",
-        "tailwindcss-language-server",
-        "typescript-language-server",
-        "vue-language-server",
-        "vtsls",
-        "yaml-language-server",
+        -- 🗂️ LANGUAGE SERVERS
+        "json-lsp",                    -- JSON support
+        "sqls",                        -- SQL language server
+        "vue-language-server",         -- Vue/Nuxt support (Volar)
+        "vtsls",                       -- TypeScript/React support
+        "tailwindcss-language-server", -- Tailwind CSS
+        "css-lsp",                     -- CSS/SCSS support
+        "html-lsp",                    -- HTML support
+        "emmet-ls",                    -- HTML/CSS expansions
+        "eslint-lsp",                  -- ESLint language server
+        "lua-language-server",         -- Lua (essential for Neovim config!)
 
-        -- Formatters
-        "eslint_d",
-        "prettierd",
-        "stylua",
-        "htmlbeautifier",
-        "rustywind",
+        -- ⚡ FORMATTERS & LINTERS
+        "eslint_d",  -- Fast ESLint (Vue/React)
+        "prettierd", -- Fast Prettier (all web tech)
+        "stylua",    -- Lua formatter (for Neovim config)
 
-        -- Linters
-        "eslint_d",
+        -- 📝 NOTES:
+        -- • Elixir uses elixir-tools (NextLS), not Mason
+        -- • Removed unnecessary tools: cssmodules, htmlbeautifier, rustywind, yaml
+        -- • Kept lua-language-server for Neovim config development
       },
     })
   end,

@@ -1,33 +1,80 @@
--- File: plugins/lsp.lua
+-- Enhanced Elixir configuration using elixir-tools (NextLS + modern tooling)
 return {
   "neovim/nvim-lspconfig",
 
   dependencies = {
-    "elixir-tools/elixir-tools.nvim",
-    "nvim-lua/plenary.nvim",
-    "elixir-editors/vim-elixir",
+    {
+      "elixir-tools/elixir-tools.nvim",
+      version = "*",
+      event = { "BufReadPre", "BufNewFile" },
+      config = function()
+        local elixir = require("elixir")
+        local elixirls = require("elixir.elixirls")
 
-    -- TypeScript (vtsls only)
-    { "yioneko/nvim-vtsls" },
+        elixir.setup({
+          nextls = {
+            enable = true, -- Use NextLS (modern Elixir language server)
+            init_options = {
+              mix_env = "dev",
+              mix_target = "host",
+              experimental = {
+                completions = { enable = true },
+              },
+            },
+            on_attach = function(client, buffer)
+              -- Elixir-specific keymaps
+              vim.keymap.set("n", "<leader>cp", function()
+                vim.lsp.buf.execute_command({
+                  command = "nextls:toPipe",
+                  arguments = { vim.uri_from_bufnr(buffer) },
+                })
+              end, { buffer = buffer, desc = "To Pipe" })
+
+              vim.keymap.set("n", "<leader>cP", function()
+                vim.lsp.buf.execute_command({
+                  command = "nextls:fromPipe",
+                  arguments = { vim.uri_from_bufnr(buffer) },
+                })
+              end, { buffer = buffer, desc = "From Pipe" })
+
+              vim.keymap.set("n", "<leader>ct", function()
+                vim.lsp.buf.execute_command({
+                  command = "nextls:test",
+                  arguments = { vim.uri_from_bufnr(buffer) },
+                })
+              end, { buffer = buffer, desc = "Run Tests" })
+            end,
+          },
+
+          credo = {
+            enable = true, -- Enable Credo for linting
+            on_attach = function(client, buffer)
+              vim.keymap.set("n", "<leader>cc", function()
+                vim.cmd("!mix credo")
+              end, { buffer = buffer, desc = "Run Credo" })
+            end,
+          },
+
+          elixirls = {
+            enable = false, -- Disable ElixirLS in favor of NextLS
+          },
+        })
+      end,
+    },
+    "nvim-lua/plenary.nvim",
+    "elixir-editors/vim-elixir", -- Syntax highlighting
   },
 
   opts = {
-    -- ---------------------------------------------------------
-    -- LSP SERVER DEFINITIONS
-    -- ---------------------------------------------------------
     servers = {
-
-      -- HTML
+      -- HTML Language Server with Elixir template support
       ["html-lsp"] = {
         filetypes = {
           "html",
           "elixir",
           "heex",
-          "javascript",
-          "javascriptreact",
-          "typescript",
-          "typescriptreact",
-          "vue",
+          "eex",
+          "surface",
         },
         settings = {
           html = {
@@ -40,113 +87,65 @@ return {
         },
       },
 
-      -- CSS
-      ["css-lsp"] = {
-        settings = {
-          css = { lint = { unknownAtRules = "ignore" } },
+      -- Tailwind CSS with Elixir template support
+      tailwindcss = {
+        filetypes = {
+          "elixir",
+          "heex",
+          "eex",
+          "html",
+          "css",
+          "scss",
         },
-      },
-
-      dockerls = {},
-      docker_compose_language_service = {},
-
-      -- ESLINT
-      ["eslint-lsp"] = {},
-
-      -- TypeScript (vtsls replaces tsserver completely)
-      vtsls = {
-        settings = {
-          typescript = {
-            inlayHints = {
-              enumMemberValues = { enabled = true },
-              functionLikeReturnTypes = { enabled = true },
-              parameterTypes = { enabled = true },
-              propertyDeclarationTypes = { enabled = true },
-              variableTypes = { enabled = true },
-            },
-          },
-        },
-      },
-    },
-
-    -- ---------------------------------------------------------
-    -- CUSTOM SERVER SETUP OVERRIDES
-    -- ---------------------------------------------------------
-    setup = {
-      -- Do NOT load the old Emmet one
-      ["emmet-ls"] = function() end,
-
-      ["eslint-lsp"] = function()
-        local lsp = require("snacks.util.lsp")
-        lsp.on(function(client)
-          if client.name == "eslint-lsp" then
-            client.server_capabilities.documentFormattingProvider = true
-          elseif client.name == "tsserver" then
-            -- vtsls replaces tsserver, but this guards against fallback
-            client.server_capabilities.documentFormattingProvider = false
-          end
-        end)
-        return true
-      end,
-    },
-  },
-
-  -- ---------------------------------------------------------
-  -- EXTRA CONFIG FOR TYPESCRIPT KEYMAPS + ELIXIR TOOLS
-  -- ---------------------------------------------------------
-  config = function(_, opts)
-    local lsp = require("snacks.util.lsp")
-
-    --------------------------------------------------------------------
-    -- TYPESCRIPT KEYMAPS (vtsls)
-    --------------------------------------------------------------------
-    lsp.on(function(client, buffer)
-      if client.name == "vtsls" then
-        vim.keymap.set("n", "<leader>co", function()
-          client.request("workspace/executeCommand", {
-            command = "typescript.organizeImports",
-            arguments = { vim.api.nvim_buf_get_name(buffer) },
-          })
-        end, { buffer = buffer, desc = "Organize Imports (vtsls)" })
-
-        vim.keymap.set("n", "<leader>cR", function()
-          client.request("workspace/executeCommand", {
-            command = "typescript.renameFile",
-            arguments = {
-              vim.api.nvim_buf_get_name(buffer),
-              vim.fn.input("New path: "),
-            },
-          })
-        end, { buffer = buffer, desc = "Rename File (vtsls)" })
-      end
-    end)
-
-    --------------------------------------------------------------------
-    -- ELIXIR-TOOLS SETUP
-    --------------------------------------------------------------------
-    require("elixir").setup({
-      credo = { enable = true },
-
-      elixirls = { enable = false }, -- disable old LSP
-
-      nextls = {
-        enable = true,
         init_options = {
-          experimental = {
-            completions = { enable = true },
+          userLanguages = {
+            elixir = "phoenix-heex",
+            eruby = "erb",
+            heex = "phoenix-heex",
+            svelte = "html",
           },
-          extensions = {
-            credo = { enable = true },
-            elixir = { enable = true },
+        },
+        settings = {
+          tailwindCSS = {
+            experimental = {
+              classRegex = {
+                -- Phoenix LiveView patterns
+                'class[:]?\\s*"([^"]*)',
+                '~H"""[\\s\\S]*?class="([^"]*)"',
+                'assign\\([^,]*,\\s*class:\\s*"([^"]*)"',
+                -- Standard patterns
+                'class="([^"]*)',
+                "class='([^']*)",
+              },
+            },
           },
         },
       },
-    })
 
-    --------------------------------------------------------------------
-    -- PASS OPTIONS TO LSPCONFIG
-    --------------------------------------------------------------------
-    require("lspconfig") -- ensure loaded
-    require("lazyvim.plugins.lsp").setup(opts)
-  end,
+      -- Emmet for templates
+      emmet_ls = {
+        filetypes = {
+          "html",
+          "css",
+          "scss",
+          "elixir",
+          "heex",
+          "eex",
+        },
+      },
+    },
+
+    on_attach = function(client, buffer)
+      -- Specific handling for NextLS
+      if client.name == "nextls" then
+        -- Enable formatting for Elixir files
+        client.server_capabilities.documentFormattingProvider = true
+
+        -- Enable inlay hints if supported
+        if client.supports_method("textDocument/inlayHint") then
+          vim.lsp.inlay_hint.enable(true, { bufnr = buffer })
+        end
+      end
+    end,
+  },
 }

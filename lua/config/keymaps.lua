@@ -1,6 +1,12 @@
 local opts = { noremap = true, silent = true }
 local map = vim.keymap.set
 
+-- Better escape mapping
+map({ "i", "v" }, "jk", "<Esc>", { desc = "Exit insert mode with jk" })
+
+-- Clear highlights on search when pressing <Esc> in normal mode
+map("n", "<Esc>", "<cmd>nohlsearch<CR>")
+
 -- Move selected line / block of text in visual mode
 map("v", "J", ":m '>+1<CR>gv=gv", opts)
 map("v", "K", ":m '<-2<CR>gv=gv", opts)
@@ -13,13 +19,32 @@ map("n", "<Leader>q", ":q!<CR>", opts)
 map("v", "<", "<gv")
 map("v", ">", ">gv")
 
--- paste over currently selected text without yanking it
-map("v", "p", '"_dp')
-map("v", "P", '"_dP')
+-- Better text manipulation
+map("v", "p", '"_dP', { desc = "Paste without yanking selection" })
+map("v", "P", '"_dp', { desc = "Paste without yanking selection" })
+
+-- Quick fix for common typos
+map("n", "<leader>fq", function()
+  vim.cmd([[%s/\<teh\>/the/gi]])
+  vim.cmd([[%s/\<recieve\>/receive/gi]])
+  vim.cmd([[%s/\<seperator\>/separator/gi]])
+  vim.cmd([[%s/\<occured\>/occurred/gi]])
+end, { desc = "Fix common typos" })
 
 -- Move to start/end of line
 map({ "n", "x", "o" }, "H", "^", opts)
 map({ "n", "x", "o" }, "L", "g_", opts)
+
+-- Better line join
+map("n", "J", "mzJ`z", { desc = "Join lines and maintain cursor position" })
+
+-- Better page up/down - keep cursor in middle
+map("n", "<C-d>", "<C-d>zz", { desc = "Page down and center" })
+map("n", "<C-u>", "<C-u>zz", { desc = "Page up and center" })
+
+-- Better search - keep cursor in middle
+map("n", "n", "nzzzv", { desc = "Next search result and center" })
+map("n", "N", "Nzzzv", { desc = "Previous search result and center" })
 
 -- Map enter to ciw in normal mode
 map("n", "<CR>", "ciw", opts)
@@ -40,7 +65,7 @@ map("v", "<C-F>", function()
   require("grug-far").with_visual_selection({ prefills = { paths = vim.fn.expand("%") } })
 end, { desc = "Search current selection" })
 
-map("n", "<Esc>", ":nohlsearch<CR>", opts)
+map("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- ctrl + x to cut full line
 map("n", "<C-x>", "dd", opts)

@@ -36,12 +36,25 @@ return {
       ["*"] = { "trim_newlines", "trim_whitespace" },
     })
 
-    -- Custom formatters configuration
+    -- Custom formatters configuration (matching your VSCode settings)
     opts.formatters = opts.formatters or {}
+
+    -- Mix formatter with proper project root detection
     opts.formatters.mix = {
       command = "mix",
       args = { "format", "-" },
       stdin = true,
+      cwd = require("conform.util").root_file({ "mix.exs" }),
+    }
+
+    -- Prettier configuration (matching your VSCode prettier settings)
+    opts.formatters.prettierd = {
+      prepend_args = {
+        "--single-quote",     -- prettier.singleQuote: true
+        "--jsx-single-quote", -- prettier.jsxSingleQuote: true
+        "--tab-width=2",      -- editor.tabSize: 2
+        "--print-width=120",  -- editor.wordWrapColumn: 120
+      },
     }
 
     if LazyVim.has_extra("formatting.prettierd") then

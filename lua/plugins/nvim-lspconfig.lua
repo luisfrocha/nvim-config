@@ -1,6 +1,6 @@
 return {
   "neovim/nvim-lspconfig",
-  ft = { "html", "htmldjango", "css", "javascript", "typescript", "javascriptreact", "typescriptreact", "vue", "elixir", "heex", "eex" },
+  ft = { "html", "htmldjango", "css", "javascript", "typescript", "javascriptreact", "typescriptreact", "vue" },
   dependencies = {
     {
       "folke/neoconf.nvim",
@@ -12,13 +12,10 @@ return {
 
   opts = {
     servers = {
-      -- HTML Language Server with support for templates
+      -- HTML Language Server (Elixir support moved to elixir-tools)
       ["html-lsp"] = {
         filetypes = {
           "html",
-          "elixir",
-          "heex",
-          "eex",
           "javascript",
           "javascriptreact",
           "typescript",
@@ -50,7 +47,7 @@ return {
         },
       },
 
-      -- Tailwind CSS Language Server
+      -- Tailwind CSS Language Server (Elixir support moved to elixir-tools)
       tailwindcss = {
         filetypes = {
           "html",
@@ -61,9 +58,6 @@ return {
           "typescript",
           "typescriptreact",
           "vue",
-          "elixir",
-          "heex",
-          "eex",
         },
         settings = {
           tailwindCSS = {
@@ -71,7 +65,6 @@ return {
               classRegex = {
                 "class[:]\\s*\"([^\"]*)\"",
                 "class[:]\\s*\"([^\"]*)\"",
-                "~H\"\"\"[\\s\\S]*?class=\"([^\"]*)\"",
                 'class="([^"]*)',
                 "class: \"([^\"]*)\"",
               },
@@ -82,71 +75,6 @@ return {
 
       dockerls = {},
       docker_compose_language_service = {},
-
-      -- Elixir Language Server with comprehensive setup
-      elixirls = {
-        settings = {
-          elixirLS = {
-            -- Enable dialyzer for better type checking
-            dialyzerEnabled = true,
-            -- Enable formatting
-            enableTestLenses = true,
-            -- Suggest specs for functions
-            suggestSpecs = true,
-            -- Auto-import completion
-            autoLinkedDeps = true,
-            -- Project root patterns
-            projectDir = ".",
-          },
-        },
-        keys = {
-          {
-            "<leader>cp",
-            function()
-              local params = vim.lsp.util.make_position_params()
-              require("snacks.util.lsp").execute({
-                command = "manipulatePipes:serverid",
-                arguments = {
-                  "toPipe",
-                  params.textDocument.uri,
-                  params.position.line,
-                  params.position.character,
-                },
-              })
-            end,
-            desc = "To Pipe",
-            ft = "elixir",
-          },
-          {
-            "<leader>cP",
-            function()
-              local params = vim.lsp.util.make_position_params()
-              require("snacks.util.lsp").execute({
-                command = "manipulatePipes:serverid",
-                arguments = {
-                  "fromPipe",
-                  params.textDocument.uri,
-                  params.position.line,
-                  params.position.character,
-                },
-              })
-            end,
-            desc = "From Pipe",
-            ft = "elixir",
-          },
-          {
-            "<leader>ct",
-            function()
-              require("snacks.util.lsp").execute({
-                command = "elixir.lens.test.run",
-                arguments = { vim.uri_from_fname(vim.fn.expand("%:p")) },
-              })
-            end,
-            desc = "Run Tests",
-            ft = "elixir",
-          },
-        },
-      },
 
       -- Vue Language Server for Vue and Nuxt
       volar = {
@@ -291,7 +219,7 @@ return {
         },
       },
 
-      -- Emmet for HTML/CSS expansions
+      -- Emmet for HTML/CSS expansions (Elixir support moved to elixir-tools)
       emmet_ls = {
         filetypes = {
           "html",
@@ -302,9 +230,6 @@ return {
           "typescript",
           "typescriptreact",
           "vue",
-          "elixir",
-          "heex",
-          "eex",
         },
       },
     },
@@ -317,9 +242,6 @@ return {
       elseif client.name == "tsserver" or client.name == "vtsls" then
         -- Disable formatting for TypeScript servers if ESLint is available
         client.server_capabilities.documentFormattingProvider = false
-      elseif client.name == "elixirls" then
-        -- Enable Elixir formatting
-        client.server_capabilities.documentFormattingProvider = true
       elseif client.name == "volar" then
         -- Enable Vue formatting
         client.server_capabilities.documentFormattingProvider = true
