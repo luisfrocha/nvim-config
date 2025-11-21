@@ -8,24 +8,6 @@ return {
       opts = {},
     },
     "jose-elias-alvarez/typescript.nvim",
-
-    -- Typescript-specific keymaps (fixed)
-    init = function()
-      local lsp = require("snacks.util.lsp")
-
-      lsp.on(function(client, buffer)
-        if client.name == "tsserver" or client.name == "typescript-tools" then
-          vim.keymap.set(
-            "n",
-            "<leader>co",
-            "<cmd>TypescriptOrganizeImports<CR>",
-            { buffer = buffer, desc = "Organize Imports" }
-          )
-          vim.keymap.set("n", "<leader>cR", "<cmd>TypescriptRenameFile<CR>", { buffer = buffer, desc = "Rename File" })
-        end
-      end)
-      return true
-    end,
   },
 
   opts = {
@@ -97,26 +79,39 @@ return {
       },
 
       ["eslint-lsp"] = {},
+
       vtsls = {
         settings = {},
+        keys = {
+          {
+            "<leader>co",
+            "<cmd>TypescriptOrganizeImports<CR>",
+            desc = "Organize Imports",
+            ft = { "typescript", "typescriptreact" },
+          },
+          {
+            "<leader>cR",
+            "<cmd>TypescriptRenameFile<CR>",
+            desc = "Rename File",
+            ft = { "typescript", "typescriptreact" },
+          },
+        },
       },
     },
 
+    -- Global LSP configuration that applies to all servers
+    on_attach = function(client, buffer)
+      -- ESLint formatting setup
+      if client.name == "eslint-lsp" then
+        client.server_capabilities.documentFormattingProvider = true
+      elseif client.name == "tsserver" or client.name == "vtsls" then
+        -- Disable formatting for TypeScript servers if ESLint is available
+        client.server_capabilities.documentFormattingProvider = false
+      end
+    end,
+
     setup = {
       ["emmet-ls"] = function() end,
-
-      ["eslint-lsp"] = function()
-        local lsp = require("snacks.util.lsp")
-
-        lsp.on(function(client)
-          if client.name == "eslint-lsp" then
-            client.server_capabilities.documentFormattingProvider = true
-          elseif client.name == "tsserver" then
-            client.server_capabilities.documentFormattingProvider = false
-          end
-        end)
-        return true
-      end,
     },
   },
 }
