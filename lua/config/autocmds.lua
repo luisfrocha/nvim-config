@@ -40,3 +40,22 @@ api.nvim_create_autocmd("FileType", {
     vim.b.emmet_html5 = true
   end,
 })
+
+-- Show project folder + relative path (remove " - Nvim")
+api.nvim_create_autocmd({ "BufEnter", "BufNewFile", "BufRead", "DirChanged", "VimEnter" }, {
+  callback = function()
+    vim.schedule(function()
+      local file = vim.fn.expand("%:t")                                -- filename
+      if file ~= "" then
+        local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t") -- project folder name
+        local relative_path = vim.fn.expand("%:.")                     -- relative path from project root
+        vim.o.titlestring = project_name .. "/" .. relative_path
+      else
+        -- No file open, just show project name
+        local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+        vim.o.titlestring = project_name
+      end
+    end)
+  end,
+  group = vim.api.nvim_create_augroup("ProjectPathTitle", { clear = true }),
+})
