@@ -55,7 +55,7 @@ return {
   -- REST client
   {
     "rest-nvim/rest.nvim",
-    dependencies = { "luarocks.nvim" },
+    dependencies = { "vhyrro/luarocks.nvim" },
     ft = "http",
     config = function()
       require("rest-nvim").setup()
