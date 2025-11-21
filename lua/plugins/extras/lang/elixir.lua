@@ -1,157 +1,152 @@
-local elixir_ft = { "elixir", "eex", "heex", "surface" }
-
-vim.filetype.add({
-  extension = {
-    ["neex"] = "heex",
-  },
-})
-
-local ok, icons = pcall(require, "nvim-web-devicons")
-if ok then
-  icons.set_icon({
-    [".neex"] = { icon = "", color = "#916AB2", name = "Neex" },
-  })
-  icons.set_icon({
-    neex = { icon = "", color = "#916AB2", name = "Neex" },
-  })
-end
-
+-- File: plugins/lsp.lua
 return {
-  {
-    "SmiteshP/nvim-navic",
-    optional = true,
-    opts = {
-      lsp = {
-        preference = { "nextls" },
-      },
-    },
-  },
-  {
-    "nvim-treesitter/nvim-treesitter",
-    opts = function(_, opts)
-      if type(opts.ensure_installed) == "table" then
-        vim.list_extend(opts.ensure_installed, elixir_ft)
-      else
-        opts.ensure_installed = elixir_ft
-      end
-    end,
-  },
-  {
-    "mason.nvim",
-    ft = elixir_ft,
-    opts = function(_, opts)
-      opts.ensure_installed = opts.ensure_installed or {}
-      vim.list_extend(opts.ensure_installed, { "elixir-ls" })
-    end,
-  },
-  {
-    "neovim/nvim-lspconfig",
-    ft = elixir_ft,
-    opts = {
-      setup = {
-        -- stylua: ignore start
-        elixirls = function() return true end,
-        nextls = function() return true end,
-        -- stylua: ignore end
-      },
-    },
-  },
-  {
+  "neovim/nvim-lspconfig",
+
+  dependencies = {
     "elixir-tools/elixir-tools.nvim",
-    dependencies = {
-      "elixir-editors/vim-elixir",
-      "nvim-lua/plenary.nvim",
+    "nvim-lua/plenary.nvim",
+    "elixir-editors/vim-elixir",
+
+    -- TypeScript (vtsls only)
+    { "yioneko/nvim-vtsls" },
+  },
+
+  opts = {
+    -- ---------------------------------------------------------
+    -- LSP SERVER DEFINITIONS
+    -- ---------------------------------------------------------
+    servers = {
+
+      -- HTML
+      ["html-lsp"] = {
+        filetypes = {
+          "html",
+          "elixir",
+          "heex",
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact",
+          "vue",
+        },
+        settings = {
+          html = {
+            format = {
+              templating = true,
+              wrapLineLength = 120,
+              wrapAttributes = "auto",
+            },
+          },
+        },
+      },
+
+      -- CSS
+      ["css-lsp"] = {
+        settings = {
+          css = { lint = { unknownAtRules = "ignore" } },
+        },
+      },
+
+      dockerls = {},
+      docker_compose_language_service = {},
+
+      -- ESLINT
+      ["eslint-lsp"] = {},
+
+      -- TypeScript (vtsls replaces tsserver completely)
+      vtsls = {
+        settings = {
+          typescript = {
+            inlayHints = {
+              enumMemberValues = { enabled = true },
+              functionLikeReturnTypes = { enabled = true },
+              parameterTypes = { enabled = true },
+              propertyDeclarationTypes = { enabled = true },
+              variableTypes = { enabled = true },
+            },
+          },
+        },
+      },
     },
-    ft = elixir_ft,
-    -- stylua: ignore
-    enabled = not vim.o.diff,
-    config = function()
-      local elixir = require("elixir")
-      local elixirls = require("elixir.elixirls")
 
-      local register_keys = function()
-        local wk = require("which-key")
-        local bufnr = vim.api.nvim_get_current_buf()
+    -- ---------------------------------------------------------
+    -- CUSTOM SERVER SETUP OVERRIDES
+    -- ---------------------------------------------------------
+    setup = {
+      -- Do NOT load the old Emmet one
+      ["emmet-ls"] = function() end,
 
-        wk.add({
-          { "<leader>cE",  group = "elixir" },
-          { "<leader>cEp", "<cmd>ElixirToPipe<cr>",      desc = "To Pipe" },
-          { "<leader>cEP", "<cmd>ElixirFromPipe<cr>",    desc = "From Pipe" },
-          { "<leader>cEm", "<cmd>ElixirExpandMacro<cr>", desc = "Expand Macro" },
-          { "<leader>cEr", "<cmd>ElixirRestart<cr>",     desc = "Restart" },
-          { "<leader>cEo", "<cmd>ElixirOutputPanel<cr>", desc = "Output Panel" },
-        }, { buffer = bufnr })
+      ["eslint-lsp"] = function()
+        local lsp = require("snacks.util.lsp")
+        lsp.on(function(client)
+          if client.name == "eslint-lsp" then
+            client.server_capabilities.documentFormattingProvider = true
+          elseif client.name == "tsserver" then
+            -- vtsls replaces tsserver, but this guards against fallback
+            client.server_capabilities.documentFormattingProvider = false
+          end
+        end)
+        return true
+      end,
+    },
+  },
+
+  -- ---------------------------------------------------------
+  -- EXTRA CONFIG FOR TYPESCRIPT KEYMAPS + ELIXIR TOOLS
+  -- ---------------------------------------------------------
+  config = function(_, opts)
+    local lsp = require("snacks.util.lsp")
+
+    --------------------------------------------------------------------
+    -- TYPESCRIPT KEYMAPS (vtsls)
+    --------------------------------------------------------------------
+    lsp.on(function(client, buffer)
+      if client.name == "vtsls" then
+        vim.keymap.set("n", "<leader>co", function()
+          client.request("workspace/executeCommand", {
+            command = "typescript.organizeImports",
+            arguments = { vim.api.nvim_buf_get_name(buffer) },
+          })
+        end, { buffer = buffer, desc = "Organize Imports (vtsls)" })
+
+        vim.keymap.set("n", "<leader>cR", function()
+          client.request("workspace/executeCommand", {
+            command = "typescript.renameFile",
+            arguments = {
+              vim.api.nvim_buf_get_name(buffer),
+              vim.fn.input("New path: "),
+            },
+          })
+        end, { buffer = buffer, desc = "Rename File (vtsls)" })
       end
+    end)
 
-      vim.api.nvim_create_autocmd(
-        "FileType",
-        { pattern = { "elixir", "eex", "heex", "surface" }, callback = register_keys }
-      )
+    --------------------------------------------------------------------
+    -- ELIXIR-TOOLS SETUP
+    --------------------------------------------------------------------
+    require("elixir").setup({
+      credo = { enable = true },
 
-      elixir.setup({
-        nextls = {
-          enable = true,
-          init_options = {
-            experimental = {
-              completions = {
-                enable = true,
-              },
-            },
-            extensions = {
-              credo = {
-                enable = true,
-              },
-              elixir = {
-                enable = true,
-              },
-            },
+      elixirls = { enable = false }, -- disable old LSP
+
+      nextls = {
+        enable = true,
+        init_options = {
+          experimental = {
+            completions = { enable = true },
+          },
+          extensions = {
+            credo = { enable = true },
+            elixir = { enable = true },
           },
         },
-        credo = { enable = true },
-        elixirls = { enable = true },
-      })
-    end,
-  },
-  {
-    "mfussenegger/nvim-dap",
-    config = function()
-      local mason = (os.getenv("HOME") or "") .. "/.local/share/nvim/mason"
-      local dap = require("dap")
+      },
+    })
 
-      dap.adapters.elixir = {
-        type = "executable",
-        command = mason .. "/packages/elixir-ls/debug_adapter.sh",
-        args = {},
-      }
-
-      dap.configurations.elixir = {
-        {
-          type = "elixir",
-          name = "Debug Elixir Program",
-          request = "launch",
-          task = "phx.server",
-          taskArgs = { "--trace" },
-          startApps = true,
-          projectDir = "${workspaceFolder}",
-          requireFiles = {
-            "test/**/test_helper.exs",
-            "test/**/*_test.exs",
-          },
-        },
-        {
-          type = "elixir",
-          name = "Debug Tests",
-          request = "launch",
-          task = "test",
-          taskArgs = { "--trace" },
-          startApps = true,
-          projectDir = "${workspaceFolder}",
-          requireFiles = {
-            "test/**/test_helper.exs",
-            "test/**/*_test.exs",
-          },
-        },
-      }
-    end,
-  },
+    --------------------------------------------------------------------
+    -- PASS OPTIONS TO LSPCONFIG
+    --------------------------------------------------------------------
+    require("lspconfig") -- ensure loaded
+    require("lazyvim.plugins.lsp").setup(opts)
+  end,
 }

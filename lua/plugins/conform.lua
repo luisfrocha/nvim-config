@@ -26,11 +26,11 @@ return {
     end
 
     -- Enable format on save for better development experience
-    opts.format_on_save = {
-      lsp_fallback = true,
-      async = false,
-      timeout_ms = 1000,
-    }
+    -- opts.format_on_save = {
+    --   lsp_fallback = true,
+    --   async = false,
+    --   timeout_ms = 1000,
+    -- }
   end,
   keys = {
     {
