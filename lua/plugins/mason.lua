@@ -42,6 +42,7 @@ return {
     local mason_tool_installer = require("mason-tool-installer")
     mason_tool_installer.setup({
       ensure_installed = {
+        -- Language Servers
         "css-lsp",
         "cssmodules-language-server",
         "elixir-ls",
@@ -51,10 +52,20 @@ return {
         "json-lsp",
         "lua-language-server",
         "tailwindcss-language-server",
-        "htmlbeautifier",
+        "typescript-language-server",
         "vue-language-server",
-        "rustywind",
+        "vtsls",
         "yaml-language-server",
+
+        -- Formatters
+        "eslint_d",
+        "prettierd",
+        "stylua",
+        "htmlbeautifier",
+        "rustywind",
+
+        -- Linters
+        "eslint_d",
       },
     })
   end,
