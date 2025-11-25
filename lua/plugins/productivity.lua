@@ -39,26 +39,6 @@ return {
     },
   },
 
-  -- Auto-save
-  {
-    "okuuva/auto-save.nvim",
-    cmd = "ASToggle",
-    event = { "InsertLeave", "TextChanged" },
-    opts = {
-      enabled = true,
-      -- execution_message removed - this option has been deprecated
-      events = { "InsertLeave", "TextChanged" },
-      conditions = {
-        exists = true,
-        filename_is_not = {},
-        filetype_is_not = { "hgcommit", "gitcommit", "gitrebase", "svn", "fzf" },
-        modifiable = true,
-      },
-      write_all_buffers = false,
-      debounce_delay = 1000,
-    },
-  },
-
   -- Better yanking/clipboard
   {
     "gbprod/yanky.nvim",
