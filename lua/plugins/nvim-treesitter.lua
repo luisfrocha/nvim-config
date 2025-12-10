@@ -37,7 +37,7 @@ return {
     -- Enhanced highlighting configuration
     opts.highlight = opts.highlight or {}
     opts.highlight.enable = true
-    opts.highlight.additional_vim_regex_highlighting = false
+    opts.highlight.additional_vim_regex_highlighting = { "elixir" }
 
     -- Better incremental selection
     opts.incremental_selection = {

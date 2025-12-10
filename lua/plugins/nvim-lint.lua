@@ -11,7 +11,7 @@ return {
       typescript = { "eslint_d" },
       typescriptreact = { "eslint_d" },
       vue = { "eslint_d" },
-      -- Note: Elixir linting is now handled by elixir-tools (NextLS + Credo)
+      elixir = { "credo" }, -- LazyVim's Elixir extra also configures this
     }
 
     -- Custom linter for Elixir Credo
