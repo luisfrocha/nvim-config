@@ -8,7 +8,7 @@ return {
       ---@type snacks.win.Config|{}
       snacks_win_opts = {
         relative = "editor",
-        position = "float", -- ✅ bottom drawer
+        position = "bottom", -- ✅ bottom drawer
         row = 0.65,
         col = 0.5,
         height = 100,
