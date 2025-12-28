@@ -17,6 +17,7 @@ return {
         "tsx",
         "javascript",
         "jsx",
+        "graphql",
 
         -- Elixir ecosystem
         "elixir",
@@ -29,6 +30,8 @@ return {
         "yaml",
         "markdown",
       })
+    else
+      opts.ensure_install = { "graphql" }
     end
 
     -- Register livebook files as markdown
