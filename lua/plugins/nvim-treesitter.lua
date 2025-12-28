@@ -31,7 +31,7 @@ return {
         "markdown",
       })
     else
-      opts.ensure_install = { "graphql" }
+      opts.ensure_install = { "graphql", "css", "html", "vue", "typescript", "javascript", "jsx", "json" }
     end
 
     -- Register livebook files as markdown
