@@ -1,0 +1,63 @@
+return {
+  "nvim-treesitter/nvim-treesitter",
+  build = function()
+    pcall(require("nvim-treesitter.install").update({ with_sync = true }))
+  end,
+  config = function()
+    require("nvim-treesitter.configs").setup({
+      ensure_installed = {
+        "bash",
+        "c_sharp",
+        "caddy",
+        "css",
+        "csv",
+        "diff",
+        "gitattributes",
+        "gitcommit",
+        "gitignore",
+        "go",
+        "graphql",
+        "hcl",
+        "http",
+        "javascript",
+        "jsdoc",
+        "json",
+        "jsonc",
+        "lua",
+        "markdown",
+        "markdown_inline",
+        "mermaid",
+        "nginx",
+        "php",
+        "prisma",
+        "python",
+        "rust",
+        "scss",
+        "sql",
+        "svelte",
+        "terraform",
+        "toml",
+        "tsx",
+        "typescript",
+        "vhs",
+        "vim",
+        "vimdoc",
+        "xml",
+        "yaml",
+        "zig",
+      },
+
+      highlight = { enable = true },
+      indent = { enable = true, disable = { "python" } },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "<c-space>",
+          node_incremental = "<c-space>",
+          scope_incremental = "<c-s>",
+          node_decremental = "<c-backspace>",
+        },
+      },
+    })
+  end,
+}
