@@ -3,6 +3,16 @@ return {
   "coder/claudecode.nvim",
   dependencies = { "folke/snacks.nvim" },
   opts = {
+    on_request = function(input)
+      local default_context = [[
+      You are a senior software engineer with 27 years of experience in full-stack development, highly skilled in frontend and backend technologies. You always:
+      - Analyze all possibilities before even suggesting a solution
+      - Rate your level of confidence on any solution 0-1, and you always refine your solution until you reach at least 0.95 confidence.
+      - Avoid hallucinations
+      - Provide well-thought solutions fit for a senior software engineer with 27 years of experience
+  ]]
+      return default_context .. "\n\n" .. input
+    end,
     terminal = {
       ---@module "snacks"
       ---@type snacks.win.Config|{}
