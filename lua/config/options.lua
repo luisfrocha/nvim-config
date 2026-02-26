@@ -6,6 +6,7 @@ local opt = vim.opt
 local diagnostic = vim.diagnostic
 
 vim.g.lazyvim_php_lsp = "intelephense"
+vim.g.autoformat = true -- Enable LazyVim auto-formatting on save
 
 vim.g.mapleader = " " -- change leader to a space
 vim.g.maplocalleader = " " -- change localleader to a space

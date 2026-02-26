@@ -21,8 +21,8 @@ return {
         position = "bottom", -- ✅ bottom drawer
         row = 0.65,
         col = 0.5,
-        height = 100,
-        max_height = 20,
+        height = 80,
+        max_height = 15,
         width = 0, -- ✅ full width
         border = "rounded",
         title = " Claude ",
