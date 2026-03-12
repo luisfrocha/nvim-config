@@ -34,6 +34,15 @@ api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- Force treesitter for heex/eex — vim-elixir sets b:current_syntax at startup
+-- which prevents treesitter from auto-starting on these filetypes
+api.nvim_create_autocmd("FileType", {
+  pattern = { "heex", "eex" },
+  callback = function()
+    vim.treesitter.start()
+  end,
+})
+
 -- Show project folder + relative path (remove " - Nvim")
 -- api.nvim_create_autocmd({ "BufEnter", "BufNewFile", "BufRead", "DirChanged", "VimEnter" }, {
 --   callback = function()

@@ -4,8 +4,10 @@ return {
   -- (LazyVim's default elixir extra doesn't include this)
   {
     "elixir-editors/vim-elixir",
-    ft = { "elixir", "heex", "eex", "exs" },
+    ft = { "elixir", "exs" },
     lazy = false, -- Load immediately to ensure syntax highlighting works
-    enabled = false,
+    config = function()
+      vim.filetype.add({ extension = { heex = "heex" } })
+    end,
   },
 }
