@@ -63,10 +63,10 @@ return {
           tailwindCSS = {
             experimental = {
               classRegex = {
-                "class[:]\\s*\"([^\"]*)\"",
-                "class[:]\\s*\"([^\"]*)\"",
+                'class[:]\\s*"([^"]*)"',
+                'class[:]\\s*"([^"]*)"',
                 'class="([^"]*)',
-                "class: \"([^\"]*)\"",
+                'class: "([^"]*)"',
               },
             },
           },
@@ -132,22 +132,7 @@ return {
         },
       },
 
-      -- ESLint for linting JavaScript/TypeScript/Vue
-      ["eslint-lsp"] = {
-        settings = {
-          workingDirectory = { mode = "auto" },
-          experimental = {
-            useFlatConfig = true,
-          },
-        },
-        filetypes = {
-          "javascript",
-          "javascriptreact",
-          "typescript",
-          "typescriptreact",
-          "vue",
-        },
-      },
+      -- NOTE: oxc_language_server binary not yet distributable outside VS Code extension
 
       -- TypeScript Language Server
       vtsls = {
@@ -236,21 +221,19 @@ return {
 
     -- Global LSP configuration that applies to all servers
     on_attach = function(client, buffer)
-      -- ESLint formatting setup
-      if client.name == "eslint-lsp" then
-        client.server_capabilities.documentFormattingProvider = true
-      elseif client.name == "tsserver" or client.name == "vtsls" then
-        -- Disable formatting for TypeScript servers if ESLint is available
+      -- Disable formatting for TS/Vue servers (oxfmt handles it via conform)
+      if client.name == "tsserver" or client.name == "vtsls" or client.name == "volar" then
         client.server_capabilities.documentFormattingProvider = false
-      elseif client.name == "volar" then
-        -- Enable Vue formatting
-        client.server_capabilities.documentFormattingProvider = true
       end
 
       -- Enable inlay hints if supported
       if client.supports_method("textDocument/inlayHint") then
         vim.lsp.inlay_hint.enable(true, { bufnr = buffer })
       end
+    end,
+    init = function()
+      vim.lsp.enable("expert")
+      vim.lsp.config("expert", { settings = { workspaceSymbols = { minQueryLength = 0 } } })
     end,
 
     setup = {

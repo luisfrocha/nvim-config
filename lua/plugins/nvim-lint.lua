@@ -4,13 +4,9 @@ return {
   config = function()
     local lint = require("lint")
 
-    -- Configure linters for different file types
+    local js_fts = { javascript = true, javascriptreact = true, typescript = true, typescriptreact = true, vue = true }
+
     lint.linters_by_ft = {
-      javascript = { "eslint_d" },
-      javascriptreact = { "eslint_d" },
-      typescript = { "eslint_d" },
-      typescriptreact = { "eslint_d" },
-      vue = { "eslint_d" },
       elixir = { "credo" }, -- LazyVim's Elixir extra also configures this
     }
 
@@ -33,15 +29,28 @@ return {
       ),
     }
 
+    -- Pick oxlint or eslint_d based on which config exists in the project
+    local function js_linter()
+      local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":h")
+      if #vim.fs.find(".oxlintrc.json", { upward = true, path = dir }) > 0 then
+        return "oxlint"
+      end
+      if #vim.fs.find({ ".eslintrc", ".eslintrc.json", ".eslintrc.js", ".eslintrc.cjs", "eslint.config.js", "eslint.config.cjs", "eslint.config.mjs" }, { upward = true, path = dir }) > 0 then
+        return "eslint_d"
+      end
+      return "oxlint" -- default
+    end
+
     -- Auto-lint on specific events
     local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
 
     vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
       group = lint_augroup,
       callback = function()
-        -- Only lint if the file type is supported
         local ft = vim.bo.filetype
-        if lint.linters_by_ft[ft] then
+        if js_fts[ft] then
+          lint.try_lint(js_linter())
+        elseif lint.linters_by_ft[ft] then
           lint.try_lint()
         end
       end,
@@ -49,7 +58,12 @@ return {
 
     -- Manual lint command
     vim.keymap.set("n", "<leader>cl", function()
-      lint.try_lint()
+      local ft = vim.bo.filetype
+      if js_fts[ft] then
+        lint.try_lint(js_linter())
+      else
+        lint.try_lint()
+      end
     end, { desc = "Trigger linting for current file" })
   end,
 }

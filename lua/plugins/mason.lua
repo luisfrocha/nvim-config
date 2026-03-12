@@ -51,13 +51,13 @@ return {
         "css-lsp",                     -- CSS/SCSS support
         "html-lsp",                    -- HTML support
         "emmet-ls",                    -- HTML/CSS expansions
-        "eslint-lsp",                  -- ESLint language server
+        -- NOTE: oxc-language-server is not in Mason's registry yet — skip for now
         "lua-language-server",         -- Lua (essential for Neovim config!)
 
         -- ⚡ FORMATTERS & LINTERS
-        "eslint_d",  -- Fast ESLint (Vue/React)
-        "prettierd", -- Fast Prettier (all web tech)
-        "stylua",    -- Lua formatter (for Neovim config)
+        "oxlint",  -- Fast JS/TS linter (replaces eslint_d)
+        "oxfmt",   -- Fast formatter, reads .prettierrc (replaces prettierd)
+        "stylua",  -- Lua formatter (for Neovim config)
 
         -- 📝 NOTES:
         -- • Elixir uses elixir-tools (NextLS), not Mason

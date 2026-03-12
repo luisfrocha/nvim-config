@@ -6,8 +6,6 @@ return {
     "elixir-editors/vim-elixir",
     ft = { "elixir", "heex", "eex", "exs" },
     lazy = false, -- Load immediately to ensure syntax highlighting works
-    config = function()
-      vim.filetype.add({ extension = { heex = "heex" } })
-    end,
+    enabled = false,
   },
 }
