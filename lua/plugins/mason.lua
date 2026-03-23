@@ -55,8 +55,9 @@ return {
         "lua-language-server",         -- Lua (essential for Neovim config!)
 
         -- ⚡ FORMATTERS & LINTERS
-        "oxlint",  -- Fast JS/TS linter (replaces eslint_d)
-        "oxfmt",   -- Fast formatter, reads .prettierrc (replaces prettierd)
+        "oxlint",   -- Fast JS/TS linter (used when .oxlintrc.json is present)
+        "eslint_d", -- ESLint daemon (used when eslint config is present)
+        "oxfmt",    -- Fast formatter, reads .prettierrc (replaces prettierd)
         "stylua",  -- Lua formatter (for Neovim config)
 
         -- 📝 NOTES:
