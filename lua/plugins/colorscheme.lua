@@ -8,8 +8,8 @@ return {
       transparent = true,
       styles = {
         sidebars = "transparent",
-        floats = "transparent"
-      }
+        floats = "transparent",
+      },
     },
   },
   {
@@ -22,8 +22,8 @@ return {
       theme = "wave",
       background = {
         dark = "wave",
-        light = "lotus"
-      }
+        light = "lotus",
+      },
     },
   },
   {

@@ -1,6 +1,7 @@
 return {
   "mason-org/mason.nvim",
   dependencies = {
+    "mason-org/mason-lspconfig.nvim",
     "WhoIsSethDaniel/mason-tool-installer.nvim",
   },
   config = function()
@@ -39,26 +40,32 @@ return {
       end
     end, 100)
 
+    -- mason-lspconfig bridges Mason package names and LSP config names.
+    -- automatic_enable = false keeps LazyVim lang extras in control of enabling servers.
+    require("mason-lspconfig").setup({
+      automatic_enable = false,
+    })
+
     local mason_tool_installer = require("mason-tool-installer")
     mason_tool_installer.setup({
       ensure_installed = {
         -- 🗂️ LANGUAGE SERVERS
-        "json-lsp",                    -- JSON support
-        "sqls",                        -- SQL language server
-        "vue-language-server",         -- Vue/Nuxt support (Volar)
-        "vtsls",                       -- TypeScript/React support
+        "json-lsp", -- JSON support
+        "sqls", -- SQL language server
+        "vue-language-server", -- Vue/Nuxt support (Volar)
+        "vtsls", -- TypeScript/React support
         "tailwindcss-language-server", -- Tailwind CSS
-        "css-lsp",                     -- CSS/SCSS support
-        "html-lsp",                    -- HTML support
-        "emmet-ls",                    -- HTML/CSS expansions
+        "css-lsp", -- CSS/SCSS support
+        "html-lsp", -- HTML support
+        "emmet-ls", -- HTML/CSS expansions
         -- NOTE: oxc-language-server is not in Mason's registry yet — skip for now
-        "lua-language-server",         -- Lua (essential for Neovim config!)
+        "lua-language-server", -- Lua (essential for Neovim config!)
 
         -- ⚡ FORMATTERS & LINTERS
-        "oxlint",   -- Fast JS/TS linter (used when .oxlintrc.json is present)
+        "oxlint", -- Fast JS/TS linter (used when .oxlintrc.json is present)
         "eslint_d", -- ESLint daemon (used when eslint config is present)
-        "oxfmt",    -- Fast formatter, reads .prettierrc (replaces prettierd)
-        "stylua",  -- Lua formatter (for Neovim config)
+        "oxfmt", -- Fast formatter, reads .prettierrc (replaces prettierd)
+        "stylua", -- Lua formatter (for Neovim config)
 
         -- 📝 NOTES:
         -- • Elixir uses elixir-tools (NextLS), not Mason

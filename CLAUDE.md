@@ -88,17 +88,27 @@ stylua lua/
 
 Configuration is in `stylua.toml`.
 
-## Commit Message Guidelines
+## CLAUDE.md Maintenance
 
-When the user asks to "commit" changes:
+- **Propagating updates**: When a rule or guideline is added or changed in an individual project's CLAUDE.md — whether it's already generic or could be made generic — generalize it if needed, add or update it in `~/.claude/CLAUDE.md`, and then disseminate to all other project CLAUDE.md files (with any project-specific values like commands filled in per project).
+- **Command lookup**: Always use the test and lint commands specified in the current project's CLAUDE.md. Never guess or use a default — if the project's CLAUDE.md defines `mix test`, use `mix test`; if it defines `npm test`, use `npm test`, etc.
 
-1. Review staged changes
-2. Write a concise commit message:
-   - Subject line: no bullet point, imperative mood
-   - Description items start with `- ` (dash and space), one line each
-   - Only include changes from currently staged files
-   - No leading spaces
-3. Copy the commit message to clipboard: `cat << 'EOF' | pbcopy ... EOF` — unless Claude is executing the commit directly, in which case clipboard copy is not needed
+## Commit & PR Workflow
+
+When the user asks to "commit" changes or "create a PR", this means the full workflow:
+1. Review the staged/changed files
+2. Run `stylua lua/` to format all Lua files and re-stage
+3. Create a commit message and commit
+
+Note: This is a Neovim config — there are no automated tests to run.
+
+When providing a commit message:
+1. Subject line has no bullet point
+2. Each description item starts with "- " (dash and space)
+3. Each description item is a single line (no line breaks within an item)
+4. Only include changes from currently staged files
+5. No spaces at beginning of lines (either subject or description)
+6. Always copy the commit message to the macOS clipboard using: `cat << 'EOF' | pbcopy ... EOF` — unless Claude is the one executing the commit, in which case copying to the clipboard is not needed
 
 ## Git Workflow
 

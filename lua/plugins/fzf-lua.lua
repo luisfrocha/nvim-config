@@ -1,4 +1,4 @@
--- Missing FzfLua plugin that keymaps reference  
+-- Missing FzfLua plugin that keymaps reference
 return {
   "ibhagwan/fzf-lua",
   cmd = "FzfLua",

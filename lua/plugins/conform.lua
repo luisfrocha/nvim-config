@@ -9,7 +9,12 @@ return {
       if #vim.fs.find(".oxfmtrc.json", { upward = true, path = dir }) > 0 then
         return { "oxfmt" }
       end
-      if #vim.fs.find({ ".prettierrc", ".prettierrc.json", ".prettierrc.js", ".prettierrc.cjs", "prettier.config.js" }, { upward = true, path = dir }) > 0 then
+      if
+        #vim.fs.find(
+          { ".prettierrc", ".prettierrc.json", ".prettierrc.js", ".prettierrc.cjs", "prettier.config.js" },
+          { upward = true, path = dir }
+        ) > 0
+      then
         return { "prettier" }
       end
       return { "oxfmt" }
@@ -77,7 +82,10 @@ return {
       "<leader>cO",
       function()
         local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":h")
-        local found = vim.fs.find({ ".prettierrc", ".prettierrc.json", ".prettierrc.js", "package.json", ".git" }, { upward = true, path = dir })
+        local found = vim.fs.find(
+          { ".prettierrc", ".prettierrc.json", ".prettierrc.js", "package.json", ".git" },
+          { upward = true, path = dir }
+        )
         if #found == 0 then
           vim.notify("oxfmt migrate: no project root found", vim.log.levels.WARN)
           return
@@ -96,9 +104,17 @@ return {
               return
             end
             local prettier_files = {
-              ".prettierrc", ".prettierrc.json", ".prettierrc.js", ".prettierrc.cjs",
-              ".prettierrc.mjs", ".prettierrc.yaml", ".prettierrc.yml", ".prettierrc.toml",
-              "prettier.config.js", "prettier.config.cjs", "prettier.config.mjs",
+              ".prettierrc",
+              ".prettierrc.json",
+              ".prettierrc.js",
+              ".prettierrc.cjs",
+              ".prettierrc.mjs",
+              ".prettierrc.yaml",
+              ".prettierrc.yml",
+              ".prettierrc.toml",
+              "prettier.config.js",
+              "prettier.config.cjs",
+              "prettier.config.mjs",
               ".prettierignore",
             }
             local deleted = {}

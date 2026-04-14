@@ -35,7 +35,20 @@ return {
       if #vim.fs.find(".oxlintrc.json", { upward = true, path = dir }) > 0 then
         return "oxlint"
       end
-      if #vim.fs.find({ ".eslintrc", ".eslintrc.json", ".eslintrc.js", ".eslintrc.cjs", "eslint.config.js", "eslint.config.cjs", "eslint.config.mjs" }, { upward = true, path = dir }) > 0 then
+      if
+        #vim.fs.find(
+          {
+            ".eslintrc",
+            ".eslintrc.json",
+            ".eslintrc.js",
+            ".eslintrc.cjs",
+            "eslint.config.js",
+            "eslint.config.cjs",
+            "eslint.config.mjs",
+          },
+          { upward = true, path = dir }
+        ) > 0
+      then
         return "eslint_d"
       end
       return "oxlint" -- default
