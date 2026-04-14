@@ -217,6 +217,12 @@ return {
               function()
                 return require("package-info").get_status()
               end,
+              {
+                function()
+                  return require("config.theme_mode").label()
+                end,
+                color = { bg = colors.bg_dark, fg = colors.cyan },
+              },
               { "fileformat", symbols = { unix = icon } },
               space,
             },

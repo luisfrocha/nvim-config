@@ -7,6 +7,8 @@ local diagnostic = vim.diagnostic
 
 vim.g.lazyvim_php_lsp = "intelephense"
 vim.g.autoformat = true -- Enable LazyVim auto-formatting on save
+vim.o.background = "dark" -- Default to dark; use <leader>ua to cycle (dark/light/system)
+vim.g.theme_mode = "dark"
 
 vim.g.mapleader = " " -- change leader to a space
 vim.g.maplocalleader = " " -- change localleader to a space
@@ -76,6 +78,18 @@ vim.filetype.add({
 })
 
 diagnostic.config({
+  severity_sort = true,
+  update_in_insert = false,
+  underline = true,
+  float = {
+    border = "rounded",
+    source = "if_many",
+  },
+  virtual_text = {
+    spacing = 2,
+    source = "if_many",
+    prefix = "●",
+  },
   signs = {
     text = {
       [vim.diagnostic.severity.ERROR] = "",

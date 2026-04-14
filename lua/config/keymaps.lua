@@ -95,3 +95,8 @@ map(
 -- map({ "n" }, "<Leader>bd", "<cmd>bd<cr>", { desc = "Close buffer", noremap = true, silent = true })
 map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true, silent = true })
 map({ "n", "i" }, "<C-a>", "gg<S-v><S-G>", { desc = "Select all", noremap = true, silent = true })
+
+-- Cycle theme appearance: dark → light → system
+map("n", "<leader>ua", function()
+  require("config.theme_mode").cycle()
+end, { desc = "Cycle appearance (dark/light/system)" })
