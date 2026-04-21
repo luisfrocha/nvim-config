@@ -35,6 +35,10 @@ end, { desc = "Fix common typos" })
 map({ "n", "x", "o" }, "H", "^", opts)
 map({ "n", "x", "o" }, "L", "g_", opts)
 
+-- Option+Left/Right: word navigation (mirrors insert mode behavior)
+map({ "n", "x", "o" }, "<M-Left>", "b", opts)
+map({ "n", "x", "o" }, "<M-Right>", "w", opts)
+
 -- Better line join
 map("n", "J", "mzJ`z", { desc = "Join lines and maintain cursor position" })
 

@@ -34,6 +34,16 @@ api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- Remove insert-mode arrow key mappings added by the built-in SQL ftplugin;
+-- they call sqlcomplete#DrillIntoTable/DrillOutOfColumns which fail in Neovim
+api.nvim_create_autocmd("FileType", {
+  pattern = "sql",
+  callback = function()
+    vim.keymap.del("i", "<Left>", { buffer = true })
+    vim.keymap.del("i", "<Right>", { buffer = true })
+  end,
+})
+
 -- Force treesitter for heex/eex — vim-elixir sets b:current_syntax at startup
 -- which prevents treesitter from auto-starting on these filetypes
 api.nvim_create_autocmd("FileType", {
