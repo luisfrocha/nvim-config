@@ -100,6 +100,9 @@ map(
 map({ "n" }, "U", "<cmd>redo<cr>", { desc = "Redo last change", noremap = true, silent = true })
 map({ "n", "i" }, "<C-a>", "gg<S-v><S-G>", { desc = "Select all", noremap = true, silent = true })
 
+-- Open current file in default browser
+map("n", "<leader>ob", "<cmd>!open %<cr>", { desc = "Open file in browser", noremap = true, silent = true })
+
 -- Cycle theme appearance: dark → light → system
 map("n", "<leader>ua", function()
   require("config.theme_mode").cycle()
