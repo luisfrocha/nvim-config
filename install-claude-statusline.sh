@@ -12,102 +12,108 @@ mkdir -p "$HOME/.claude"
 
 cat > "$SCRIPT_DEST" << 'STATUSLINE'
 #!/bin/bash
-# Claude Code status line — research-backed context meter
-# Supports real-time mode (Claude Code 2.1.72+) and fallback JSONL parsing mode.
+# Claude Code statusline — research-backed context tracking
+# Supports real-time mode (Claude Code 2.1.72+) and fallback transcript-parse mode.
 
-LOG_FILE="/tmp/claude-statusline-calls.log"
-TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-
-# ── Read stdin ──────────────────────────────────────────────────────────────
 input=$(cat)
 
-# ── Extract common fields ────────────────────────────────────────────────────
+# ── Fields from JSON ──────────────────────────────────────────────────────────
 MODEL=$(echo "$input" | jq -r '.model.display_name // "Claude"')
-CWD=$(echo "$input" | jq -r '.workspace.current_dir // ""')
-DIR="${CWD##*/}"
+DIR=$(echo "$input" | jq -r '.workspace.current_dir // ""')
 TRANSCRIPT=$(echo "$input" | jq -r '.transcript_path // ""')
-EXCEEDS=$(echo "$input" | jq -r '.context_window.exceeds_200k_tokens // false')
-
-# ── Version detection: does used_percentage exist? ───────────────────────────
+TOTAL_INPUT=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
 USED_PCT_RAW=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
+EXCEEDS=$(echo "$input" | jq -r 'if (.context_window.total_input_tokens // 0) > 200000 then "true" else "false" end')
 
+LOG=/tmp/claude-statusline-calls.log
+TIMESTAMP=$(date '+%Y-%m-%dT%H:%M:%S')
+
+# ── Version detection & percentage calculation ────────────────────────────────
 if [ -n "$USED_PCT_RAW" ]; then
-  # ── REAL-TIME MODE ────────────────────────────────────────────────────────
-  TOTAL_TOKENS=$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')
-
-  # Scale: treat 80% real usage as 100% on the display scale
-  SCALED=$(echo "$USED_PCT_RAW 80" | awk '{v = ($1 / $2) * 100; if (v > 100) v = 100; printf "%.0f", v}')
-
-  # Override to 100% if exceeds_200k flag is set
+  # REAL-TIME MODE (Claude Code 2.1.72+)
+  RAW_INT=$(echo "$USED_PCT_RAW" | cut -d. -f1)
+  SCALED=$(( (RAW_INT * 100) / 80 ))
+  [ "$SCALED" -gt 100 ] && SCALED=100
   [ "$EXCEEDS" = "true" ] && SCALED=100
-
-  echo "[$TIMESTAMP] REALTIME: Tokens: ${TOTAL_TOKENS} | Raw: ${USED_PCT_RAW}% | Scaled: ${SCALED}%" >> "$LOG_FILE"
+  printf '%s REALTIME: Tokens: %s | Raw: %s%% | Scaled: %s%%\n' \
+    "$TIMESTAMP" "$TOTAL_INPUT" "$RAW_INT" "$SCALED" >> "$LOG"
 else
-  # ── FALLBACK MODE — parse JSONL transcript ────────────────────────────────
-  TOTAL_TOKENS=0
-
+  # FALLBACK MODE — parse transcript JSONL
+  RAW_INT=0
   if [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ]; then
-    LAST_USAGE=$(grep '"role":"assistant"' "$TRANSCRIPT" 2>/dev/null \
-      | awk -F'"usage":' 'NF>1{print $2}' \
-      | awk -F'}' '{print $1"}"}' \
-      | while read -r obj; do
-          input_t=$(echo "$obj" | jq -r '.input_tokens // 0' 2>/dev/null)
-          cache_r=$(echo "$obj" | jq -r '.cache_read_input_tokens // 0' 2>/dev/null)
-          total=$((input_t + cache_r))
-          [ "$total" -gt 1000 ] && echo "$total"
-        done \
-      | tail -1)
-
-    [ -n "$LAST_USAGE" ] && TOTAL_TOKENS="$LAST_USAGE"
+    LAST=$(grep '"type":"assistant"' "$TRANSCRIPT" 2>/dev/null \
+      | awk -F'"input_tokens":' 'NF>1{
+          split($2,a,","); split($3,b,",");
+          cache=0; gsub(/[^0-9]/,"",a[1]);
+          if (length($3)) {gsub(/[^0-9]/,"",b[1]); cache=b[1]+0}
+          total=a[1]+cache;
+          if (total>1000) last=total
+        } END{print last+0}')
+    if [ "$LAST" -gt 0 ]; then
+      RAW_INT=$(( (LAST * 100) / 200000 ))
+    fi
   fi
-
-  RAW_PCT=$(echo "$TOTAL_TOKENS" | awk '{printf "%.2f", ($1 / 200000) * 100}')
-  SCALED=$(echo "$RAW_PCT 80" | awk '{v = ($1 / $2) * 100; if (v > 100) v = 100; printf "%.0f", v}')
-
+  SCALED=$(( (RAW_INT * 100) / 80 ))
+  [ "$SCALED" -gt 100 ] && SCALED=100
   [ "$EXCEEDS" = "true" ] && SCALED=100
-
-  echo "[$TIMESTAMP] FALLBACK: Tokens: ${TOTAL_TOKENS} | Raw: ${RAW_PCT}% | Scaled: ${SCALED}%" >> "$LOG_FILE"
+  printf '%s FALLBACK: Tokens: %s | Raw: %s%% | Scaled: %s%%\n' \
+    "$TIMESTAMP" "$TOTAL_INPUT" "$RAW_INT" "$SCALED" >> "$LOG"
 fi
 
-# ── Progress bar ──────────────────────────────────────────────────────────────
-BAR_WIDTH=10
-FILLED=$((SCALED / 10))
-[ "$FILLED" -gt "$BAR_WIDTH" ] && FILLED=$BAR_WIDTH
-EMPTY=$((BAR_WIDTH - FILLED))
+# ── ANSI colors (must be defined before bar/git use them) ─────────────────────
+RESET=$'\033[0m'
+DIM=$'\033[2m'
+BOLD=$'\033[1m'
+GREEN_B=$'\033[32m'
+YELLOW_C=$'\033[33m'
+ORANGE_W=$'\033[38;5;208m'
+RED_CRIT=$'\033[5;31m'
 
+if   [ "$SCALED" -ge 80 ]; then BAR_COLOR="$RED_CRIT"
+elif [ "$SCALED" -ge 70 ]; then BAR_COLOR="$ORANGE_W"
+elif [ "$SCALED" -ge 60 ]; then BAR_COLOR="$YELLOW_C"
+else                             BAR_COLOR="$GREEN_B"
+fi
+
+# ── Progress bar ─────────────────────────────────────────────────────────────
+BAR_WIDTH=10
+FILLED=$(( SCALED * BAR_WIDTH / 100 ))
+EMPTY=$(( BAR_WIDTH - FILLED ))
 BAR=""
 i=0
-while [ "$i" -lt "$FILLED" ]; do BAR="${BAR}█"; i=$((i+1)); done
+while [ $i -lt "$FILLED" ]; do BAR="${BAR}${BAR_COLOR}${BOLD}▰${RESET}"; i=$(( i+1 )); done
 i=0
-while [ "$i" -lt "$EMPTY" ]; do BAR="${BAR}░"; i=$((i+1)); done
-
-# ── Colors ────────────────────────────────────────────────────────────────────
-RESET='\033[0m'
-DIM='\033[2m'
-
-if [ "$SCALED" -ge 80 ]; then
-  COLOR='\033[5;31m'       # blinking red — critical
-elif [ "$SCALED" -ge 70 ]; then
-  COLOR='\033[38;5;208m'   # orange — warning
-elif [ "$SCALED" -ge 60 ]; then
-  COLOR='\033[33m'         # yellow — caution
-else
-  COLOR='\033[32m'         # bright green — safe
-fi
+while [ $i -lt "$EMPTY" ];  do BAR="${BAR}${DIM}▱${RESET}"; i=$(( i+1 )); done
 
 # ── Warning message ───────────────────────────────────────────────────────────
 WARN=""
-if [ "$SCALED" -ge 80 ]; then
-  WARN=" 🚨 /handoff-prompt NOW - dontsleeponai.com"
-elif [ "$SCALED" -ge 70 ]; then
-  WARN=" ⚠️  /handoff-prompt dontsleeponai.com/handoff-prompt"
-elif [ "$SCALED" -ge 60 ]; then
-  WARN=" 👉 /handoff-prompt dontsleeponai.com/handoff-prompt"
+if   [ "$SCALED" -ge 80 ]; then WARN=" 🚨 /handoff-prompt NOW - dontsleeponai.com"
+elif [ "$SCALED" -ge 70 ]; then WARN=" ⚠️  /handoff-prompt dontsleeponai.com/handoff-prompt"
+elif [ "$SCALED" -ge 60 ]; then WARN=" 👉 /handoff-prompt dontsleeponai.com/handoff-prompt"
 fi
 
-# ── Render ────────────────────────────────────────────────────────────────────
-printf "${DIM}%s${RESET} │ ${DIM}%s${RESET} ${COLOR}%s %s%%${RESET}%s\n" \
-  "$MODEL" "$DIR" "$BAR" "$SCALED" "$WARN"
+# ── Git info ──────────────────────────────────────────────────────────────────
+GIT_LINE=""
+GIT_STATUS_STR=""
+if git -c core.fsync=none rev-parse --git-dir >/dev/null 2>&1; then
+  BRANCH=$(git -c core.fsync=none branch --show-current 2>/dev/null)
+  STAGED=$(git -c core.fsync=none diff --cached --numstat 2>/dev/null | wc -l | tr -d ' ')
+  MODIFIED=$(git -c core.fsync=none diff --numstat 2>/dev/null | wc -l | tr -d ' ')
+  [ "$STAGED" -gt 0 ]   && GIT_STATUS_STR="${GREEN_B}+${STAGED}${RESET}"
+  [ "$MODIFIED" -gt 0 ] && GIT_STATUS_STR="${GIT_STATUS_STR}${YELLOW_C}~${MODIFIED}${RESET}"
+  GIT_LINE="🌿 ${BRANCH}${GIT_STATUS_STR:+ $GIT_STATUS_STR}"
+fi
+
+# ── Two output lines ──────────────────────────────────────────────────────────
+DIRNAME="${DIR##*/}"
+if [ -n "$GIT_LINE" ]; then
+  printf "${DIM}📁 %s${RESET} │ %s\n" "$DIRNAME" "$GIT_LINE"
+else
+  printf "${DIM}📁 %s${RESET}\n" "$DIRNAME"
+fi
+
+printf "${DIM}%s${RESET} │ %s${BAR_COLOR} %s%%%s${RESET}\n" \
+  "$MODEL" "$BAR" "$SCALED" "$WARN"
 STATUSLINE
 
 chmod +x "$SCRIPT_DEST"
@@ -119,7 +125,6 @@ if [ ! -f "$SETTINGS" ]; then
   echo "✓ Created $SETTINGS"
 fi
 
-# Only add statusLine if not already present
 if ! jq -e '.statusLine' "$SETTINGS" > /dev/null 2>&1; then
   tmp=$(mktemp)
   jq '. + {"statusLine": {"type": "command", "command": "~/.claude/statusline.sh"}}' \
