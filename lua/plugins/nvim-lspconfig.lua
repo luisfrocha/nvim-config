@@ -135,6 +135,7 @@ return {
         "vue",
       },
     })
+    vim.lsp.enable("emmet_ls")
 
     -- Custom server
     vim.lsp.config("expert", { settings = { workspaceSymbols = { minQueryLength = 0 } } })
