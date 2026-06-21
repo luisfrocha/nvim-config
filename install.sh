@@ -17,6 +17,7 @@ case $option in
 -c)
 	echo "Uninstalling configs..."
 	rm -rf $HOME/.config/nvim
+	rm -rf $HOME/.config/ghostty
 	LAZYGIT_VAR="CONFIG_DIR"
 	LINE_NUMBER=$(cat ~/.zshrc | grep -n "${LAZYGIT_VAR}" | cut -d : -f 1)
 	if [ -n "${LINE_NUMBER+1}" ]; then
@@ -42,7 +43,8 @@ case $option in
 		neovide
 	$(brew --prefix)/opt/fzf/install
 	mkdir -p $HOME/.config
-	ln -s $CURR_DIR $HOME/.config/nvim
+	ln -s $CURR_DIR/nvim $HOME/.config/nvim
+	ln -s $CURR_DIR/ghostty $HOME/.config/ghostty
 	# cp -r $CURR_DIR/NeovideLauncher.app ~/Applications/
 	export CONFIG_DIR="$HOME/.config/nvim/lazygit"
 	echo 'export CONFIG_DIR="$HOME/.config/nvim/lazygit"' >>~/.zshrc

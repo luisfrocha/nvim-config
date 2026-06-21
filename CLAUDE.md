@@ -4,28 +4,32 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Personal Neovim configuration built on [LazyVim](https://www.lazyvim.org/). Uses `lazy.nvim` as the plugin manager and extends LazyVim defaults with custom plugins, keymaps, and settings.
+Personal config repo with two top-level tool directories:
+- **`nvim/`** — Neovim configuration (symlinked to `~/.config/nvim`)
+- **`ghostty/`** — Ghostty terminal configuration (symlinked to `~/.config/ghostty`)
+
+The Neovim config is built on [LazyVim](https://www.lazyvim.org/), using `lazy.nvim` as the plugin manager.
 
 ## Tech Stack
 
 - **Base**: LazyVim (LazyVim/LazyVim)
 - **Plugin Manager**: lazy.nvim
 - **Language**: Lua
-- **Formatter**: StyLua (see `stylua.toml`)
+- **Formatter**: StyLua (see `nvim/stylua.toml`)
 - **GUI support**: Neovide
 
 ## Project Structure
 
 ### Key Directories and Files
 
-- **`init.lua`**: Entry point — bootstraps lazy.nvim, sets transparent background, Neovide-specific config
-- **`lua/config/`**: Core configuration
+- **`nvim/init.lua`**: Entry point — bootstraps lazy.nvim, sets transparent background, Neovide-specific config
+- **`nvim/lua/config/`**: Core configuration
   - `lazy.lua`: Plugin manager setup and spec imports
   - `keymaps.lua`: Custom key mappings
   - `options.lua`: Vim options and global settings
   - `autocmds.lua`: Autocommands
   - `icons.lua`: Icon definitions
-- **`lua/plugins/`**: Individual plugin config files (one file per plugin or feature group)
+- **`nvim/lua/plugins/`**: Individual plugin config files (one file per plugin or feature group)
   - `conform.lua`: Formatting (conform.nvim)
   - `nvim-lspconfig.lua`: LSP server configuration
   - `nvim-lint.lua`: Linting setup
@@ -41,13 +45,14 @@ Personal Neovim configuration built on [LazyVim](https://www.lazyvim.org/). Uses
   - `nvim-cmp.lua`: Completion
   - `neotest-elixir.lua`: Elixir test runner
   - `productivity.lua`, `advanced.lua`: Misc productivity plugins
-- **`stylua.toml`**: StyLua formatting config (used to format all Lua files)
-- **`lazyvim.json`**: LazyVim extras enabled
-- **`lazy-lock.json`**: Plugin version lockfile (do not manually edit)
+- **`nvim/stylua.toml`**: StyLua formatting config (used to format all Lua files)
+- **`nvim/lazyvim.json`**: LazyVim extras enabled
+- **`nvim/lazy-lock.json`**: Plugin version lockfile (do not manually edit)
+- **`ghostty/config.ghostty`**: Ghostty terminal font and display settings
 
 ## Adding Plugins
 
-1. Create a new file in `lua/plugins/your-plugin.lua`
+1. Create a new file in `nvim/lua/plugins/your-plugin.lua`
 2. Return a table (or array of tables) following the lazy.nvim spec:
 
 ```lua
@@ -67,7 +72,7 @@ return {
 
 ## Keymaps
 
-Custom keymaps are in `lua/config/keymaps.lua`. Key conventions:
+Custom keymaps are in `nvim/lua/config/keymaps.lua`. Key conventions:
 
 - Leader key: `<Space>`
 - `jk` → Exit insert mode
@@ -83,10 +88,10 @@ Custom keymaps are in `lua/config/keymaps.lua`. Key conventions:
 All Lua files are formatted with **StyLua**. Run before committing:
 
 ```bash
-stylua lua/
+stylua nvim/lua/
 ```
 
-Configuration is in `stylua.toml`.
+Configuration is in `nvim/stylua.toml`.
 
 ## CLAUDE.md Maintenance
 
@@ -97,7 +102,7 @@ Configuration is in `stylua.toml`.
 
 When the user asks to "commit" changes or "create a PR", this means the full workflow:
 1. Review the staged/changed files
-2. Run `stylua lua/` to format all Lua files and re-stage
+2. Run `stylua nvim/lua/` to format all Lua files and re-stage
 3. Create a commit message and commit
 
 Note: This is a Neovim config — there are no automated tests to run.
