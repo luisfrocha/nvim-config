@@ -1,5 +1,15 @@
 local api = vim.api
 
+-- Prevent vtsls and vue_ls from overriding conform's formatter
+api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if client and (client.name == "vtsls" or client.name == "vue_ls") then
+      client.server_capabilities.documentFormattingProvider = false
+    end
+  end,
+})
+
 -- Set file type for Vue files
 
 -- Apply VSCode-like editor preferences

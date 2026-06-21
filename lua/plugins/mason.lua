@@ -1,7 +1,6 @@
 return {
   "mason-org/mason.nvim",
   dependencies = {
-    "mason-org/mason-lspconfig.nvim",
     "WhoIsSethDaniel/mason-tool-installer.nvim",
   },
   config = function()
@@ -39,12 +38,6 @@ return {
         end
       end
     end, 100)
-
-    -- mason-lspconfig bridges Mason package names and LSP config names.
-    -- automatic_enable = false keeps LazyVim lang extras in control of enabling servers.
-    require("mason-lspconfig").setup({
-      automatic_enable = false,
-    })
 
     local mason_tool_installer = require("mason-tool-installer")
     mason_tool_installer.setup({
