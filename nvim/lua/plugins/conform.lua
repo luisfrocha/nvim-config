@@ -20,6 +20,29 @@ return {
       return { "oxfmt" }
     end
 
+    local function style_formatter(bufnr)
+      local filepath = vim.api.nvim_buf_get_name(bufnr)
+      local dir = vim.fn.fnamemodify(filepath, ":h")
+      if #vim.fs.find(".oxfmtrc.json", { upward = true, path = dir }) > 0 then
+        return { "oxfmt" }
+      end
+      return { "prettier" }
+    end
+
+    local function scss_formatter(bufnr)
+      local filepath = vim.api.nvim_buf_get_name(bufnr)
+      local dir = vim.fn.fnamemodify(filepath, ":h")
+      if
+        #vim.fs.find(
+          { ".stylelintrc", ".stylelintrc.json", ".stylelintrc.js", ".stylelintrc.cjs", "stylelint.config.js" },
+          { upward = true, path = dir }
+        ) > 0
+      then
+        return { "scss_combinator_fix" }
+      end
+      return { "prettier" }
+    end
+
     opts.formatters_by_ft = vim.tbl_extend("force", opts.formatters_by_ft or {}, {
       javascript = js_formatter,
       typescript = js_formatter,
@@ -27,9 +50,9 @@ return {
       typescriptreact = js_formatter,
       vue = js_formatter,
       svelte = js_formatter,
-      css = js_formatter,
-      scss = js_formatter,
-      html = js_formatter,
+      css = style_formatter,
+      scss = scss_formatter,
+      html = style_formatter,
       json = js_formatter,
       jsonc = js_formatter,
       yaml = js_formatter,
@@ -52,6 +75,15 @@ return {
     -- Custom formatters configuration (matching your VSCode settings)
     opts.formatters = opts.formatters or {}
 
+    -- Fixes `>selector` → `> selector` in SCSS nested combinators.
+    -- stylelint's selector-combinator-space-after doesn't handle leading
+    -- combinators in SCSS nesting, so we do it with a targeted perl regex.
+    opts.formatters.scss_combinator_fix = {
+      command = "perl",
+      args = { "-pe", "s/^(\\s*)>([^ >\\n])/$1> $2/g" },
+      stdin = true,
+    }
+
     -- Mix formatter with proper project root detection
     opts.formatters.mix = {
       command = "mix",
@@ -73,7 +105,7 @@ return {
       "<leader>cp",
       function()
         local conform = require("conform")
-        conform.format({ lsp_fallback = true, async = false, timeout_ms = 1000 })
+        conform.format({ lsp_format = "fallback", async = false, timeout_ms = 1000 })
       end,
       mode = { "n", "v" },
       { desc = "Format file or range (in visual mode)" },

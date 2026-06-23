@@ -5,6 +5,7 @@ return {
     local lint = require("lint")
 
     local js_fts = { javascript = true, javascriptreact = true, typescript = true, typescriptreact = true, vue = true }
+    local css_fts = { css = true, scss = true }
 
     lint.linters_by_ft = {
       elixir = { "credo" }, -- LazyVim's Elixir extra also configures this
@@ -60,6 +61,15 @@ return {
         local ft = vim.bo.filetype
         if js_fts[ft] then
           lint.try_lint(js_linter())
+        elseif css_fts[ft] then
+          local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":h")
+          local has_stylelint = #vim.fs.find(
+            { ".stylelintrc", ".stylelintrc.json", ".stylelintrc.js", ".stylelintrc.cjs", "stylelint.config.js" },
+            { upward = true, path = dir }
+          ) > 0
+          if has_stylelint then
+            lint.try_lint("stylelint")
+          end
         elseif lint.linters_by_ft[ft] then
           lint.try_lint()
         end
@@ -71,6 +81,15 @@ return {
       local ft = vim.bo.filetype
       if js_fts[ft] then
         lint.try_lint(js_linter())
+      elseif css_fts[ft] then
+        local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":h")
+        local has_stylelint = #vim.fs.find(
+          { ".stylelintrc", ".stylelintrc.json", ".stylelintrc.js", ".stylelintrc.cjs", "stylelint.config.js" },
+          { upward = true, path = dir }
+        ) > 0
+        if has_stylelint then
+          lint.try_lint("stylelint")
+        end
       else
         lint.try_lint()
       end

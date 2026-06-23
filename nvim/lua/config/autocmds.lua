@@ -1,12 +1,79 @@
 local api = vim.api
 
--- Prevent vtsls and vue_ls from overriding conform's formatter
+-- Prevent vtsls, vue_ls, cssls, tailwindcss, and emmet_ls from overriding conform's formatter
 api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     local client = vim.lsp.get_client_by_id(args.data.client_id)
-    if client and (client.name == "vtsls" or client.name == "vue_ls") then
+    if
+      client
+      and (
+        client.name == "vtsls"
+        or client.name == "vue_ls"
+        or client.name == "cssls"
+        or client.name == "tailwindcss"
+        or client.name == "emmet_ls"
+      )
+    then
       client.server_capabilities.documentFormattingProvider = false
     end
+  end,
+})
+
+-- Run stylelint --fix directly on the file after saving SCSS/CSS files.
+-- conform's stdin-based stylelint has convergence issues with multi-pass fixes
+-- (blank-line removal and indentation correction interfere across passes).
+-- Running on the actual file and reloading the buffer is reliable.
+local scss_fixing = false
+api.nvim_create_autocmd("BufWritePost", {
+  pattern = { "*.scss", "*.css" },
+  callback = function()
+    if scss_fixing then
+      return
+    end
+    local filepath = vim.fn.expand("%:p")
+    local dir = vim.fn.fnamemodify(filepath, ":h")
+    local config = vim.fs.find(
+      { ".stylelintrc", ".stylelintrc.json", ".stylelintrc.js", ".stylelintrc.cjs", "stylelint.config.js" },
+      { upward = true, path = dir }
+    )
+    if #config == 0 then
+      return
+    end
+    local root = vim.fs.find({ "package.json" }, { upward = true, path = dir })[1]
+    local cwd = root and vim.fn.fnamemodify(root, ":h") or dir
+    local bufnr = vim.api.nvim_get_current_buf()
+    scss_fixing = true
+    vim.fn.jobstart({ "npx", "stylelint", "--fix", filepath }, {
+      cwd = cwd,
+      on_exit = function(_, code1)
+        if code1 == 0 or code1 == 2 then
+          vim.fn.jobstart({ "npx", "stylelint", "--fix", filepath }, {
+            cwd = cwd,
+            on_exit = function()
+              scss_fixing = false
+              vim.schedule(function()
+                if vim.api.nvim_buf_is_valid(bufnr) then
+                  vim.diagnostic.reset(nil, bufnr)
+                  vim.api.nvim_buf_call(bufnr, function()
+                    vim.cmd("checktime")
+                  end)
+                  vim.defer_fn(function()
+                    if vim.api.nvim_buf_is_valid(bufnr) then
+                      local ft = vim.bo[bufnr].filetype
+                      if ft == "scss" or ft == "css" then
+                        require("lint").try_lint("stylelint")
+                      end
+                    end
+                  end, 200)
+                end
+              end)
+            end,
+          })
+        else
+          scss_fixing = false
+        end
+      end,
+    })
   end,
 })
 

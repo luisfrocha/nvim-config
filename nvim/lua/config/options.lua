@@ -3,6 +3,7 @@
 -- Add any additional options here
 local vim = vim
 local opt = vim.opt
+opt.autoread = true -- auto-reload files changed outside vim (used by BufWritePost stylelint fix)
 local diagnostic = vim.diagnostic
 
 vim.g.lazyvim_php_lsp = "intelephense"
