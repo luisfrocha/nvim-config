@@ -41,13 +41,18 @@ api.nvim_create_autocmd("BufWritePost", {
     end
     local root = vim.fs.find({ "package.json" }, { upward = true, path = dir })[1]
     local cwd = root and vim.fn.fnamemodify(root, ":h") or dir
+    -- Use local binary directly — avoids npx startup overhead
+    local bin = cwd .. "/node_modules/.bin/stylelint"
+    if vim.fn.executable(bin) == 0 then
+      return
+    end
     local bufnr = vim.api.nvim_get_current_buf()
     scss_fixing = true
-    vim.fn.jobstart({ "npx", "stylelint", "--fix", filepath }, {
+    vim.fn.jobstart({ bin, "--fix", "--cache", filepath }, {
       cwd = cwd,
       on_exit = function(_, code1)
         if code1 == 0 or code1 == 2 then
-          vim.fn.jobstart({ "npx", "stylelint", "--fix", filepath }, {
+          vim.fn.jobstart({ bin, "--fix", "--cache", filepath }, {
             cwd = cwd,
             on_exit = function()
               scss_fixing = false
