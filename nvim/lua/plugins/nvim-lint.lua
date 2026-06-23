@@ -7,6 +7,16 @@ return {
     local js_fts = { javascript = true, javascriptreact = true, typescript = true, typescriptreact = true, vue = true }
     local css_fts = { css = true, scss = true }
 
+    -- Override stylelint to use local binary directly instead of PATH lookup
+    lint.linters.stylelint = vim.tbl_deep_extend("force", lint.linters.stylelint or {}, {
+      cmd = function()
+        local dir = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":h")
+        local root = vim.fs.find({ "package.json" }, { upward = true, path = dir })[1]
+        local bin = root and (vim.fn.fnamemodify(root, ":h") .. "/node_modules/.bin/stylelint")
+        return (bin and vim.fn.executable(bin) == 1) and bin or "stylelint"
+      end,
+    })
+
     lint.linters_by_ft = {
       elixir = { "credo" }, -- LazyVim's Elixir extra also configures this
     }
