@@ -17,11 +17,14 @@ Example: branch `hotfix/dashboard-activate-update` in repo `~/Sites/vistara-bi-a
 The user provides the branch name as an argument, e.g.
 `/remove-supacode-tree hotfix/old-branch`.
 
-Run the bundled helper from inside any worktree of the target repo:
+IMPORTANT: the `supacode` CLI only works from a terminal Supacode itself spawned
+(it needs `$SUPACODE_SOCKET_PATH`, which is empty in iTerm and in Claude). It
+fails from Claude with "Operation not permitted" (sandbox on OR off). So do NOT
+execute the helper yourself — give the user the exact command to paste into a
+Supacode terminal tab:
 
 ```sh
-supacode-wt-rm <branch>                # if ~/.local/bin is on PATH
-scripts/supacode-wt-rm <branch>        # relative to this skill dir
+supacode-wt-rm <branch>
 ```
 
 The script computes the worktree directory from the branch, percent-encodes its
@@ -31,15 +34,18 @@ path into the Supacode worktree ID, and calls `supacode worktree delete`.
 
 - Pass the user's branch argument exactly as given — do NOT pre-convert slashes.
 - If the user gave no branch argument, ask for one instead of guessing.
+- Do NOT run `supacode-wt-rm` / `supacode` yourself — it fails from Claude/iTerm.
+  Print the command for the user to run in a Supacode terminal.
 - This is destructive — it removes a worktree. Confirm the branch with the user
-  before running if there's any ambiguity, and surface the script's output.
+  before presenting the command if there's any ambiguity.
 - The script refuses to act if no matching worktree directory exists, and refuses
-  to remove the main worktree; relay those errors rather than working around them.
+  to remove the main worktree; if the user shares those errors, relay them rather
+  than working around them.
 - IMPORTANT / unverified: it is not confirmed whether `supacode worktree delete`
   also removes the on-disk directory, runs `git worktree remove`, and/or deletes
-  the local branch, versus only removing Supacode's entry. After running, check
-  whether the directory and branch still exist and tell the user what remains, so
-  they can clean up manually (`git worktree remove` / delete branch) if needed.
+  the local branch, versus only removing Supacode's entry. After the user runs it,
+  have them check whether the directory and branch still exist, and tell them how
+  to clean up manually (`git worktree remove` / delete branch) if anything remains.
 - The helper lives at `scripts/supacode-wt-rm` in this skill and is also symlinked
-  onto PATH by the nvim-config `setup.sh`. If neither resolves, tell the user to
-  run `./setup.sh --link` in `~/Sites/nvim-config`.
+  onto PATH by the nvim-config `setup.sh`. If the user reports `command not found`,
+  tell them to run `./setup.sh --link` in `~/Sites/nvim-config`.
