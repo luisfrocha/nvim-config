@@ -18,10 +18,12 @@ The user provides a branch name (and optionally a base ref) as arguments, e.g.
 `/create-supacode-tree hotfix/new-branch-name` or
 `/create-supacode-tree feature/x develop`.
 
-Run the helper with those arguments, from inside any worktree of the target repo:
+Run the bundled helper with those arguments, from inside any worktree of the
+target repo. It is available two ways (prefer whichever resolves):
 
 ```sh
-supacode-wt <branch> [base-ref]
+supacode-wt <branch> [base-ref]                  # if ~/.local/bin is on PATH
+scripts/supacode-wt <branch> [base-ref]          # relative to this skill dir
 ```
 
 - `<branch>` — the branch name the user gave (pass it through verbatim, slashes
@@ -33,10 +35,10 @@ supacode-wt <branch> [base-ref]
 
 - Pass the user's branch argument exactly as given — do NOT pre-convert slashes.
 - If the user gave no branch argument, ask for one instead of guessing.
-- `supacode-wt` is installed on PATH (symlinked from the nvim-config repo). If the
-  command is not found, tell the user to run `./setup.sh --install` (or `--update`) in
-  `~/Sites/nvim-config` and ensure `~/.local/bin` is on PATH — do not reimplement
-  the worktree creation inline.
+- The helper lives at `scripts/supacode-wt` in this skill and is also symlinked
+  onto PATH as `supacode-wt` by the nvim-config `setup.sh`. If neither resolves,
+  tell the user to run `./setup.sh --link` (or `--install`) in `~/Sites/nvim-config`
+  — do not reimplement the worktree creation inline.
 - The script refuses to overwrite an existing directory and requires being run
   inside a git repo / a Supacode terminal; surface its error message to the user
   rather than working around it.

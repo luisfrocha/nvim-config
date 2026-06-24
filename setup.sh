@@ -9,9 +9,10 @@ usage() {
 	code=${1:-1}
 	msg=$(
 		cat <<EOF
-Usage $PROGNAME [-i|--install] [-u|--update] [-x|--uninstall] [-h|--help]
+Usage $PROGNAME [-i|--install] [-u|--update] [-l|--link] [-x|--uninstall] [-h|--help]
   -i, --install:   Install config files and dependencies (fresh machine)
-  -u, --update:    Update config files and brew packages
+  -u, --update:    git pull, upgrade brew packages, and re-link
+  -l, --link:      Re-link symlinks only (no git pull, no brew) — fast
   -x, --uninstall: Remove config symlinks
   -h, --help:      Show this help
 EOF
@@ -85,10 +86,16 @@ link_configs() {
 	mkdir -p "$HOME/.config"
 	ln -sfn "$CURR_DIR/nvim" "$HOME/.config/nvim"
 	ln -sfn "$CURR_DIR/ghostty" "$HOME/.config/ghostty"
-	# Personal scripts onto PATH (ensure ~/.local/bin is on your PATH).
+	# Standalone personal scripts onto PATH (ensure ~/.local/bin is on your PATH).
 	link_dir_contents "$CURR_DIR/bin" "$HOME/.local/bin"
 	# Claude Code skills (kept in a visible, non-dotted dir so they show in Finder).
 	link_dir_contents "$CURR_DIR/claude/skills" "$HOME/.claude/skills"
+	# Skill-bundled scripts are also exposed on PATH so they're runnable directly
+	# in a terminal, not only via the skill.
+	for sdir in "$CURR_DIR"/claude/skills/*/scripts; do
+		[ -d "$sdir" ] || continue
+		link_dir_contents "$sdir" "$HOME/.local/bin"
+	done
 }
 
 CURR_DIR=$(pwd)
@@ -113,6 +120,11 @@ case $option in
 	install_packages
 	link_configs
 	echo "Update complete."
+	;;
+-l | --link)
+	echo "Re-linking symlinks..."
+	link_configs
+	echo "Link complete."
 	;;
 -h | --help)
 	usage 0

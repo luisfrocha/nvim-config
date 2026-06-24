@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+#
+# supacode-wt-rm — remove the Supacode git worktree for a branch, matching the
+# Git Tower naming pattern used by supacode-wt (<repo>-<branch-as-dashes>).
+#
+#   branch hotfix/dashboard-activate-update in repo ~/Sites/vistara-bi-ads-ui
+#   ->  removes worktree at ~/Sites/vistara-bi-ads-ui-hotfix-dashboard-activate-update
+#
+# Run from inside any worktree of the repo. The Supacode worktree ID is the
+# percent-encoded absolute path of the worktree.
+#
+# Usage:
+#   supacode-wt-rm <branch>
+
+set -euo pipefail
+
+# Resolve this script's real directory even when invoked via a PATH symlink,
+# then source the shared worktree helpers (kept in claude/common/).
+self=${BASH_SOURCE[0]}
+while [ -L "$self" ]; do
+  target=$(readlink "$self")
+  case $target in
+  /*) self=$target ;;
+  *) self=$(dirname "$self")/$target ;;
+  esac
+done
+script_dir=$(cd "$(dirname "$self")" && pwd)
+# shellcheck source=/dev/null
+. "$script_dir/../../../common/worktree.sh"
+
+if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "Usage: supacode-wt-rm <branch>" >&2
+  exit 1
+fi
+
+branch=$1
+
+wt_require_supacode
+wt_resolve_repo
+
+target=$(wt_target_path "$branch")
+
+if [ ! -e "$target" ]; then
+  echo "supacode-wt-rm: no worktree directory at '$target'." >&2
+  echo "  (Expected the Tower-pattern folder for branch '$branch'.)" >&2
+  exit 1
+fi
+
+if [ "$target" = "$WT_MAIN_ROOT" ]; then
+  echo "supacode-wt-rm: refusing to remove the main worktree ('$target')." >&2
+  exit 1
+fi
+
+worktree_id=$(wt_percent_encode "$target")
+
+echo "Removing worktree"
+echo "  branch: $branch"
+echo "  path:   $target"
+
+exec supacode worktree delete -w "$worktree_id"
