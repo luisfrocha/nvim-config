@@ -36,16 +36,13 @@ path into the Supacode worktree ID, and calls `supacode worktree delete`.
 - If the user gave no branch argument, ask for one instead of guessing.
 - Do NOT run `supacode-wt-rm` / `supacode` yourself — it fails from Claude/iTerm.
   Print the command for the user to run in a Supacode terminal.
-- This is destructive — it removes a worktree. Confirm the branch with the user
-  before presenting the command if there's any ambiguity.
+- This is destructive. Verified behavior: `supacode worktree delete` fully tears
+  down the worktree — it removes the on-disk directory, the git worktree
+  registration, AND the local branch. So it will DELETE the branch; warn the user
+  before presenting the command if the branch may have unmerged/unpushed work.
 - The script refuses to act if no matching worktree directory exists, and refuses
   to remove the main worktree; if the user shares those errors, relay them rather
   than working around them.
-- IMPORTANT / unverified: it is not confirmed whether `supacode worktree delete`
-  also removes the on-disk directory, runs `git worktree remove`, and/or deletes
-  the local branch, versus only removing Supacode's entry. After the user runs it,
-  have them check whether the directory and branch still exist, and tell them how
-  to clean up manually (`git worktree remove` / delete branch) if anything remains.
 - The helper lives at `scripts/supacode-wt-rm` in this skill and is also symlinked
   onto PATH by the nvim-config `setup.sh`. If the user reports `command not found`,
   tell them to run `./setup.sh --link` in `~/Sites/nvim-config`.
