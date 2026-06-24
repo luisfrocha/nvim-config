@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+#
+# supacode-wt — create a Supacode git worktree whose directory follows Git
+# Tower's naming pattern: <repo-name>-<branch-with-slashes-as-dashes>, placed
+# alongside the main repo.
+#
+#   branch hotfix/dashboard-activate-update in repo ~/Sites/vistara-bi-ads-ui
+#   ->  ~/Sites/vistara-bi-ads-ui-hotfix-dashboard-activate-update
+#
+# Supacode's "Default directory" setting is a plain parent path, not a template,
+# so it can't reproduce this pattern on its own. Run this from inside any
+# worktree of the repo you want to branch from.
+#
+# Usage:
+#   supacode-wt <branch> [base-ref]
+#
+#   <branch>    Name of the new (or existing) branch for the worktree.
+#   [base-ref]  Optional ref to branch from; when given, the base is fetched
+#               first. Omit to branch from the current HEAD.
+
+set -euo pipefail
+
+if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "Usage: supacode-wt <branch> [base-ref]" >&2
+  exit 1
+fi
+
+branch=$1
+base=${2:-}
+
+command -v supacode >/dev/null 2>&1 || {
+  echo "supacode-wt: the 'supacode' CLI is not on PATH (run inside a Supacode terminal)." >&2
+  exit 1
+}
+
+# Resolve the MAIN repo root (not the current worktree) so the location and
+# folder name are stable no matter which worktree we're invoked from.
+git_common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || {
+  echo "supacode-wt: not inside a git repository." >&2
+  exit 1
+}
+main_root=$(dirname "$git_common_dir")
+repo_name=$(basename "$main_root")
+parent_dir=$(dirname "$main_root")
+
+# Tower pattern: repo name + branch with every "/" turned into "-".
+folder="${repo_name}-${branch//\//-}"
+target="$parent_dir/$folder"
+
+if [ -e "$target" ]; then
+  echo "supacode-wt: '$target' already exists; aborting." >&2
+  exit 1
+fi
+
+echo "Creating worktree"
+echo "  branch:   $branch"
+echo "  base:     ${base:-<current HEAD>}"
+echo "  path:     $target"
+
+args=(repo worktree-new --branch "$branch" --location "$parent_dir" --name "$folder")
+if [ -n "$base" ]; then
+  args+=(--base "$base" --fetch)
+fi
+
+exec supacode "${args[@]}"
