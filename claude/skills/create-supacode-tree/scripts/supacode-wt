@@ -16,7 +16,9 @@
 #
 #   <branch>    Name of the new (or existing) branch for the worktree.
 #   [base-ref]  Optional ref to branch from; when given, the base is fetched
-#               first. Omit to branch from the current HEAD.
+#               first. Omit to branch from the repo's default branch (origin/HEAD,
+#               e.g. branch-development). Pass 'HEAD' (or '.') to branch from the
+#               current HEAD instead.
 
 set -euo pipefail
 
@@ -46,7 +48,19 @@ base=${2:-}
 wt_require_supacode
 wt_resolve_repo
 
-folder=$(wt_folder_name "$branch")
+# Default the base to the repo's mainline (origin/HEAD, e.g. branch-development)
+# when not given, so new worktrees branch off the trunk rather than whatever HEAD
+# happens to be. origin/HEAD is set at clone time; if it's missing, ask the remote
+# once. Leave base empty (-> current HEAD) only if it can't be discovered.
+if [ -z "$base" ]; then
+  default_ref=$(git symbolic-ref --short -q refs/remotes/origin/HEAD || true)
+  if [ -z "$default_ref" ]; then
+    git remote set-head origin --auto >/dev/null 2>&1 || true
+    default_ref=$(git symbolic-ref --short -q refs/remotes/origin/HEAD || true)
+  fi
+  base=${default_ref#origin/}
+fi
+
 target=$(wt_target_path "$branch")
 
 if [ -e "$target" ]; then
@@ -54,14 +68,69 @@ if [ -e "$target" ]; then
   exit 1
 fi
 
+# Emit the Supacode lock reason, reused from any existing supacode-locked
+# worktree so build/version stay correct across Supacode upgrades, stamped with
+# a current createdAt. Falls back to owner-only if no existing lock is found.
+wt_supacode_lock_json() {
+  local common sample build='' version='' now
+  common=$(git rev-parse --git-common-dir 2>/dev/null) || return 1
+  now=$(date +%s)
+  for sample in "$common"/worktrees/*/locked; do
+    [ -f "$sample" ] || continue
+    grep -q '"owner":"supacode"' "$sample" || continue
+    build=$(sed -E 's/.*"build":"([^"]*)".*/\1/' "$sample")
+    version=$(sed -E 's/.*"version":"([^"]*)".*/\1/' "$sample")
+    break
+  done
+  if [ -n "$build" ] && [ -n "$version" ]; then
+    printf '{"build":"%s","createdAt":%s,"owner":"supacode","version":"%s"}' "$build" "$now" "$version"
+  else
+    printf '{"createdAt":%s,"owner":"supacode"}' "$now"
+  fi
+}
+
 echo "Creating worktree"
 echo "  branch:   $branch"
 echo "  base:     ${base:-<current HEAD>}"
 echo "  path:     $target"
 
-args=(repo worktree-new --branch "$branch" --location "$WT_PARENT_DIR" --name "$folder")
-if [ -n "$base" ]; then
-  args+=(--base "$base" --fetch)
+# Create the worktree with native git (synchronous — no supacode daemon race).
+# --no-track is the key fix: when branching from a remote-tracking base (e.g.
+# origin/branch-development) git would otherwise auto-record it as this branch's
+# upstream, which is the footgun that makes a GUI/no-arg push land on the base
+# branch. --no-track leaves the upstream unset; we set the correct one below.
+if git show-ref --verify --quiet "refs/heads/$branch"; then
+  # Branch already exists -> just attach a worktree to it.
+  git worktree add "$target" "$branch"
+else
+  start=HEAD
+  if [ -n "$base" ] && [ "$base" != "HEAD" ] && [ "$base" != "." ]; then
+    # Fetch the base so we branch from its latest state (mirrors the old --fetch),
+    # and prefer the freshly-fetched remote ref when the base names a remote branch.
+    git fetch origin "$base" 2>/dev/null || true
+    if git show-ref --verify --quiet "refs/remotes/origin/$base"; then
+      start="origin/$base"
+    else
+      start="$base"
+    fi
+  fi
+  git worktree add --no-track -b "$branch" "$target" "$start"
 fi
 
-exec supacode "${args[@]}"
+# Upstream: track origin/<branch> if it already exists on the remote, otherwise
+# leave it unset so the first `git push -u origin <branch>` sets it correctly.
+# Never the base branch — that was the bug.
+if git -C "$target" rev-parse --verify -q "refs/remotes/origin/$branch" >/dev/null; then
+  git -C "$target" branch --set-upstream-to="origin/$branch" "$branch"
+  echo "  upstream: origin/$branch"
+else
+  git -C "$target" branch --unset-upstream "$branch" 2>/dev/null || true
+  echo "  upstream: (none — set on first 'git push -u origin $branch')"
+fi
+
+# Mark the worktree as Supacode-owned (same lock reason the supacode CLI writes)
+# so the app recognizes it as one of its worktrees.
+git worktree lock --reason "$(wt_supacode_lock_json)" "$target"
+
+echo "Done."
+echo "Note: press Cmd-Shift-R in Supacode if the new worktree isn't in the sidebar yet."
