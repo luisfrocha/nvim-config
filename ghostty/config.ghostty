@@ -2,3 +2,7 @@ font-family = VictorMono Nerd Font
 font-family = Hack Nerd Font
 font-style = Italic
 font-size = 16
+
+# Scrollback buffer size in bytes (default ~10MB). Raised to ~2GB so long
+# logs are kept around. Ghostty has no truly "unlimited" option.
+scrollback-limit = 2000000000
