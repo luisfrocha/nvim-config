@@ -48,6 +48,11 @@ base=${2:-}
 wt_require_supacode
 wt_resolve_repo
 
+# Capture the worktree we're invoked from — Supacode copies ignored/untracked
+# files from here into the new worktree (its copy_source_path is the current
+# repo root for non-bare repos). Grab it before we create anything.
+source_worktree=$(git rev-parse --show-toplevel 2>/dev/null || true)
+
 # Default the base to the repo's mainline (origin/HEAD, e.g. branch-development)
 # when not given, so new worktrees branch off the trunk rather than whatever HEAD
 # happens to be. origin/HEAD is set at clone time; if it's missing, ask the remote
@@ -86,6 +91,71 @@ wt_supacode_lock_json() {
     printf '{"build":"%s","createdAt":%s,"owner":"supacode","version":"%s"}' "$build" "$now" "$version"
   else
     printf '{"createdAt":%s,"owner":"supacode"}' "$now"
+  fi
+}
+
+# Copy the source worktree's ignored + untracked files into the new worktree,
+# mirroring Supacode (copyIgnored + copyUntracked). Everything is copied as-is —
+# no exclusion heuristic — via APFS reflinks (cp -c): independent copy-on-write
+# clones that cost ~no disk until modified (real-copy fallback on non-APFS).
+# A big node_modules still takes ~30s of per-file cloning, so we render a real
+# progress bar: cp -v prints one line per item, so counting those lines against
+# an upfront item total gives an accurate percentage with no tree-polling.
+copy_worktree_extras() {
+  local src=$1 dst=$2 rel parent list total=0 tty=0
+  [ -t 1 ] && tty=1
+  list=$( {
+    git -C "$src" ls-files --others --ignored --exclude-standard --directory
+    git -C "$src" ls-files --others --exclude-standard --directory
+  } 2>/dev/null | sed -e 's:/*$::' -e '/^\.git$/d' -e '/^$/d' | LC_ALL=C sort -u )
+  [ -n "$list" ] || return 0
+
+  # Total items to copy (files + dirs) = the number of lines cp -v will emit.
+  while IFS= read -r rel; do
+    [ -n "$rel" ] || continue
+    [ -e "$src/$rel" ] || continue
+    total=$((total + $(find "$src/$rel" 2>/dev/null | wc -l)))
+  done <<EOF
+$list
+EOF
+  [ "$total" -gt 0 ] || return 0
+
+  # Stream each entry's copy with -v; the caller pipes this into the bar counter.
+  run_copies() {
+    local rel parent
+    while IFS= read -r rel; do
+      [ -n "$rel" ] || continue
+      [ -e "$src/$rel" ] || continue
+      parent=$(dirname "$rel")
+      mkdir -p "$dst/$parent"
+      if [ -d "$src/$rel" ]; then
+        cp -cRpv "$src/$rel" "$dst/$parent/" 2>/dev/null || cp -Rpv "$src/$rel" "$dst/$parent/" 2>/dev/null
+      else
+        cp -cpv "$src/$rel" "$dst/$rel" 2>/dev/null || cp -pv "$src/$rel" "$dst/$rel" 2>/dev/null
+      fi
+    done <<INNER
+$list
+INNER
+  }
+
+  if [ "$tty" -eq 1 ]; then
+    local width=30 done=0 pct filled bar
+    run_copies | {
+      while IFS= read -r _; do
+        done=$((done + 1))
+        if [ $((done % 500)) -eq 0 ] || [ "$done" -ge "$total" ]; then
+          pct=$((done * 100 / total)); [ "$pct" -gt 100 ] && pct=100
+          filled=$((pct * width / 100))
+          bar=$(printf '%*s' "$filled" '' | tr ' ' '#')
+          printf '\r  copying [%-*s] %3d%% (%d/%d)\033[K' "$width" "$bar" "$pct" "$done" "$total"
+        fi
+      done
+      bar=$(printf '%*s' "$width" '' | tr ' ' '#')
+      printf '\r  copied  [%s] 100%% (%d items) from %s\033[K\n' "$bar" "$total" "$(basename "$src")"
+    } || true
+  else
+    run_copies >/dev/null 2>&1 || true
+    echo "  copied $total ignored/untracked item(s) from $(basename "$src")"
   fi
 }
 
@@ -131,6 +201,12 @@ fi
 # Mark the worktree as Supacode-owned (same lock reason the supacode CLI writes)
 # so the app recognizes it as one of its worktrees.
 git worktree lock --reason "$(wt_supacode_lock_json)" "$target"
+
+# Bring over ignored/untracked files (.env, local config, etc.) from the source
+# worktree, as Supacode does.
+if [ -n "$source_worktree" ] && [ "$source_worktree" != "$target" ]; then
+  copy_worktree_extras "$source_worktree" "$target"
+fi
 
 echo "Done."
 echo "Note: press Cmd-Shift-R in Supacode if the new worktree isn't in the sidebar yet."
