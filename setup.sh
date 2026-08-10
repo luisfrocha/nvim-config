@@ -9,12 +9,16 @@ usage() {
 	code=${1:-1}
 	msg=$(
 		cat <<EOF
-Usage $PROGNAME [-i|--install] [-u|--update] [-l|--link] [-x|--uninstall] [-h|--help]
+Usage $PROGNAME [-i|--install] [-u|--update] [-l|--link] [-x|--uninstall] [-h|--help] [personal|work]
   -i, --install:   Install config files and dependencies (fresh machine)
   -u, --update:    git pull, upgrade brew packages, and re-link
   -l, --link:      Re-link symlinks only (no git pull, no brew) — fast
   -x, --uninstall: Remove config symlinks
   -h, --help:      Show this help
+
+  [personal|work]: Obsidian profile for this machine (-i/-u/-l only). Only
+                    needed once — remembered in ~/.config/obsidian-profile
+                    after that.
 EOF
 	)
 	if [ "$code" -eq 0 ]; then
@@ -40,13 +44,77 @@ install_packages() {
 		nvm \
 		pnpm \
 		luarocks \
-		git-flow
+		git-flow \
+		jq
 	brew install --cask \
 		font-hack-nerd-font \
 		font-victor-mono-nerd-font \
-		supacode
+		supacode \
+		obsidian
 	"$(brew --prefix)/opt/fzf/install"
 	pnpm add -g neovim prettier
+}
+
+OBSIDIAN_PROFILE_FILE="$HOME/.config/obsidian-profile"
+OBSIDIAN_CONFIG_REPO="git@github.com:luisfrocha/obsidian-config.git"
+OBSIDIAN_CONFIG_DIR="$HOME/Sites/obsidian-config"
+
+# Clone/pull the shared Obsidian settings repo and link it into this
+# machine's personal or work vault. Profile is passed in on first run and
+# then remembered in $OBSIDIAN_PROFILE_FILE so later -u/-l calls don't need
+# it again.
+setup_obsidian() {
+	profile=$1
+	do_pull=$2
+	if [ -z "$profile" ] && [ -f "$OBSIDIAN_PROFILE_FILE" ]; then
+		profile=$(cat "$OBSIDIAN_PROFILE_FILE")
+	fi
+	if [ -z "$profile" ]; then
+		echo "No Obsidian profile set yet — skipping. Re-run with: $PROGNAME $option personal|work" >&2
+		return 0
+	fi
+	case "$profile" in
+	personal | work) : ;;
+	*)
+		echo "Unknown Obsidian profile '$profile' (expected personal|work)" >&2
+		return 1
+		;;
+	esac
+	mkdir -p "$HOME/.config"
+	printf '%s' "$profile" >"$OBSIDIAN_PROFILE_FILE"
+
+	if [ -d "$OBSIDIAN_CONFIG_DIR/.git" ]; then
+		[ "$do_pull" = "yes" ] && (cd "$OBSIDIAN_CONFIG_DIR" && git pull)
+	elif [ "$do_pull" = "yes" ]; then
+		git clone "$OBSIDIAN_CONFIG_REPO" "$OBSIDIAN_CONFIG_DIR"
+	else
+		echo "obsidian-config not cloned yet — run $PROGNAME -i $profile first" >&2
+		return 1
+	fi
+
+	vault="$HOME/Sites/${profile}-vault"
+	mkdir -p "$vault"
+	"$OBSIDIAN_CONFIG_DIR/install.sh" "$vault"
+	link_obsidian_skills_plugin
+}
+
+# Declare the kepano/obsidian-skills marketplace + plugin in
+# ~/.claude/settings.json (merged in with jq so unrelated settings like
+# "model" survive). This is the documented non-interactive equivalent of
+# running `/plugin marketplace add` + `/plugin install` by hand — same keys
+# Claude Code itself writes when you run those interactively.
+link_obsidian_skills_plugin() {
+	settings="$HOME/.claude/settings.json"
+	mkdir -p "$HOME/.claude"
+	[ -f "$settings" ] || echo '{}' >"$settings"
+	tmp=$(mktemp)
+	jq '.extraKnownMarketplaces["obsidian-skills"] = {"source": {"source": "github", "repo": "kepano/obsidian-skills"}}
+		| .enabledPlugins["obsidian@obsidian-skills"] = true' \
+		"$settings" >"$tmp" && mv "$tmp" "$settings"
+	echo "Declared obsidian-skills plugin in $settings."
+	echo "If Claude Code doesn't pick it up on next launch, run this once in a Claude Code session:"
+	echo "  /plugin marketplace add kepano/obsidian-skills"
+	echo "  /plugin install obsidian@obsidian-skills"
 }
 
 # Symlink every entry of a repo source dir into a destination dir, then prune
@@ -112,6 +180,7 @@ case $option in
 	echo "Installing configs..."
 	install_packages
 	link_configs
+	setup_obsidian "$2" yes
 	echo "Installation complete."
 	;;
 -u | --update)
@@ -119,11 +188,13 @@ case $option in
 	git pull
 	install_packages
 	link_configs
+	setup_obsidian "$2" yes
 	echo "Update complete."
 	;;
 -l | --link)
 	echo "Re-linking symlinks..."
 	link_configs
+	setup_obsidian "$2" no
 	echo "Link complete."
 	;;
 -h | --help)
