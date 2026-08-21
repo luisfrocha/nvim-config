@@ -1,12 +1,13 @@
 ---
 name: radar-report
 description: >
-  Generate a self-contained HTML report of open radars for an Apple Radar component —
-  KPI tiles, classification tabs, per-classification groups, a sortable/filterable table,
-  expandable description threads, and distribution charts. Use when the user asks for a
-  radar report, an open-radars dashboard, a "report of open bugs" for a component, or
-  wants to refresh an existing one. Trigger on: "open radars report", "radar dashboard",
-  "generate the radars report", "report for <component>", "open bugs for my component".
+  Generate a self-contained HTML report of open radars — either for one Apple Radar component or
+  for every radar assigned to you across all components. KPI tiles, classification tabs, grouped
+  tables, sortable/filterable rows, expandable description threads, distribution charts. Use when
+  the user asks for a radar report, an open-radars dashboard, a "report of open bugs" for a
+  component, "all my open radars", or wants to refresh an existing one. Trigger on: "open radars
+  report", "radar dashboard", "generate the radars report", "report for <component>", "my open
+  radars", "all my radars", "what's on my plate in radar".
 ---
 
 # Radar Open-Radars Report
@@ -14,9 +15,19 @@ description: >
 Produces one HTML file in `~/Downloads`, self-contained (no external requests), light/dark,
 printable.
 
+## Two modes
+
+| Mode | Scope | Groups are | Extra filter |
+|---|---|---|---|
+| component | one `Component \| Version` | classification | — |
+| `--mine` | every open radar assigned to the account, all components | component | component select |
+
+Tabs are always the classification families (Bugs / Features & Enhancements / Tasks / All), so in
+`--mine` mode a component group spans families and tab filtering happens per row.
+
 ## Steps
 
-### 1. Resolve the component
+### 1. Resolve the component (component mode only)
 
 The component is a **name + version** pair, e.g. `WPC Analytics | iReporter` (id `1604118`).
 
@@ -33,16 +44,22 @@ component name. Reading `.component` off any radar in the component is the depen
 Strip the `<dataPolicy:radar>` block — it is appended after the JSON and is not valid JSON.
 
 ```bash
-radar search -c "<Component | Version>" --open-only --no-limit \
-  --fields-requested "id,title,state,substate,priority,classification,assignee,originator,createdAt,keywords,description" \
-  -o json 2>/dev/null | sed '/<dataPolicy:radar>/,/<\/dataPolicy:radar>/d' > /tmp/radars.json
+FIELDS="id,title,state,substate,priority,classification,component,assignee,originator,createdAt,keywords,description"
+
+# component mode:   SCOPE='-c "WPC Analytics | iReporter"'
+# --mine mode:      SCOPE='-a me'
+
+radar search $SCOPE --open-only --no-limit --fields-requested "$FIELDS" -o json 2>/dev/null \
+  | sed '/<dataPolicy:radar>/,/<\/dataPolicy:radar>/d' > /tmp/radars.json
 
 # all-time total, for the lead tile's caption
-radar search -c "<Component | Version>" --no-limit --ids-only -o json 2>/dev/null \
+radar search $SCOPE --no-limit --ids-only -o json 2>/dev/null \
   | sed '/<dataPolicy:radar>/,/<\/dataPolicy:radar>/d' \
   | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log((JSON.parse(s).data||[]).length))" \
   > /tmp/alltime.txt
 ```
+
+`component` must be in `--fields-requested` explicitly — `--mine` groups by it.
 
 **Field gotchas, all learned the hard way:**
 
@@ -62,16 +79,19 @@ radar search -c "<Component | Version>" --no-limit --ids-only -o json 2>/dev/nul
 
 ```bash
 node <skill-dir>/build-radar-report.mjs "<Component | Version>" [YYYY-MM-DD] [account-email]
+node <skill-dir>/build-radar-report.mjs --mine                  [YYYY-MM-DD] [account-email]
 ```
 
-Date defaults to today; account is optional and only appears in the coverage note.
+Date defaults to today. Account is optional; in `--mine` it also fills the header's assignee chip.
+Output is `~/Downloads/<slug>-open-radars-<date>.html`, where the slug is the component or `my`.
 
 ### 4. Report honestly
 
 `radar search` returns **only radars the querying account can read**, and gives no total, so
 restricted radars are absent rather than reported as withheld. The coverage note says
 "readable by <account>" for this reason — do not present the count as absolute. Someone with
-broader access will legitimately see more.
+broader access will legitimately see more. Counts also drift hour to hour as radars are filed and
+closed; do not try to reconcile against an older report.
 
 ## Radar data policy
 

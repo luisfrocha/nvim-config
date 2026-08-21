@@ -37,12 +37,17 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 // Usage: node build-radar-report.mjs "<Component | Version>" [YYYY-MM-DD] [account-email]
-const COMPONENT = process.argv[2] || 'WPC Analytics | iReporter';
+//        node build-radar-report.mjs --mine            [YYYY-MM-DD] [account-email]
+//
+// --mine reports every open radar assigned to the account, across all components. Rows are then
+// grouped by component instead of classification, since classification is already the tab axis.
+const MINE = process.argv[2] === '--mine';
+const COMPONENT = MINE ? null : process.argv[2] || 'WPC Analytics | iReporter';
 const REPORT_DATE = process.argv[3] || new Date().toISOString().slice(0, 10);
 const ACCOUNT = process.argv[4] || '';
 
 // Filename slug, e.g. "WPC Analytics | iReporter" -> "wpc-analytics-ireporter"
-const SLUG = COMPONENT.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const SLUG = MINE ? 'my' : COMPONENT.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
 const rows = JSON.parse(readFileSync('/tmp/radars.json', 'utf8')).data || [];
 const allTime = Number(readFileSync('/tmp/alltime.txt', 'utf8').trim()) || 0;
@@ -118,6 +123,7 @@ const radars = rows.map(row => {
     priorityFull: `P${priority} ${PRIORITY_LABEL[priority] ?? ''}`.trim(),
     classification,
     family: FAMILY[classification] ?? 'Bugs',
+    component: row.component ? `${row.component.name} | ${row.component.version}` : '—',
     assignee: personName(row.assignee),
     filedBy: personName(row.originator),
     filed: (row.createdAt ?? '').slice(0, 10),
@@ -144,6 +150,7 @@ const p1 = radars.filter(radar => radar.priority === 1);
 const p2 = radars.filter(radar => radar.priority === 2);
 const serious = radars.filter(radar => radar.classification === 'Serious Bug');
 const biggestClass = tally(radars, 'classification')[0] ?? ['—', 0];
+const componentCount = new Set(radars.map(radar => radar.component)).size;
 
 const AGE_BUCKETS = [
   ['0–7 days', age => age <= 7], ['8–30 days', age => age > 7 && age <= 30],
@@ -197,7 +204,7 @@ const rowHtml = radar => {
 
   return `<tr class="r ${stripe}" data-id="${radar.id}" data-fam="${esc(radar.family)}"
   data-pri="${radar.priorityLabel}" data-state="${esc(radar.state)}" data-asg="${esc(radar.assignee)}"
-  data-cls="${esc(radar.classification)}" data-search="${esc(search)}">
+  data-cls="${esc(radar.classification)}" data-comp="${esc(radar.component)}" data-search="${esc(search)}">
   <td class="tog"><button class="tw${radar.thread.length ? '' : ' none'}" aria-label="${radar.thread.length ? 'Show description' : 'No description'}"><span>&#9654;</span></button></td>
   <td class="num"><a href="rdar://problem/${radar.id}">${radar.id}</a></td>
   <td><span class="chip ${radar.priority <= 2 ? (radar.priority === 1 ? 'c-danger' : 'c-warning') : 'c-neutral'}" title="${esc(radar.priorityFull)}">${radar.priorityLabel}</span></td>
@@ -214,13 +221,20 @@ ${entries}
 </td></tr>`;
 };
 
-const allGroups = CLASS_ORDER.filter(cls => radars.some(radar => radar.classification === cls))
-  .map(cls => {
-    const members = radars
-      .filter(radar => radar.classification === cls)
-      .sort((left, right) => left.priority - right.priority || (right.age ?? 0) - (left.age ?? 0));
-    return `<div class="sec grp" data-grp="${esc(cls)}" data-fam="${esc(FAMILY[cls] ?? 'Bugs')}">
-  <h2>${esc(cls)}<span class="n">${members.length}</span></h2>
+// Groups: classification for a single component, component for --mine. In --mine a component
+// group spans several families, so tab filtering is done per row (see render) rather than by a
+// group-level data-fam — which also keeps both modes on one code path.
+const GROUP_BY = MINE ? 'component' : 'classification';
+const GROUP_ORDER = MINE
+  ? tally(radars, 'component').map(([name]) => name) // busiest component first
+  : CLASS_ORDER.filter(cls => radars.some(radar => radar.classification === cls));
+
+const allGroups = GROUP_ORDER.map(name => {
+  const members = radars
+    .filter(radar => radar[GROUP_BY] === name)
+    .sort((left, right) => left.priority - right.priority || (right.age ?? 0) - (left.age ?? 0));
+  return `<div class="sec grp" data-grp="${esc(name)}">
+  <h2>${esc(name)}<span class="n">${members.length}</span></h2>
   <div class="card"><table class="tbl"><thead><tr>
 ${COLUMNS.map(([label, key]) => key === 'tog'
       ? '    <th class="tog"></th>'
@@ -263,7 +277,7 @@ const html = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(COMPONENT)} Open Radars</title>
+<title>${MINE ? "My Open Radars" : esc(COMPONENT)}</title>
 <!--
   <dataSource:radar>
   Derived from Apple Radar data. Access to this file must be restricted to at least the
@@ -301,10 +315,10 @@ table.tbl { width: 100%; border-collapse: collapse }
 
   <div class="head">
     <div>
-      <h1>${esc(COMPONENT)} &middot; Open Radars</h1>
-      <div class="crumb">Component <code>${esc(COMPONENT)}</code> &nbsp;&middot;&nbsp;
+      <h1>${MINE ? "My Open Radars" : `${esc(COMPONENT)} &middot; Open Radars`}</h1>
+      <div class="crumb">${MINE ? `Assignee <code>${esc(ACCOUNT || "me")}</code>` : `Component <code>${esc(COMPONENT)}</code>`} &nbsp;&middot;&nbsp;
         Scope <code>state != Closed</code> &nbsp;&middot;&nbsp; ${esc(REPORT_DATE)}
-        &nbsp;&middot;&nbsp; Source <code>radar search --open-only</code></div>
+        &nbsp;&middot;&nbsp; Source <code>radar search ${MINE ? "-a me" : "-c <component>"} --open-only</code></div>
     </div>
     <button id="theme" class="icon-btn no-print" title="Toggle light / dark" aria-label="Toggle light or dark mode">
       <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
@@ -313,7 +327,7 @@ table.tbl { width: 100%; border-collapse: collapse }
   </div>
 
   <div class="kpis lead-hero">
-    ${tile('Open radars', radars.length, `of ${allTime.toLocaleString('en-US')} all-time in this component`, 'accent-neutral', true)}
+    ${tile('Open radars', radars.length, MINE ? `across ${componentCount} component${componentCount === 1 ? '' : 's'}` : `of ${allTime.toLocaleString('en-US')} all-time in this component`, 'accent-neutral', true)}
     ${tile('Bugs', bugs.length, `${serious.length} classed Serious`, 'accent-danger')}
     ${tile('Features', feats.length, 'Feature (New) plus Enhancement', 'accent-info')}
     ${tile('Tasks', tasks.length, biggestClass[0] === 'Task' ? 'largest single bucket' : `${biggestClass[0]} is larger`, 'accent-warning')}
@@ -332,6 +346,7 @@ table.tbl { width: 100%; border-collapse: collapse }
     <select id="fstate">${options(radars.map(radar => radar.state), 'All states', { order: STATE_ORDER })}</select>
     <select id="fasg">${options(radars.map(radar => radar.assignee), 'All assignees')}</select>
     <select id="fcls">${options(radars.map(radar => radar.classification), 'All classifications', { order: CLASS_ORDER, counts: true })}</select>
+    ${MINE ? `<select id="fcomp">${options(radars.map(radar => radar.component), 'All components', { counts: true })}</select>` : ''}
     <button id="expand" class="btn">Expand all</button>
     <button id="reset" class="btn">Reset filters</button>
     <span id="count" class="count"></span>
@@ -363,7 +378,7 @@ ${allGroups}
 
   <div class="callout info">
     <b>Source and handling.</b> Generated ${esc(REPORT_DATE)} from Apple Radar via
-    <code>radar search -c "${esc(COMPONENT)}" --open-only</code>. Radar data is tagged
+    <code>radar search ${MINE ? "-a me" : `-c "${esc(COMPONENT)}"`} --open-only</code>. Radar data is tagged
     <code>&lt;dataSource:radar&gt;</code>: permitted for triage, understanding and resolving bugs, and
     Radar automation; it must not be used to make decisions about people. Restrict access to this file to
     at least the level required to read the source radars.
@@ -387,6 +402,9 @@ const matches = row => {
   if ($('fstate').value && row.dataset.state !== $('fstate').value) return false;
   if ($('fasg').value && row.dataset.asg !== $('fasg').value) return false;
   if ($('fcls').value && row.dataset.cls !== $('fcls').value) return false;
+  // Only rendered in --mine mode, so guard on existence rather than assuming it.
+  const comp = $('fcomp');
+  if (comp && comp.value && row.dataset.comp !== comp.value) return false;
   return true;
 };
 
@@ -400,9 +418,11 @@ function render() {
   let total = 0;
 
   document.querySelectorAll('.grp').forEach(group => {
-    const inTab = !charts && (activeTab === 'All' || group.dataset.fam === activeTab);
     let any = false;
+    let visibleHere = 0;
     group.querySelectorAll('tr.r').forEach(row => {
+      // Per row, not per group: a --mine component group spans several families.
+      const inTab = !charts && (activeTab === 'All' || row.dataset.fam === activeTab);
       const ok = inTab && matches(row);
       row.style.display = ok ? '' : 'none';
       const detail = detailOf.get(row);
@@ -410,9 +430,12 @@ function render() {
       detail.classList.toggle('show', open);
       detail.style.display = open ? '' : 'none';
       row.classList.toggle('open', open);
-      if (inTab) { total++; if (ok) { shown++; any = true; } }
+      if (inTab) { total++; if (ok) { shown++; any = true; visibleHere++; } }
     });
-    group.style.display = inTab && any ? '' : 'none';
+    group.style.display = any ? '' : 'none';
+    // The heading count tracks what's actually shown, so it stays honest under a filter.
+    const badge = group.querySelector('h2 .n');
+    if (badge) badge.textContent = visibleHere;
   });
 
   $('count').innerHTML = charts
@@ -480,7 +503,7 @@ document.addEventListener('click', event => {
   render();
 });
 
-for (const id of ['q', 'fpri', 'fstate', 'fasg', 'fcls']) $(id).addEventListener('input', render);
+for (const id of ['q', 'fpri', 'fstate', 'fasg', 'fcls', 'fcomp']) $(id)?.addEventListener('input', render);
 
 $('expand').addEventListener('click', () => {
   expandAll = !expandAll;
@@ -491,7 +514,7 @@ $('expand').addEventListener('click', () => {
 
 $('reset').addEventListener('click', () => {
   $('q').value = '';
-  for (const id of ['fpri', 'fstate', 'fasg', 'fcls']) $(id).value = '';
+  for (const id of ['fpri', 'fstate', 'fasg', 'fcls', 'fcomp']) { const el = $(id); if (el) el.value = ''; }
   expandAll = false; openIds.clear();
   $('expand').textContent = 'Expand all';
   render();
