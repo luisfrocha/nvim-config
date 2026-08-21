@@ -93,6 +93,18 @@ stylua nvim/lua/
 
 Configuration is in `nvim/stylua.toml`.
 
+## Scope Destructive Actions Narrowly
+
+**Any destructive action — delete, clear, reset, overwrite, drop, revoke, `rm`, `git checkout --`, truncate — must be isolated to only the specific items that should be touched.** Never suggest a broad sweep or a "nuclear option" that wipes everything available in the namespace, not even as a labelled fallback offered alongside the narrow fix. Users reach for the simpler-looking command.
+
+This exists because a broad `clear()`, offered as a fallback while a diagnosis was still incomplete, destroyed unrelated settings that could not be restored — the only snapshot taken beforehand had been *filtered* rather than complete.
+
+1. **Finish the diagnosis before proposing any removal.** If the exact target isn't known yet, the next step is another read, not a wider delete.
+2. **Name exact targets in the command.** `removeItem('exact-key')`, explicit file paths, `DELETE ... WHERE id IN (...)`. Never globs, regexes, `clear()`, `*`, `--all`, or truncate as a shortcut for "I'm not sure which one."
+3. **A filtered dump is not a backup.** Capture an unfiltered snapshot of anything about to be destroyed, and state plainly that the snapshot is what makes the action reversible.
+4. **Prefer repair over removal.** Overwrite a bad value with a valid one rather than deleting the record, when both would fix it.
+5. **If a broad action truly is the only option**, say exactly what will be lost, confirm first, and do not present it as an equal-footing alternative to a narrow fix.
+
 ## CLAUDE.md Maintenance
 
 - **Propagating updates**: When a rule or guideline is added or changed in an individual project's CLAUDE.md — whether it's already generic or could be made generic — generalize it if needed, add or update it in `~/.claude/CLAUDE.md`, and then disseminate to all other project CLAUDE.md files (with any project-specific values like commands filled in per project).
