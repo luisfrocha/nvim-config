@@ -334,12 +334,6 @@ table.tbl { width: 100%; border-collapse: collapse }
     ${tile('P1', p1.length, `${p2.length} at P2`, 'accent-danger')}
   </div>
 
-  <div class="callout">
-    <b>Coverage note.</b> Covers the ${radars.length} open radars readable by <code>${esc(ACCOUNT)}</code>.
-    Radars restricted from this account are absent from the result set rather than reported as withheld,
-    so these are readable-by totals, not absolute counts for the component.
-  </div>
-
   <div class="filters no-print">
     <input id="q" type="search" placeholder="Search title, description, rdar ID, assignee">
     <select id="fpri">${options(radars.map(radar => radar.priorityLabel), 'All priorities', { order: PRIORITY_ORDER })}</select>
