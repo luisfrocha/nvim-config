@@ -115,3 +115,10 @@ a trailing `.asset-screenshot > img`, or `.annotated-img` with absolutely-positi
 - `table.doc-table` — th/td table in the card palette.
 - `.tag.red`, `.banner.danger`, `.card h4`, `.card ul.plain` / `ol.plain` — gaps the original
   lacked. Reuse these; don't redefine them.
+- `.tag { white-space: nowrap; }` — chips never wrap mid-label.
+- `.two-col { margin-bottom: 20px; }` — the original added this inline on every `.two-col`; made a
+  default so a two-col row isn't flush against the next block.
+- `table.doc-table.keyed` — add `keyed` to a `doc-table` whose first column is a short label, to keep
+  that column on one line. Don't use it when the first column holds long text/`<code>` (it'd overflow).
+- `<strong>Label</strong><span class="sub">detail</span>` inside a `doc-table` cell — puts secondary
+  text on its own muted line below the label. The `.sub` line wraps even in a `keyed` first column.
