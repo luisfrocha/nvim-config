@@ -120,7 +120,7 @@ When the user asks to "commit" changes or "create a PR", this means the full wor
 Note: This is a Neovim config — there are no automated tests to run.
 
 When providing a commit message:
-1. Subject line has no bullet point
+1. Subject line has no bullet point, and is followed by exactly one blank line before the first description item (without it, git folds the whole message into the subject)
 2. Each description item starts with "- " (dash and space)
 3. Each description item is a single line (no line breaks within an item)
 4. Only include changes from currently staged files
