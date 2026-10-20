@@ -51,6 +51,13 @@ better fit. This skill is for narrative documentation organised into tabbed sect
 
 5. **Write to `~/Downloads/<slug>.html`** and tell the user the path. Do not open it yourself.
 
+**Shortcut for steps 1–5: `build_page.py`.** Put the page's content in a throwaway script (e.g. in
+`/tmp`), import `build_page` from this skill dir, and pass an ordered list of section dicts. It fills
+the placeholders, generates the tabs and prev/next links from the list order, runs the "Verify before
+delivering" checks below, and only writes the file if they pass. Helpers `code`, `table`, `chips` and
+`banner` emit the reference.md patterns. Usage is in the module docstring. Keep page content out of
+this skill dir; the module is generic.
+
 ## Rules
 
 - **Never edit the template's `<style>` or `<script>`.** Only replace placeholders and compose
@@ -73,3 +80,4 @@ better fit. This skill is for narrative documentation organised into tabbed sect
 |---|---|
 | `template.html` | the page shell: original CSS/JS verbatim + marked additions + 7 placeholders |
 | `reference.md` | every stylesheet class, and the HTML pattern for each section/block type |
+| `build_page.py` | assembles a page from a list of section dicts and verifies it before writing |
