@@ -1,6 +1,6 @@
 ---
 name: remove-supacode-tree
-description: Remove the Supacode git worktree for a branch (Git Tower naming pattern <repo>-<branch-with-slashes-as-dashes>). Use when the user says "/remove-supacode-tree <branch>", or asks to remove/delete a Supacode worktree or work tree for a branch.
+description: Remove the Supacode git worktree for a branch (Git Tower naming pattern <repo>-<branch-with-slashes-as-dashes>), guarded against losing work, and report what every worktree/branch would lose. Use when the user says "/remove-supacode-tree <branch>", asks to remove/delete a Supacode worktree or work tree, or asks which worktrees/branches are safe to delete or would be orphaned.
 ---
 
 # Remove Supacode Worktree
@@ -12,37 +12,65 @@ located alongside the main repo.
 Example: branch `hotfix/dashboard-activate-update` in repo `~/Sites/vistara-bi-ads-ui`
 → removes the worktree at `~/Sites/vistara-bi-ads-ui-hotfix-dashboard-activate-update`.
 
+## What deleting actually does (verified 2026-10-12, Supacode 0.10.8)
+
+- Removes the folder and the git worktree registration. **Uncommitted and untracked files are
+  gone for good** — `/private/tmp/supacode-worktree-trash/` is transient, not a recycle bin.
+- **Keeps the local branch**: `~/.supacode/settings.json` has
+  `global.deleteBranchOnDeleteWorktree = false`. Deleting the branch is a separate step (log
+  its tip SHA in `~/.claude/deleted-refs.log` first).
+- Runs the repository's **Delete Script** first; a **non-zero exit cancels the delete** (both
+  the sidebar entry and the folder survive).
+
+## The scripts (all in `scripts/`, on PATH via nvim-config `setup.sh --link`)
+
+| Script | What it does |
+|---|---|
+| `supacode-wt-rm [--force] <branch>` | Runs `wt-guard --check`, refuses if anything would be lost, otherwise asks Supacode to delete. `--force` deletes anyway and the override is logged. |
+| `wt-guard [path]` | The Delete Script hook. Exit 1 with a list of what would be lost; exit 0 and append to `~/.claude/deleted-refs.log`. `--check` audits without logging. |
+| `wt-report [--all] [--no-gh] [repo]` | Read-only: every worktree's branch, PR, push state, mainline status and guard verdict; orphaned `<repo>-*` folders; separate clones; local branches whose commits are on no remote. |
+| `wt-report --orphan <folder> <branch>` | What a folder whose worktree registration was pruned holds that the branch lacks (throwaway index; the repo's index is untouched). |
+
+What the guard treats as "would be lost" (shared logic in `claude/common/worktree-audit.sh`):
+tracked changes (except a CLAUDE.md whose added lines all exist in the mainline's CLAUDE.md);
+untracked non-ignored files with no byte-identical copy at the same path in another worktree;
+top-level ignored `.env*` files with no identical copy elsewhere; commits on no remote branch.
+Mainline is `origin/main`, else `origin/master`, else `origin/HEAD`. The "N of M added lines not
+in mainline" hint is a line-matching heuristic for deciding, never a reason to allow the delete.
+
+## Setting up the hook (once per repository, in the Supacode UI)
+
+Settings → *<repository>* → Scripts → **Delete Script**: `"$HOME/.local/bin/wt-guard"`.
+`wt-report` prints `Supacode Delete Script: NOT SET` for any repo still missing it. Until it is
+set, deleting from the sidebar is unguarded; `supacode-wt-rm` still guards and logs.
+
 ## How to run
 
-The user provides the branch name as an argument, e.g.
-`/remove-supacode-tree hotfix/old-branch`.
+The user provides the branch name, e.g. `/remove-supacode-tree hotfix/old-branch`.
 
-IMPORTANT: the `supacode` CLI only works from a terminal Supacode itself spawned
-(it needs `$SUPACODE_SOCKET_PATH`, which is empty in iTerm and in Claude). It
-fails from Claude with "Operation not permitted" (sandbox on OR off). So do NOT
-execute the helper yourself — give the user the exact command to paste into a
-Supacode terminal tab:
+IMPORTANT: the `supacode` CLI only works from a terminal Supacode itself spawned. Its socket
+refuses connections from Claude's Bash tool with "Operation not permitted" — with the sandbox on
+AND off (re-verified 2026-10-12). Do NOT execute `supacode-wt-rm` yourself; give the user:
 
 ```sh
 supacode-wt-rm <branch>
 ```
 
-The script computes the worktree directory from the branch, percent-encodes its
-path into the Supacode worktree ID, and calls `supacode worktree delete`.
+`wt-guard --check <path>` and `wt-report` are read-only and DO run from Claude — use them to
+show the user what a deletion would lose before handing over the command. `wt-report` fetches
+first; when a fetch fails it says so at the top of that repo, and its "on no remote" findings
+then rest on stale remote refs.
 
 ## Rules
 
 - Pass the user's branch argument exactly as given — do NOT pre-convert slashes.
 - If the user gave no branch argument, ask for one instead of guessing.
-- Do NOT run `supacode-wt-rm` / `supacode` yourself — it fails from Claude/iTerm.
-  Print the command for the user to run in a Supacode terminal.
-- This is destructive. Verified behavior: `supacode worktree delete` fully tears
-  down the worktree — it removes the on-disk directory, the git worktree
-  registration, AND the local branch. So it will DELETE the branch; warn the user
-  before presenting the command if the branch may have unmerged/unpushed work.
-- The script refuses to act if no matching worktree directory exists, and refuses
-  to remove the main worktree; if the user shares those errors, relay them rather
-  than working around them.
-- The helper lives at `scripts/supacode-wt-rm` in this skill and is also symlinked
-  onto PATH by the nvim-config `setup.sh`. If the user reports `command not found`,
-  tell them to run `./setup.sh --link` in `~/Sites/nvim-config`.
+- Before presenting the command, run `wt-guard --check` on the target and show the findings. If
+  it would refuse, say what is at risk; suggest `--force` only after the user has seen the list.
+- Do NOT run `supacode-wt-rm` / `supacode` yourself.
+- The local branch remains afterwards. Offer to delete it only if it is contained in the mainline
+  or a remote branch, and log its tip SHA first (global CLAUDE.md, destructive-actions rule 6).
+- The script refuses if no matching worktree directory exists, and refuses to remove the main
+  worktree; relay those errors rather than working around them.
+- If the user reports `command not found`, tell them to run `./setup.sh --link` in
+  `~/Sites/nvim-config`.

@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+#
+# wt-report — everything you would need to decide what to keep, across a repo's worktrees and
+# branches. Read-only: it never changes a worktree, a branch or the index.
+#
+# For each registered worktree: branch, PR, push state, whether it reached the mainline, and the
+# wt-guard verdict (what deleting the folder would lose). Then what no worktree listing shows:
+#   - orphaned folders next to the repo: a <repo>-* folder whose worktree registration is gone
+#     (its .git file points at metadata that no longer exists), a separate clone, or no git at all
+#   - local branches with no worktree whose commits exist on no remote branch
+#   - whether the repo's Supacode Delete Script is wt-guard
+#
+# Usage:
+#   wt-report [--no-gh] [repo-path ...]   default: the repo containing the current directory
+#   wt-report --all [--no-gh]             every repository registered in Supacode
+#   wt-report --orphan <folder> <branch>  what an orphaned worktree folder holds that <branch> lacks
+#
+# --no-gh skips PR lookups (offline, or faster).
+#
+# --orphan compares the folder's files with the branch through a throwaway index in $TMPDIR, so the
+# repo's own index is never touched. It reports files changed or added relative to the branch; a
+# folder whose branch moved on since will also show the branch's newer changes as "differences".
+
+set -uo pipefail
+
+self=${BASH_SOURCE[0]}
+while [ -L "$self" ]; do
+  target=$(readlink "$self")
+  case $target in
+  /*) self=$target ;;
+  *) self=$(dirname "$self")/$target ;;
+  esac
+done
+script_dir=$(cd "$(dirname "$self")" && pwd)
+# shellcheck source=/dev/null
+. "$script_dir/../../../common/worktree-audit.sh"
+
+SUPACODE_SETTINGS=${SUPACODE_SETTINGS:-$HOME/.supacode/settings.json}
+
+# --orphan <folder> <branch>: files in the folder that differ from, or are absent in, the branch.
+inspect_orphan() {
+  local folder=$1 branch=$2 gitfile common idx
+  folder=$(cd "$folder" && pwd -P) || return 1
+  gitfile=$(sed -n 's/^gitdir: //p' "$folder/.git" 2>/dev/null)
+  # The pruned registration lived at <common-dir>/worktrees/<name>; the common dir is two levels up.
+  common=$(dirname "$(dirname "$gitfile")")
+  [ -d "$common" ] || {
+    echo "wt-report: cannot find the repo for $folder (.git points at $gitfile)" >&2
+    return 1
+  }
+  idx=$(mktemp)
+  GIT_INDEX_FILE=$idx git --git-dir="$common" --work-tree="$folder" read-tree "$branch" || {
+    rm -f "$idx"
+    return 1
+  }
+  echo "── $folder vs $branch ($(git --git-dir="$common" log -1 --format='%h %ad' --date=short "$branch"))"
+  echo "Files present in the folder and different from the branch (lines +added/-removed):"
+  GIT_INDEX_FILE=$idx git --git-dir="$common" --work-tree="$folder" diff --numstat --diff-filter=M |
+    awk '{printf "  +%s/-%s  %s\n", $1, $2, $3} END {if (NR == 0) print "  none"}'
+  echo "Files in the folder that the branch does not track (ignored files excluded):"
+  GIT_INDEX_FILE=$idx git --git-dir="$common" --work-tree="$folder" ls-files --others --exclude-standard |
+    awk '{print "  " $0} END {if (NR == 0) print "  none"}'
+  local missing
+  missing=$(GIT_INDEX_FILE=$idx git --git-dir="$common" --work-tree="$folder" diff --name-only --diff-filter=D | wc -l | tr -d ' ')
+  echo "Tracked files missing from the folder: $missing$([ "$missing" -gt 0 ] && echo ' (a partly deleted folder: missing files are not lost work)')"
+  rm -f "$idx"
+}
+
+if [ "${1:-}" = "--orphan" ]; then
+  [ "$#" -eq 3 ] || {
+    echo "Usage: wt-report --orphan <folder> <branch>" >&2
+    exit 1
+  }
+  inspect_orphan "$2" "$3"
+  exit $?
+fi
+use_gh=1
+all=0
+repos=()
+for arg in "$@"; do
+  case $arg in
+  --no-gh) use_gh=0 ;;
+  --all) all=1 ;;
+  -h | --help)
+    sed -n '3,19p' "$self" | sed 's/^# \{0,1\}//'
+    exit 0
+    ;;
+  *) repos+=("$arg") ;;
+  esac
+done
+
+# Supacode repository paths, one per line (python3 -I: stdlib only, ignores cwd and env).
+supacode_repos() {
+  python3 -I -c 'import json,sys; print("\n".join(json.load(open(sys.argv[1])).get("repositories", {})))' \
+    "$SUPACODE_SETTINGS" 2>/dev/null
+}
+
+# The repo's configured Delete Script, or empty.
+supacode_delete_script() {
+  python3 -I -c 'import json,sys; r=json.load(open(sys.argv[1])).get("repositories", {}).get(sys.argv[2], {}); print(r.get("deleteScript", "") or "")' \
+    "$SUPACODE_SETTINGS" "$1" 2>/dev/null
+}
+
+if [ "$all" -eq 1 ]; then
+  while IFS= read -r r; do [ -n "$r" ] && repos+=("$r"); done <<EOF
+$(supacode_repos)
+EOF
+elif [ "${#repos[@]}" -eq 0 ]; then
+  repos=("$PWD")
+fi
+
+report_repo() {
+  local input=$1 main_root name parent mainline prs wt branch pr sync verdict findings blocks line \
+    folder gitfile inwt b uniq last hook
+  main_root=$(dirname "$(git -C "$input" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)") || {
+    echo "wt-report: $input is not a git repository" >&2
+    return 1
+  }
+  main_root=$(cd "$main_root" && pwd -P)
+  name=$(basename "$main_root")
+  parent=$(dirname "$main_root")
+  # Report git's own reason; drop OpenSSH's post-quantum advisory, which is printed on success too.
+  line=$(git -C "$main_root" fetch -q --prune origin 2>&1 | grep -v -e '^\*\*' -e '^$') ||
+    true
+  mainline=$(wta_mainline "$main_root")
+
+  echo "════════ $name  (mainline: $mainline)"
+  if [ -n "$line" ]; then
+    echo "FETCH FAILED — every 'on no remote' / 'not in $mainline' below uses remote refs from the last"
+    echo "  successful fetch: $(printf '%s' "$line" | head -2 | paste -sd' ' -)"
+  fi
+  hook=$(supacode_delete_script "$main_root")
+  case $hook in
+  *wt-guard*) echo "Supacode Delete Script: wt-guard ✓" ;;
+  '') echo "Supacode Delete Script: NOT SET — deleting a worktree from the sidebar is unguarded" ;;
+  *) echo "Supacode Delete Script: '$hook' (not wt-guard)" ;;
+  esac
+
+  prs=$(mktemp)
+  if [ "$use_gh" -eq 1 ]; then
+    (cd "$main_root" && gh pr list --state all --limit 1000 --json number,state,headRefName \
+      --jq '.[] | "\(.headRefName)\t#\(.number) \(.state)"' >"$prs" 2>/dev/null) ||
+      echo "  (gh PR lookup failed — PR column shows ?)"
+  fi
+
+  echo
+  echo "── Worktrees  (KEEP = deleting the folder would lose the BLOCK items; MAIN = the main checkout)"
+  while IFS= read -r wt; do
+    [ -z "$wt" ] && continue
+    branch=$(git -C "$wt" branch --show-current 2>/dev/null)
+    if [ "$use_gh" -eq 1 ] && [ -n "$branch" ]; then
+      pr=$(awk -F'\t' -v b="$branch" '$1==b{print $2}' "$prs" | head -2 | paste -sd, -)
+      [ -s "$prs" ] || pr='?'
+    else
+      pr=-
+    fi
+    if [ -n "$branch" ] && git -C "$wt" rev-parse -q --verify "origin/$branch" >/dev/null; then
+      sync=$(git -C "$wt" rev-list --left-right --count "$branch...origin/$branch" | awk '{printf "pushed (+%s/-%s vs origin)", $1, $2}')
+    else
+      sync="no origin/${branch:-<detached>}"
+    fi
+    if findings=$(wta_audit "$wt"); then verdict=ok; else verdict=KEEP; fi
+    # The main checkout is never removed by Supacode; its findings are still worth seeing, but
+    # "KEEP" would read as a deletion decision that does not exist.
+    [ "$(cd "$wt" && pwd -P)" = "$main_root" ] && verdict=MAIN
+    printf '%-4s %s\n' "$verdict" "${wt#"$parent"/}"
+    printf '       branch %s | PR %s | %s\n' "${branch:-<detached>}" "${pr:-none}" "$sync"
+    printf '%s\n' "$findings" | grep -E '^INFO: (HEAD is contained|[0-9]+ commit\(s\) not in)' | sed 's/^INFO: /       /'
+    blocks=$(printf '%s\n' "$findings" | grep -c '^BLOCK:')
+    printf '%s\n' "$findings" | sed -n 's/^BLOCK: /       ✗ /p' | head -8
+    [ "$blocks" -gt 8 ] && echo "       ✗ … and $((blocks - 8)) more (wt-guard --check $wt)"
+  done <<EOF
+$(wta_worktrees "$main_root")
+EOF
+
+  echo
+  echo "── Folders next to the repo that are not registered worktrees"
+  inwt=$(wta_worktrees "$main_root" | while IFS= read -r p; do (cd "$p" 2>/dev/null && pwd -P); done)
+  local found=0
+  for folder in "$parent/$name"-*; do
+    [ -d "$folder" ] || continue
+    folder=$(cd "$folder" && pwd -P)
+    printf '%s\n' "$inwt" | grep -qxF -- "$folder" && continue
+    found=1
+    if [ -f "$folder/.git" ]; then
+      gitfile=$(sed -n 's/^gitdir: //p' "$folder/.git")
+      if [ -e "$gitfile" ]; then
+        echo "  ? ${folder#"$parent"/}: worktree of another repo ($gitfile)"
+      else
+        echo "  ✗ ${folder#"$parent"/}: ORPHANED worktree folder — registration gone, so git can no longer show"
+        echo "      its changes; $(du -sh "$folder" 2>/dev/null | cut -f1). Compare it with its branch before deleting:"
+        echo "      wt-report --orphan $folder <branch>"
+      fi
+    elif [ -d "$folder/.git" ]; then
+      echo "  • ${folder#"$parent"/}: separate clone on $(git -C "$folder" branch --show-current 2>/dev/null);" \
+        "$(git -C "$folder" status --porcelain 2>/dev/null | wc -l | tr -d ' ') uncommitted path(s)"
+      git -C "$folder" for-each-ref --format='%(refname:short)' refs/heads | while IFS= read -r b; do
+        uniq=$(git -C "$folder" rev-list --count "$b" --not --remotes)
+        [ "$uniq" -gt 0 ] && echo "      ✗ $b: $uniq commit(s) on no remote branch, last $(git -C "$folder" log -1 --format=%ad --date=short "$b")"
+      done
+    elif [ -z "$(ls -A "$folder")" ]; then
+      echo "  • ${folder#"$parent"/}: empty folder"
+    else
+      echo "  ? ${folder#"$parent"/}: not a git checkout — $(du -sh "$folder" 2>/dev/null | cut -f1)," \
+        "newest file $(find "$folder" -path '*/node_modules' -prune -o -type f -print0 2>/dev/null | xargs -0 stat -f '%Sm' -t '%F' 2>/dev/null | sort | tail -1)." \
+        "Nothing can tell whether it is unique."
+    fi
+  done
+  [ "$found" -eq 0 ] && echo "  none"
+
+  echo
+  echo "── Local branches with no worktree whose commits are on no remote branch"
+  inwt=$(git -C "$main_root" worktree list --porcelain | sed -n 's#^branch refs/heads/##p')
+  found=0
+  while IFS= read -r b; do
+    [ -z "$b" ] && continue
+    printf '%s\n' "$inwt" | grep -qxF -- "$b" && continue
+    uniq=$(git -C "$main_root" rev-list --count "$b" --not --remotes)
+    [ "$uniq" -eq 0 ] && continue
+    found=1
+    last=$(git -C "$main_root" log -1 --format=%ad --date=short "$b")
+    echo "  ✗ $b: $uniq commit(s) on no remote, last $last"
+  done <<EOF
+$(git -C "$main_root" for-each-ref --format='%(refname:short)' refs/heads)
+EOF
+  [ "$found" -eq 0 ] && echo "  none"
+
+  line=$(git -C "$main_root" worktree list --porcelain | grep -c '^prunable')
+  [ "$line" -gt 0 ] && echo && echo "── $line prunable worktree registration(s): git -C $main_root worktree list --porcelain | grep -B3 prunable"
+  rm -f "$prs"
+  echo
+}
+
+for r in "${repos[@]}"; do
+  report_repo "$r"
+done

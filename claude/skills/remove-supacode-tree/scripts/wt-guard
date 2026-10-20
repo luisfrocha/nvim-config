@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+#
+# wt-guard — refuse to delete a worktree that holds work found nowhere else.
+#
+# Set it as each repository's Supacode Delete Script (Settings → <repo> → Scripts → Delete
+# Script: `wt-guard`). Supacode runs it before deleting a worktree, from the sidebar or via
+# `supacode worktree delete`, and a non-zero exit cancels the delete (verified 2026-10-12 on
+# Supacode 0.10.8: the worktree and its folder both survived an `exit 1` delete script).
+#
+# Exit 0  → nothing unique would be lost; the deletion is logged to ~/.claude/deleted-refs.log.
+# Exit 1  → lists what would be lost; Supacode keeps the worktree.
+#
+# To delete anyway: `supacode-wt-rm --force <branch>`, or `touch <worktree>/.supacode-allow-delete`
+# and delete again. The override is logged with the findings it overrode.
+#
+# Usage:
+#   wt-guard [worktree-path]      (default: $SUPACODE_WORKTREE_PATH, then the current directory)
+#   wt-guard --check [path]       audit only: print findings, never log, exit 1 if anything would be lost
+
+set -uo pipefail
+
+self=${BASH_SOURCE[0]}
+while [ -L "$self" ]; do
+  target=$(readlink "$self")
+  case $target in
+  /*) self=$target ;;
+  *) self=$(dirname "$self")/$target ;;
+  esac
+done
+script_dir=$(cd "$(dirname "$self")" && pwd)
+# shellcheck source=/dev/null
+. "$script_dir/../../../common/worktree-audit.sh"
+
+check_only=0
+if [ "${1:-}" = "--check" ]; then
+  check_only=1
+  shift
+fi
+if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+  sed -n '3,19p' "$self" | sed 's/^# \{0,1\}//'
+  exit 0
+fi
+
+wt=${1:-${SUPACODE_WORKTREE_PATH:-$PWD}}
+wt=$(cd "$wt" 2>/dev/null && pwd -P) || {
+  echo "wt-guard: no such directory: ${1:-${SUPACODE_WORKTREE_PATH:-$PWD}}" >&2
+  exit 1
+}
+
+if ! git -C "$wt" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  # Not a git worktree any more (e.g. its registration was pruned). Nothing git can audit, and
+  # refusing would leave Supacode unable to remove the entry, so say so and allow it.
+  echo "wt-guard: $wt is not a git worktree; nothing to audit."
+  exit 0
+fi
+
+echo "wt-guard: auditing $wt"
+findings=$(wta_audit "$wt")
+safe=$?
+printf '%s\n' "$findings" | sed 's/^/  /'
+
+if [ "$check_only" -eq 1 ]; then
+  exit $((safe == 0 ? 0 : 1))
+fi
+
+if [ "$safe" -eq 0 ]; then
+  wta_log_deletion "$wt" "nothing unique"
+  echo "wt-guard: nothing unique — deletion logged to ${WTA_DELETION_LOG:-$HOME/.claude/deleted-refs.log}."
+  exit 0
+fi
+
+if [ -e "$wt/$WTA_ALLOW_MARKER" ]; then
+  overridden=$(printf '%s\n' "$findings" | sed -n 's/^BLOCK: //p' | paste -sd ';' -)
+  wta_log_deletion "$wt" "FORCED over: $overridden"
+  echo "wt-guard: $WTA_ALLOW_MARKER present — deleting anyway; the overridden findings are logged."
+  exit 0
+fi
+
+echo
+echo "wt-guard: NOT deleting — the BLOCK items above exist nowhere else."
+echo "  Commit/push them, or delete anyway with:  supacode-wt-rm --force $(git -C "$wt" branch --show-current)"
+echo "  (or: touch \"$wt/$WTA_ALLOW_MARKER\" and delete again)"
+exit 1

@@ -9,8 +9,13 @@
 # Run from inside any worktree of the repo. The Supacode worktree ID is the
 # percent-encoded absolute path of the worktree.
 #
+# Before deleting it runs `wt-guard --check` and refuses when the worktree holds work found
+# nowhere else (uncommitted changes, unique untracked files, commits on no remote). --force
+# deletes anyway: it leaves the marker wt-guard accepts, and the override is logged.
+# Supacode keeps the local branch (deleteBranchOnDeleteWorktree = false); delete it separately.
+#
 # Usage:
-#   supacode-wt-rm <branch>
+#   supacode-wt-rm [--force] <branch>
 
 set -euo pipefail
 
@@ -27,9 +32,17 @@ done
 script_dir=$(cd "$(dirname "$self")" && pwd)
 # shellcheck source=/dev/null
 . "$script_dir/../../../common/worktree.sh"
+# shellcheck source=/dev/null
+. "$script_dir/../../../common/worktree-audit.sh"
+
+force=0
+if [ "${1:-}" = "--force" ]; then
+  force=1
+  shift
+fi
 
 if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-  echo "Usage: supacode-wt-rm <branch>" >&2
+  echo "Usage: supacode-wt-rm [--force] <branch>" >&2
   exit 1
 fi
 
@@ -53,8 +66,34 @@ fi
 
 worktree_id=$(wt_percent_encode "$target")
 
+# Same audit the Delete Script hook runs, shown before anything is asked of Supacode.
+if ! "$script_dir/wt-guard" --check "$target"; then
+  if [ "$force" -eq 0 ]; then
+    echo
+    echo "supacode-wt-rm: not deleting. Re-run with --force to delete anyway." >&2
+    exit 1
+  fi
+  touch "$target/$WTA_ALLOW_MARKER"
+  echo "supacode-wt-rm: --force — deleting despite the findings above."
+fi
+
+# When the repo's Delete Script is wt-guard, the hook writes the log line. Otherwise write it here,
+# so ~/.claude/deleted-refs.log records every removal either way.
+delete_script=$(python3 -I -c 'import json,sys; print(json.load(open(sys.argv[1])).get("repositories", {}).get(sys.argv[2], {}).get("deleteScript", "") or "")' \
+  "$HOME/.supacode/settings.json" "$WT_MAIN_ROOT" 2>/dev/null || true)
+case $delete_script in
+*wt-guard*) ;;
+*)
+  if [ "$force" -eq 1 ]; then
+    wta_log_deletion "$target" "FORCED via supacode-wt-rm; Delete Script is not wt-guard"
+  else
+    wta_log_deletion "$target" "nothing unique; Delete Script is not wt-guard"
+  fi
+  ;;
+esac
+
 echo "Removing worktree"
-echo "  branch: $branch"
+echo "  branch: $branch (the local branch is kept)"
 echo "  path:   $target"
 
 exec supacode worktree delete -w "$worktree_id"
