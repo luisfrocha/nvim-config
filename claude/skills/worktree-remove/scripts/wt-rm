@@ -242,10 +242,29 @@ echo "  branch: $branch"
 echo "  path:   $target"
 echo "  app:    $WT_APP"
 
+# A worktree made by Supacode (or wt-new under Supacode) carries a Supacode lock, and herdr/git refuse to
+# remove a locked worktree. Unlock it for the removal and put the same lock back if the removal fails.
+lock_reason=''
+if [ "$WT_APP" != supacode ]; then
+  lock_file="$(git -C "$target" rev-parse --absolute-git-dir 2>/dev/null)/locked"
+  if [ -f "$lock_file" ] && grep -q '"owner":"supacode"' "$lock_file"; then
+    lock_reason=$(cat "$lock_file")
+    echo "  lock:   Supacode lock removed for the deletion"
+    git worktree unlock "$target"
+  fi
+fi
+
+rc=0
 case $WT_APP in
-supacode) supacode worktree delete -w "$(wt_percent_encode "$target")" || exit $? ;;
-herdr) herdr worktree remove --workspace "$workspace_id" ${force_remove:+--force} || exit $? ;;
-*) git worktree remove ${force_remove:+--force} "$target" || exit $? ;;
+supacode) supacode worktree delete -w "$(wt_percent_encode "$target")" || rc=$? ;;
+herdr) herdr worktree remove --workspace "$workspace_id" ${force_remove:+--force} || rc=$? ;;
+*) git worktree remove ${force_remove:+--force} "$target" || rc=$? ;;
 esac
+if [ "$rc" -ne 0 ]; then
+  if [ -n "$lock_reason" ] && [ -d "$target" ]; then
+    git worktree lock --reason "$lock_reason" "$target" && echo "wt-rm: removal failed; Supacode lock restored." >&2
+  fi
+  exit "$rc"
+fi
 
 wt_branch_cleanup "$branch_tip"

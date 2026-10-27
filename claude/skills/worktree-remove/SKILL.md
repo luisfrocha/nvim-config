@@ -42,6 +42,9 @@ Example: branch `hotfix/dashboard-activate-update` in repo `~/Sites/vistara-bi-a
   a second `[y/N]` names the remote ref. Never the mainline. Each deletion is logged to
   `~/.claude/deleted-refs.log` first, with a restore command. Remote info comes from a fresh `git fetch`;
   if that fails the script says it may be stale.
+- A Supacode-created worktree is locked, and herdr/git refuse to remove a locked one (`cannot remove a locked
+  working tree`, seen 2026-10-27 on `test/delete-hook`). For herdr/git `wt-rm` removes the Supacode lock
+  just before the removal and puts the same lock back if the removal fails (the restore path is untested).
 - Tested 2026-10-27 in a throwaway repo with the plain-git path only (merged branch → both; pushed but
   unmerged → remote refused, local ok; unpushed + forced → both refused). The herdr and Supacode paths
   share this code but were not exercised.
