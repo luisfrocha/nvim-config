@@ -10,7 +10,8 @@
 # Run from inside any worktree of the repo. The removal goes through the detected app:
 #   Supacode: `supacode worktree delete`; the worktree ID is the percent-encoded absolute path.
 #   herdr:    `herdr worktree remove`; the workspace ID is looked up from `herdr worktree list`.
-#   neither:  plain `git worktree remove` (git itself refuses a dirty worktree).
+#   neither:  plain `git worktree remove`.
+# herdr and git refuse a worktree holding modified or untracked files; wt-rm asks before forcing.
 #
 # Before deleting it runs `wt-guard --check` and refuses when the worktree holds work found
 # nowhere else (uncommitted changes, unique untracked files, commits on no remote). --force
@@ -71,11 +72,52 @@ fi
 if ! "$script_dir/wt-guard" --check "$target"; then
   if [ "$force" -eq 0 ]; then
     echo
-    echo "wt-rm: not deleting. Re-run with --force to delete anyway." >&2
-    exit 1
+    if [ ! -t 0 ]; then
+      echo "wt-rm: not deleting (no terminal to ask). Re-run with --force to delete anyway." >&2
+      exit 1
+    fi
+    printf 'wt-guard found work that exists nowhere else (above). Force the deletion? [y/N] '
+    read -r answer
+    case $answer in
+    [yY] | [yY][eE][sS]) force=1 ;;
+    *)
+      echo "wt-rm: not deleting."
+      exit 1
+      ;;
+    esac
   fi
   touch "$target/$WTA_ALLOW_MARKER"
-  echo "wt-rm: --force — deleting despite the findings above."
+  echo "wt-rm: forcing — deleting despite the findings above."
+fi
+
+# herdr and git refuse to remove a worktree holding modified or untracked files, so for them ask
+# before forcing. wt-guard has already run, and its INFO lines say which of these are safe copies.
+# Supacode's own delete has no such check, so it is not asked. Nothing is logged until this passes.
+force_remove=
+if [ "$WT_APP" != supacode ]; then
+  # The --force marker is wt-rm's own file, not the user's work, so leave it out of the list.
+  dirty=$(git -C "$target" status --porcelain --untracked-files=all 2>/dev/null | grep -v "^?? $WTA_ALLOW_MARKER\$" || true)
+  if [ "$force" -eq 1 ]; then
+    force_remove=1
+  elif [ -n "$dirty" ]; then
+    echo
+    echo "I found uncommitted or untracked changes in $target:"
+    printf '%s\n' "$dirty" | head -20
+    [ "$(printf '%s\n' "$dirty" | wc -l)" -gt 20 ] && echo "  ... (more not shown)"
+    if [ ! -t 0 ]; then
+      echo "wt-rm: not deleting (no terminal to ask). Re-run with --force to delete anyway." >&2
+      exit 1
+    fi
+    printf 'Force the deletion? [y/N] '
+    read -r answer
+    case $answer in
+    [yY] | [yY][eE][sS]) force_remove=1 ;;
+    *)
+      echo "wt-rm: not deleting."
+      exit 1
+      ;;
+    esac
+  fi
 fi
 
 # herdr's remove takes a workspace ID only; find the one herdr has open at this exact path.
@@ -112,13 +154,98 @@ case $delete_script in
   ;;
 esac
 
+# After the worktree is gone, offer to delete its branch. Each option is offered only when safe:
+#   local:  the tip is on some remote branch (so no commits are lost) and no worktree has it checked out
+#   remote: origin/<branch> is fully merged into the mainline (it may be shared; unmerged work is refused)
+# Never the mainline itself. Every deletion is logged to ~/.claude/deleted-refs.log before it runs.
+wt_branch_cleanup() {
+  local tip=$1 mainline short rtip='' contained='' local_ok=0 remote_ok=0 local_note='' remote_note='' options answer
+  mainline=$(wta_mainline "$WT_MAIN_ROOT")
+  short=${mainline#origin/}
+  rtip=$(git -C "$WT_MAIN_ROOT" rev-parse -q --verify "refs/remotes/origin/$branch" 2>/dev/null || true)
+  if [ -z "$tip" ] && [ -z "$rtip" ]; then
+    return 0
+  fi
+  if [ "$branch" = "$short" ] || [ "$branch" = main ] || [ "$branch" = master ]; then
+    echo "Branch '$branch' is the mainline; not offering to delete it."
+    return 0
+  fi
+  if ! git -C "$WT_MAIN_ROOT" fetch -q origin 2>/dev/null; then
+    echo "  (could not fetch origin; remote information below may be stale)"
+    rtip=$(git -C "$WT_MAIN_ROOT" rev-parse -q --verify "refs/remotes/origin/$branch" 2>/dev/null || true)
+  fi
+
+  if [ -z "$tip" ]; then
+    local_note="no local branch"
+  elif git -C "$WT_MAIN_ROOT" worktree list --porcelain | grep -qx "branch refs/heads/$branch"; then
+    local_note="still checked out in a worktree"
+  else
+    contained=$(wta_contained_in "$WT_MAIN_ROOT" "$tip" || true)
+    if [ -n "$contained" ]; then local_ok=1; local_note="on $contained"; else local_note="REFUSED: commits on no remote branch"; fi
+  fi
+  if [ -z "$rtip" ]; then
+    remote_note="no origin/$branch"
+  elif git -C "$WT_MAIN_ROOT" merge-base --is-ancestor "$rtip" "$mainline" 2>/dev/null; then
+    remote_ok=1; remote_note="merged into $mainline"
+  else
+    remote_note="REFUSED: origin/$branch has commits not in $mainline"
+  fi
+
+  echo
+  echo "Branch '$branch':"
+  echo "  local:  $local_note"
+  echo "  remote: $remote_note"
+  [ "$local_ok" -eq 1 ] || [ "$remote_ok" -eq 1 ] || return 0
+  if [ ! -t 0 ]; then
+    echo "  (no terminal to ask; branch kept)"
+    return 0
+  fi
+
+  options=''
+  [ "$local_ok" -eq 1 ] && options="$options[l]ocal / "
+  [ "$remote_ok" -eq 1 ] && options="$options[r]emote / "
+  [ "$local_ok" -eq 1 ] && [ "$remote_ok" -eq 1 ] && options="$options[b]oth / "
+  printf 'Delete branch? %s[N]o: ' "$options"
+  read -r answer
+  case $answer in
+  l | L) [ "$local_ok" -eq 1 ] || return 0; wt_delete_branch local ;;
+  r | R) [ "$remote_ok" -eq 1 ] || return 0; wt_delete_branch remote ;;
+  b | B) [ "$local_ok" -eq 1 ] && [ "$remote_ok" -eq 1 ] || return 0; wt_delete_branch local; wt_delete_branch remote ;;
+  *) echo "Branches kept." ;;
+  esac
+}
+
+# Delete one side of the branch. The remote side asks once more, naming the ref, since it affects
+# everyone. Relies on tip/rtip/contained from wt_branch_cleanup (bash dynamic scope).
+wt_delete_branch() {
+  if [ "$1" = local ]; then
+    wta_log_branch local "$WT_MAIN_ROOT" "$branch" "$tip" "$contained"
+    git -C "$WT_MAIN_ROOT" branch -D "$branch"
+  else
+    printf "Delete origin/%s on the remote? Others may be using it. [y/N] " "$branch"
+    read -r answer
+    case $answer in
+    [yY] | [yY][eE][sS])
+      wta_log_branch remote "$WT_MAIN_ROOT" "$branch" "$rtip" "$mainline"
+      git -C "$WT_MAIN_ROOT" push origin --delete "$branch"
+      ;;
+    *) echo "Remote branch kept." ;;
+    esac
+  fi
+}
+
+# The branch tip, read before the worktree goes away; used by the branch cleanup afterwards.
+branch_tip=$(git -C "$WT_MAIN_ROOT" rev-parse -q --verify "refs/heads/$branch" 2>/dev/null || true)
+
 echo "Removing worktree"
-echo "  branch: $branch (the local branch is kept)"
+echo "  branch: $branch"
 echo "  path:   $target"
 echo "  app:    $WT_APP"
 
 case $WT_APP in
-supacode) exec supacode worktree delete -w "$(wt_percent_encode "$target")" ;;
-herdr) exec herdr worktree remove --workspace "$workspace_id" ;;
-*) exec git worktree remove "$target" ;;
+supacode) supacode worktree delete -w "$(wt_percent_encode "$target")" || exit $? ;;
+herdr) herdr worktree remove --workspace "$workspace_id" ${force_remove:+--force} || exit $? ;;
+*) git worktree remove ${force_remove:+--force} "$target" || exit $? ;;
 esac
+
+wt_branch_cleanup "$branch_tip"

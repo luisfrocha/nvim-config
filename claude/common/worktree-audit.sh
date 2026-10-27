@@ -187,11 +187,29 @@ wta_log_deletion() {
   repo=$(basename "$(dirname "$(git -C "$wt" rev-parse --path-format=absolute --git-common-dir)")")
   branch=$(git -C "$wt" branch --show-current)
   sha=$(git -C "$wt" rev-parse HEAD)
-  contained=$(wta_contained_in "$wt" "$sha")
+  contained=$(wta_contained_in "$wt" "$sha" || true)
   [ -f "$log" ] || printf '%s\n%s\n' \
     '# Deleted git refs (branches, worktrees). Append-only: one line per deletion, written BEFORE deleting.' \
     '# Format: date | repo | ref | tip SHA | contained in | restore command' >"$log"
   printf '%s | %s | worktree %s (branch %s kept; %s) | %s | %s | git worktree add %s %s\n' \
     "$(date +%F)" "$repo" "$wt" "${branch:-detached}" "$note" "$sha" "${contained:-no remote branch}" \
     "$wt" "${branch:-$sha}" >>"$log"
+}
+
+# Log a branch deletion (local or remote) in the same format, BEFORE deleting it.
+# Usage: wta_log_branch <local|remote> <main-repo-root> <branch> <tip-sha> <contained-in>
+wta_log_branch() {
+  local kind=$1 root=$2 branch=$3 sha=$4 contained=$5 log=${WTA_DELETION_LOG:-$HOME/.claude/deleted-refs.log} ref restore
+  if [ "$kind" = remote ]; then
+    ref="branch origin/$branch (remote)"
+    restore="git push origin $sha:refs/heads/$branch"
+  else
+    ref="branch $branch (local)"
+    restore="git branch $branch $sha"
+  fi
+  [ -f "$log" ] || printf '%s\n%s\n' \
+    '# Deleted git refs (branches, worktrees). Append-only: one line per deletion, written BEFORE deleting.' \
+    '# Format: date | repo | ref | tip SHA | contained in | restore command' >"$log"
+  printf '%s | %s | %s | %s | %s | %s\n' \
+    "$(date +%F)" "$(basename "$root")" "$ref" "$sha" "${contained:-no remote branch}" "$restore" >>"$log"
 }
