@@ -10,7 +10,7 @@
 # Exit 0  → nothing unique would be lost; the deletion is logged to ~/.claude/deleted-refs.log.
 # Exit 1  → lists what would be lost; Supacode keeps the worktree.
 #
-# To delete anyway: `supacode-wt-rm --force <branch>`, or `touch <worktree>/.supacode-allow-delete`
+# To delete anyway: `wt-rm --force <branch>`, or `touch <worktree>/.supacode-allow-delete`
 # and delete again. The override is logged with the findings it overrode.
 #
 # Usage:
@@ -78,6 +78,6 @@ fi
 
 echo
 echo "wt-guard: NOT deleting — the BLOCK items above exist nowhere else."
-echo "  Commit/push them, or delete anyway with:  supacode-wt-rm --force $(git -C "$wt" branch --show-current)"
+echo "  Commit/push them, or delete anyway with:  wt-rm --force $(git -C "$wt" branch --show-current)"
 echo "  (or: touch \"$wt/$WTA_ALLOW_MARKER\" and delete again)"
 exit 1

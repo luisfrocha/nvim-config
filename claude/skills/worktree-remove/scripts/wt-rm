@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+#
+# wt-rm — remove the git worktree for a branch, matching the Git Tower naming
+# pattern used by wt-new (<repo>-<branch-as-dashes>). Works in Supacode, herdr,
+# or a plain terminal.
+#
+#   branch hotfix/dashboard-activate-update in repo ~/Sites/vistara-bi-ads-ui
+#   ->  removes worktree at ~/Sites/vistara-bi-ads-ui-hotfix-dashboard-activate-update
+#
+# Run from inside any worktree of the repo. The removal goes through the detected app:
+#   Supacode: `supacode worktree delete`; the worktree ID is the percent-encoded absolute path.
+#   herdr:    `herdr worktree remove`; the workspace ID is looked up from `herdr worktree list`.
+#   neither:  plain `git worktree remove` (git itself refuses a dirty worktree).
+#
+# Before deleting it runs `wt-guard --check` and refuses when the worktree holds work found
+# nowhere else (uncommitted changes, unique untracked files, commits on no remote). --force
+# deletes anyway: it leaves the marker wt-guard accepts, and the override is logged.
+# The local branch is always kept (Supacode: deleteBranchOnDeleteWorktree = false); delete it separately.
+#
+# Usage:
+#   wt-rm [--force] <branch>
+
+set -euo pipefail
+
+# Resolve this script's real directory even when invoked via a PATH symlink,
+# then source the shared worktree helpers (kept in claude/common/).
+self=${BASH_SOURCE[0]}
+while [ -L "$self" ]; do
+  target=$(readlink "$self")
+  case $target in
+  /*) self=$target ;;
+  *) self=$(dirname "$self")/$target ;;
+  esac
+done
+script_dir=$(cd "$(dirname "$self")" && pwd)
+# shellcheck source=/dev/null
+. "$script_dir/../../../common/worktree.sh"
+# shellcheck source=/dev/null
+. "$script_dir/../../../common/worktree-audit.sh"
+
+force=0
+if [ "${1:-}" = "--force" ]; then
+  force=1
+  shift
+fi
+
+if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "Usage: wt-rm [--force] <branch>" >&2
+  exit 1
+fi
+
+branch=$1
+
+wt_detect_app
+wt_resolve_repo
+
+target=$(wt_target_path "$branch")
+
+if [ ! -e "$target" ]; then
+  echo "wt-rm: no worktree directory at '$target'." >&2
+  echo "  (Expected the Tower-pattern folder for branch '$branch'.)" >&2
+  exit 1
+fi
+
+if [ "$target" = "$WT_MAIN_ROOT" ]; then
+  echo "wt-rm: refusing to remove the main worktree ('$target')." >&2
+  exit 1
+fi
+
+# Same audit the Delete Script hook runs, shown before anything is asked of the app.
+if ! "$script_dir/wt-guard" --check "$target"; then
+  if [ "$force" -eq 0 ]; then
+    echo
+    echo "wt-rm: not deleting. Re-run with --force to delete anyway." >&2
+    exit 1
+  fi
+  touch "$target/$WTA_ALLOW_MARKER"
+  echo "wt-rm: --force — deleting despite the findings above."
+fi
+
+# herdr's remove takes a workspace ID only; find the one herdr has open at this exact path.
+# Resolved before logging so a failed lookup never leaves a deletion on record.
+if [ "$WT_APP" = herdr ]; then
+  workspace_id=$(herdr worktree list --cwd "$WT_MAIN_ROOT" |
+    python3 -I -c 'import json,sys
+for w in json.load(sys.stdin)["result"]["worktrees"]:
+    if w["path"] == sys.argv[1] and w.get("open_workspace_id"):
+        print(w["open_workspace_id"])
+        break' "$target")
+  if [ -z "$workspace_id" ]; then
+    echo "wt-rm: herdr has no open workspace for '$target'; open it in herdr first (herdr worktree open --path ...)." >&2
+    exit 1
+  fi
+fi
+
+# Supacode runs the repo's Delete Script (wt-guard) itself, which writes the log line. herdr and
+# plain git have no such hook, so log here; so does Supacode when the Delete Script isn't wt-guard.
+# Either way ~/.claude/deleted-refs.log records every removal.
+delete_script=''
+if [ "$WT_APP" = supacode ]; then
+  delete_script=$(python3 -I -c 'import json,sys; print(json.load(open(sys.argv[1])).get("repositories", {}).get(sys.argv[2], {}).get("deleteScript", "") or "")' \
+    "$HOME/.supacode/settings.json" "$WT_MAIN_ROOT" 2>/dev/null || true)
+fi
+case $delete_script in
+*wt-guard*) ;;
+*)
+  if [ "$force" -eq 1 ]; then
+    wta_log_deletion "$target" "FORCED via wt-rm ($WT_APP); no wt-guard Delete Script ran"
+  else
+    wta_log_deletion "$target" "nothing unique; removed via wt-rm ($WT_APP); no wt-guard Delete Script ran"
+  fi
+  ;;
+esac
+
+echo "Removing worktree"
+echo "  branch: $branch (the local branch is kept)"
+echo "  path:   $target"
+echo "  app:    $WT_APP"
+
+case $WT_APP in
+supacode) exec supacode worktree delete -w "$(wt_percent_encode "$target")" ;;
+herdr) exec herdr worktree remove --workspace "$workspace_id" ;;
+*) exec git worktree remove "$target" ;;
+esac

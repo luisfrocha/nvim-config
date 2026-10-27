@@ -1,11 +1,11 @@
 ---
-name: remove-supacode-tree
-description: Remove the Supacode git worktree for a branch (Git Tower naming pattern <repo>-<branch-with-slashes-as-dashes>), guarded against losing work, and report what every worktree/branch would lose. Use when the user says "/remove-supacode-tree <branch>", asks to remove/delete a Supacode worktree or work tree, or asks which worktrees/branches are safe to delete or would be orphaned.
+name: worktree-remove
+description: Remove the git worktree for a branch (Supacode or herdr; Git Tower naming pattern <repo>-<branch-with-slashes-as-dashes>), guarded against losing work, and report what every worktree/branch would lose. Use when the user says "/worktree-remove <branch>", asks to remove/delete a worktree or work tree, or asks which worktrees/branches are safe to delete or would be orphaned.
 ---
 
-# Remove Supacode Worktree
+# Remove Worktree
 
-Removes the Supacode git worktree whose directory matches the Git Tower pattern
+Removes the git worktree whose directory matches the Git Tower pattern
 produced by the create skill: `<repo-name>-<branch-with-slashes-as-dashes>`,
 located alongside the main repo.
 
@@ -26,7 +26,7 @@ Example: branch `hotfix/dashboard-activate-update` in repo `~/Sites/vistara-bi-a
 
 | Script | What it does |
 |---|---|
-| `supacode-wt-rm [--force] <branch>` | Runs `wt-guard --check`, refuses if anything would be lost, otherwise asks Supacode to delete. `--force` deletes anyway and the override is logged. |
+| `wt-rm [--force] <branch>` | Runs `wt-guard --check`, refuses if anything would be lost, otherwise asks the detected app to delete (`supacode worktree delete`, `herdr worktree remove`, or plain `git worktree remove`). `--force` deletes anyway and the override is logged. |
 | `wt-guard [path]` | The Delete Script hook. Exit 1 with a list of what would be lost; exit 0 and append to `~/.claude/deleted-refs.log`. `--check` audits without logging. |
 | `wt-report [--all] [--no-gh] [repo]` | Read-only: every worktree's branch, PR, push state, mainline status and guard verdict; orphaned `<repo>-*` folders; separate clones; local branches whose commits are on no remote. |
 | `wt-report --orphan <folder> <branch>` | What a folder whose worktree registration was pruned holds that the branch lacks (throwaway index; the repo's index is untouched). |
@@ -38,22 +38,24 @@ top-level ignored `.env*` files with no identical copy elsewhere; commits on no 
 Mainline is `origin/main`, else `origin/master`, else `origin/HEAD`. The "N of M added lines not
 in mainline" hint is a line-matching heuristic for deciding, never a reason to allow the delete.
 
-## Setting up the hook (once per repository, in the Supacode UI)
+## Setting up the hook (Supacode only; once per repository, in the Supacode UI)
 
 Settings → *<repository>* → Scripts → **Delete Script**: `"$HOME/.local/bin/wt-guard"`.
 `wt-report` prints `Supacode Delete Script: NOT SET` for any repo still missing it. Until it is
-set, deleting from the sidebar is unguarded; `supacode-wt-rm` still guards and logs.
+set, deleting from the sidebar is unguarded; `wt-rm` still guards and logs.
+
+**herdr has no such hook that I know of** (its `worktree remove` help lists only `--workspace`, `--force`, `--trust-repository`), so removing a worktree from the herdr UI is unguarded. `wt-rm` guards and logs it itself. It finds herdr's workspace ID by matching the target path against `herdr worktree list` (`result.worktrees[].path` → `open_workspace_id`, shape verified 2026-10-27) and refuses if herdr has no open workspace there. What `herdr worktree remove` does to a dirty checkout, I have not verified — the guard runs first so it should not matter.
 
 ## How to run
 
-The user provides the branch name, e.g. `/remove-supacode-tree hotfix/old-branch`.
+The user provides the branch name, e.g. `/worktree-remove hotfix/old-branch`.
 
-IMPORTANT: the `supacode` CLI only works from a terminal Supacode itself spawned. Its socket
-refuses connections from Claude's Bash tool with "Operation not permitted" — with the sandbox on
-AND off (re-verified 2026-10-12). Do NOT execute `supacode-wt-rm` yourself; give the user:
+IMPORTANT: the `supacode` and `herdr` CLIs only work from a terminal the app itself spawned. Their
+sockets refuse connections from Claude's Bash tool with "Operation not permitted" — with the sandbox
+on AND off (Supacode re-verified 2026-10-12, herdr 2026-10-27). Do NOT execute `wt-rm` yourself; give the user:
 
 ```sh
-supacode-wt-rm <branch>
+wt-rm <branch>
 ```
 
 `wt-guard --check <path>` and `wt-report` are read-only and DO run from Claude — use them to
@@ -67,7 +69,7 @@ then rest on stale remote refs.
 - If the user gave no branch argument, ask for one instead of guessing.
 - Before presenting the command, run `wt-guard --check` on the target and show the findings. If
   it would refuse, say what is at risk; suggest `--force` only after the user has seen the list.
-- Do NOT run `supacode-wt-rm` / `supacode` yourself.
+- Do NOT run `wt-rm` / `supacode` / `herdr` yourself.
 - The local branch remains afterwards. Offer to delete it only if it is contained in the mainline
   or a remote branch, and log its tip SHA first (global CLAUDE.md, destructive-actions rule 6).
 - The script refuses if no matching worktree directory exists, and refuses to remove the main

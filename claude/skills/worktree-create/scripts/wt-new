@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 #
-# supacode-wt — create a Supacode git worktree whose directory follows Git
-# Tower's naming pattern: <repo-name>-<branch-with-slashes-as-dashes>, placed
-# alongside the main repo.
+# wt-new — create a git worktree whose directory follows Git Tower's naming
+# pattern: <repo-name>-<branch-with-slashes-as-dashes>, placed alongside the
+# main repo. Works in Supacode, herdr, or a plain terminal.
 #
 #   branch hotfix/dashboard-activate-update in repo ~/Sites/vistara-bi-ads-ui
 #   ->  ~/Sites/vistara-bi-ads-ui-hotfix-dashboard-activate-update
 #
 # Supacode's "Default directory" setting is a plain parent path, not a template,
-# so it can't reproduce this pattern on its own. Run this from inside any
-# worktree of the repo you want to branch from.
+# so it can't reproduce this pattern on its own. The worktree itself is made with
+# native git; afterwards the detected app is told about it (Supacode: ownership
+# lock; herdr: `herdr worktree open`). Run this from inside any worktree of the
+# repo you want to branch from.
 #
 # Usage:
-#   supacode-wt <branch> [base-ref]
+#   wt-new <branch> [base-ref]
 #
 #   <branch>    Name of the new (or existing) branch for the worktree.
 #   [base-ref]  Optional ref to branch from; when given, the base is fetched
@@ -38,14 +40,14 @@ script_dir=$(cd "$(dirname "$self")" && pwd)
 . "$script_dir/../../../common/worktree.sh"
 
 if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-  echo "Usage: supacode-wt <branch> [base-ref]" >&2
+  echo "Usage: wt-new <branch> [base-ref]" >&2
   exit 1
 fi
 
 branch=$1
 base=${2:-}
 
-wt_require_supacode
+wt_detect_app
 wt_resolve_repo
 
 # Capture the worktree we're invoked from — Supacode copies ignored/untracked
@@ -69,7 +71,7 @@ fi
 target=$(wt_target_path "$branch")
 
 if [ -e "$target" ]; then
-  echo "supacode-wt: '$target' already exists; aborting." >&2
+  echo "wt-new: '$target' already exists; aborting." >&2
   exit 1
 fi
 
@@ -163,6 +165,7 @@ echo "Creating worktree"
 echo "  branch:   $branch"
 echo "  base:     ${base:-<current HEAD>}"
 echo "  path:     $target"
+echo "  app:      $WT_APP"
 
 # Create the worktree with native git (synchronous — no supacode daemon race).
 # --no-track is the key fix: when branching from a remote-tracking base (e.g.
@@ -198,15 +201,25 @@ else
   echo "  upstream: (none — set on first 'git push -u origin $branch')"
 fi
 
-# Mark the worktree as Supacode-owned (same lock reason the supacode CLI writes)
-# so the app recognizes it as one of its worktrees.
-git worktree lock --reason "$(wt_supacode_lock_json)" "$target"
-
 # Bring over ignored/untracked files (.env, local config, etc.) from the source
 # worktree, as Supacode does.
 if [ -n "$source_worktree" ] && [ "$source_worktree" != "$target" ]; then
   copy_worktree_extras "$source_worktree" "$target"
 fi
 
+# Tell the detected app about the new worktree.
+#  - Supacode: mark it Supacode-owned (same lock reason the supacode CLI writes)
+#    so the app recognizes it as one of its worktrees.
+#  - herdr: register the checkout as a workspace. A failure here is not fatal —
+#    the git worktree already exists and can be opened from herdr afterwards.
+case $WT_APP in
+supacode) git worktree lock --reason "$(wt_supacode_lock_json)" "$target" ;;
+herdr)
+  herdr worktree open --cwd "$WT_MAIN_ROOT" --path "$target" --focus ||
+    echo "wt-new: worktree created, but 'herdr worktree open' failed — open it from herdr manually." >&2
+  ;;
+esac
+
 echo "Done."
-echo "Note: press Cmd-Shift-R in Supacode if the new worktree isn't in the sidebar yet."
+[ "$WT_APP" = supacode ] && echo "Note: press Cmd-Shift-R in Supacode if the new worktree isn't in the sidebar yet."
+exit 0

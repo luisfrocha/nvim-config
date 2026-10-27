@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Shared audit helpers for the Supacode worktree scripts (wt-guard, wt-report, supacode-wt-rm).
+# Shared audit helpers for the Supacode worktree scripts (wt-guard, wt-report, wt-rm).
 # Source this; do not execute it directly. Written for macOS's bash 3.2: no associative arrays,
 # no mapfile.
 #

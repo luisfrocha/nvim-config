@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
 #
-# Shared helpers for the Supacode worktree scripts (create/remove).
+# Shared helpers for the worktree scripts (wt-new / wt-rm), which work in Supacode and herdr.
 # Source this; do not execute it directly.
 #
 # Naming follows Git Tower's pattern: <repo-name>-<branch-with-slashes-as-dashes>,
 # placed alongside the main repo. Example: branch hotfix/x in ~/Sites/foo
 #   -> ~/Sites/foo-hotfix-x
 
-# Abort unless the Supacode CLI is available (only present in Supacode terminals).
-wt_require_supacode() {
-  command -v supacode >/dev/null 2>&1 || {
-    echo "${0##*/}: the 'supacode' CLI is not on PATH (run inside a Supacode terminal)." >&2
-    return 1
-  }
+# Detect which worktree-aware app owns this terminal. Sets WT_APP to one of:
+#   herdr    - inside a herdr pane (HERDR_ENV=1); checked first so herdr wins when nested
+#   supacode - the 'supacode' CLI is on PATH (only present in Supacode terminals)
+#   none     - plain terminal: git does the work, no app is told about it
+wt_detect_app() {
+  if [ "${HERDR_ENV:-}" = 1 ] && command -v herdr >/dev/null 2>&1; then
+    WT_APP=herdr
+  elif command -v supacode >/dev/null 2>&1; then
+    WT_APP=supacode
+  else
+    WT_APP=none
+  fi
 }
 
 # Resolve the MAIN repo root (not the current worktree) from the current dir, so
