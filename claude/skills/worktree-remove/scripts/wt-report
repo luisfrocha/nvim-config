@@ -35,8 +35,6 @@ script_dir=$(cd "$(dirname "$self")" && pwd)
 # shellcheck source=/dev/null
 . "$script_dir/../../../common/worktree-audit.sh"
 
-SUPACODE_SETTINGS=${SUPACODE_SETTINGS:-$HOME/.supacode/settings.json}
-
 # --orphan <folder> <branch>: files in the folder that differ from, or are absent in, the branch.
 inspect_orphan() {
   local folder=$1 branch=$2 gitfile common idx
@@ -89,17 +87,10 @@ for arg in "$@"; do
   esac
 done
 
-# Supacode repository paths, one per line (python3 -I: stdlib only, ignores cwd and env).
-supacode_repos() {
-  python3 -I -c 'import json,sys; print("\n".join(json.load(open(sys.argv[1])).get("repositories", {})))' \
-    "$SUPACODE_SETTINGS" 2>/dev/null
-}
-
-# The repo's configured Delete Script, or empty.
-supacode_delete_script() {
-  python3 -I -c 'import json,sys; r=json.load(open(sys.argv[1])).get("repositories", {}).get(sys.argv[2], {}); print(r.get("deleteScript", "") or "")' \
-    "$SUPACODE_SETTINGS" "$1" 2>/dev/null
-}
+# Supacode repository paths and each repo's Delete Script come from the shared helpers in
+# worktree-audit.sh (the settings file moved to ~/.config/supacode/repos.json on 2026-10-20).
+supacode_repos() { wta_supacode_repos; }
+supacode_delete_script() { wta_supacode_delete_script "$1"; }
 
 if [ "$all" -eq 1 ]; then
   while IFS= read -r r; do [ -n "$r" ] && repos+=("$r"); done <<EOF

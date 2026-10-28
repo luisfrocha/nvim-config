@@ -16,8 +16,9 @@ Example: branch `hotfix/dashboard-activate-update` in repo `~/Sites/vistara-bi-a
 
 - Removes the folder and the git worktree registration. **Uncommitted and untracked files are
   gone for good** — `/private/tmp/supacode-worktree-trash/` is transient, not a recycle bin.
-- **Keeps the local branch** (Supacode's own delete; `wt-rm` now offers to delete it afterwards, see below): `~/.supacode/settings.json` has
-  `global.deleteBranchOnDeleteWorktree = false`. Deleting the branch is a separate step (log
+- **Keeps the local branch** (Supacode's own delete; `wt-rm` now offers to delete it afterwards, see below): `~/.config/supacode/config.json` has
+  `deleteBranchOnDeleteWorktree = false` (Supacode moved its settings there from `~/.supacode/settings.json` on
+  2026-10-20; per-repo Delete Scripts now live in `~/.config/supacode/repos.json`, which `wt-rm` and `wt-report` read). Deleting the branch is a separate step (log
   its tip SHA in `~/.claude/deleted-refs.log` first).
 - Runs the repository's **Delete Script** first; a **non-zero exit cancels the delete** (both
   the sidebar entry and the folder survive).
@@ -38,15 +39,17 @@ Example: branch `hotfix/dashboard-activate-update` in repo `~/Sites/vistara-bi-a
   terminal it refuses and says to re-run with `--force`. `--force` skips the questions.
 - After a successful removal it offers to delete the branch: `[l]ocal / [r]emote / [b]oth / [N]o`, each
   offered only when safe. **Local**: the tip is on some remote branch and no worktree has it checked
-  out. **Remote** (`git push origin --delete`): `origin/<branch>` is fully merged into the mainline, and
-  a second `[y/N]` names the remote ref. Never the mainline. Each deletion is logged to
+  out. **Remote** (`git push origin --delete`): everything on `origin/<branch>` is already in the mainline
+  or in `origin/HEAD` (the default branch, e.g. `branch-development`), either as an ancestor or, for squash/rebase
+  merges, because every commit has an equivalent patch there (`git cherry` shows no `+`). Anything else is refused.
+  A second `[y/N]` names the remote ref. Never the mainline. Each deletion is logged to
   `~/.claude/deleted-refs.log` first, with a restore command. Remote info comes from a fresh `git fetch`;
   if that fails the script says it may be stale.
 - A Supacode-created worktree is locked, and herdr/git refuse to remove a locked one (`cannot remove a locked
   working tree`, seen 2026-10-27 on `test/delete-hook`). For herdr/git `wt-rm` removes the Supacode lock
-  just before the removal and puts the same lock back if the removal fails (the restore path is untested).
-- Tested 2026-10-27 in a throwaway repo with the plain-git path only (merged branch → both; pushed but
-  unmerged → remote refused, local ok; unpushed + forced → both refused). The herdr and Supacode paths
+  just before the removal and puts the same lock back if the removal fails. Best effort: tested 2026-10-27 with
+  an undeletable file, git had already dropped the worktree registration by then, so there was nothing to re-lock.
+- Tested 2026-10-27 in a throwaway repo with the plain-git path only (merged branch → both; unpushed + forced → both refused). The herdr and Supacode paths
   share this code but were not exercised.
 
 What the guard treats as "would be lost" (shared logic in `claude/common/worktree-audit.sh`):

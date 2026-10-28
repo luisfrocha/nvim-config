@@ -182,18 +182,39 @@ wta_contained_in() {
 # Append one line to the cross-repo deletion log, in the format ~/.claude/deleted-refs.log already
 # uses: date | repo | ref | tip SHA | contained in | restore command
 # Usage: wta_log_deletion <worktree> <note>
+# With WTA_DEFER set, the line is held in WTA_PENDING_LINE and only written by wta_flush_log, so a caller
+# can log after the removal succeeded (the line has to be built while the worktree still exists).
 wta_log_deletion() {
-  local wt=$1 note=$2 log=${WTA_DELETION_LOG:-$HOME/.claude/deleted-refs.log} repo branch sha contained
+  local wt=$1 note=$2 repo branch sha contained line
   repo=$(basename "$(dirname "$(git -C "$wt" rev-parse --path-format=absolute --git-common-dir)")")
   branch=$(git -C "$wt" branch --show-current)
   sha=$(git -C "$wt" rev-parse HEAD)
   contained=$(wta_contained_in "$wt" "$sha" || true)
+  line=$(printf '%s | %s | worktree %s (branch %s kept; %s) | %s | %s | git worktree add %s %s' \
+    "$(date +%F)" "$repo" "$wt" "${branch:-detached}" "$note" "$sha" "${contained:-no remote branch}" \
+    "$wt" "${branch:-$sha}")
+  if [ -n "${WTA_DEFER:-}" ]; then
+    WTA_PENDING_LINE=$line
+  else
+    wta_append_log "$line"
+  fi
+}
+
+# Append one finished line to the deletion log, creating it with its header if needed.
+wta_append_log() {
+  local log=${WTA_DELETION_LOG:-$HOME/.claude/deleted-refs.log}
   [ -f "$log" ] || printf '%s\n%s\n' \
     '# Deleted git refs (branches, worktrees). Append-only: one line per deletion, written BEFORE deleting.' \
     '# Format: date | repo | ref | tip SHA | contained in | restore command' >"$log"
-  printf '%s | %s | worktree %s (branch %s kept; %s) | %s | %s | git worktree add %s %s\n' \
-    "$(date +%F)" "$repo" "$wt" "${branch:-detached}" "$note" "$sha" "${contained:-no remote branch}" \
-    "$wt" "${branch:-$sha}" >>"$log"
+  printf '%s\n' "$1" >>"$log"
+}
+
+# Write the line a deferred wta_log_deletion held, once the removal has actually happened.
+wta_flush_log() {
+  if [ -n "${WTA_PENDING_LINE:-}" ]; then
+    wta_append_log "$WTA_PENDING_LINE"
+    WTA_PENDING_LINE=''
+  fi
 }
 
 # Log a branch deletion (local or remote) in the same format, BEFORE deleting it.
@@ -212,4 +233,40 @@ wta_log_branch() {
     '# Format: date | repo | ref | tip SHA | contained in | restore command' >"$log"
   printf '%s | %s | %s | %s | %s | %s\n' \
     "$(date +%F)" "$(basename "$root")" "$ref" "$sha" "${contained:-no remote branch}" "$restore" >>"$log"
+}
+
+# Supacode keeps per-repository settings in ~/.config/supacode/repos.json (relocated from
+# ~/.supacode/settings.json on 2026-10-20: a dict keyed by repo path WITH a trailing slash, each value
+# holding "deleteScript"). The old file is read only when the new one does not exist.
+# Usage: wta_supacode_delete_script <main-repo-root>   -> the Delete Script, or empty
+wta_supacode_delete_script() {
+  python3 -I - "$1" <<'PY' 2>/dev/null
+import json, os, sys
+root = sys.argv[1].rstrip("/")
+home = os.path.expanduser("~")
+try:
+    d = json.load(open(home + "/.config/supacode/repos.json"))
+    print((d.get(root + "/") or d.get(root) or {}).get("deleteScript", "") or "")
+except FileNotFoundError:
+    try:
+        d = json.load(open(home + "/.supacode/settings.json"))
+        print(d.get("repositories", {}).get(root, {}).get("deleteScript", "") or "")
+    except (FileNotFoundError, ValueError):
+        pass
+PY
+}
+
+# Repository roots Supacode knows about, one per line, no trailing slash.
+wta_supacode_repos() {
+  python3 -I - <<'PY' 2>/dev/null
+import json, os
+home = os.path.expanduser("~")
+try:
+    print("\n".join(k.rstrip("/") for k in json.load(open(home + "/.config/supacode/repos.json"))))
+except FileNotFoundError:
+    try:
+        print("\n".join(json.load(open(home + "/.supacode/settings.json")).get("repositories", {})))
+    except (FileNotFoundError, ValueError):
+        pass
+PY
 }
