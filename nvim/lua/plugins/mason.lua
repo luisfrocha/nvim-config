@@ -44,7 +44,7 @@ return {
       ensure_installed = {
         -- 🗂️ LANGUAGE SERVERS
         "json-lsp", -- JSON support
-        "sqls", -- SQL language server
+        vim.fn.executable("go") == 1 and "sqls" or nil, -- SQL language server (Mason builds it with Go)
         "vue-language-server", -- Vue/Nuxt support (Volar)
         "vtsls", -- TypeScript/React support
         "tailwindcss-language-server", -- Tailwind CSS
