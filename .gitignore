@@ -1,4 +1,4 @@
-nerd-fonts
+.DS_Store
 tt.*
 .tests
 doc/tags
@@ -7,6 +7,4 @@ debug
 foo.*
 *.log
 data
-tags*
-/lazygit/state.yml
-.DS_Store
+/nvim/lazy-lock.json

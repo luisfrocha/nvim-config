@@ -1,0 +1,301 @@
+#!/usr/bin/env bash
+#
+# wt-rm — remove the git worktree for a branch, matching the Git Tower naming
+# pattern used by wt-new (<repo>-<branch-as-dashes>). Works in Supacode, herdr,
+# or a plain terminal.
+#
+#   branch hotfix/dashboard-activate-update in repo ~/Sites/vistara-bi-ads-ui
+#   ->  removes worktree at ~/Sites/vistara-bi-ads-ui-hotfix-dashboard-activate-update
+#
+# Run from inside any worktree of the repo. The removal goes through the detected app:
+#   Supacode: `supacode worktree delete`; the worktree ID is the percent-encoded absolute path.
+#   herdr:    `herdr worktree remove`; the workspace ID is looked up from `herdr worktree list`.
+#   neither:  plain `git worktree remove`.
+# herdr and git refuse a worktree holding modified or untracked files; wt-rm asks before forcing.
+#
+# Before deleting it runs `wt-guard --check` and refuses when the worktree holds work found
+# nowhere else (uncommitted changes, unique untracked files, commits on no remote). --force
+# deletes anyway: it leaves the marker wt-guard accepts, and the override is logged.
+# The local branch is always kept (Supacode: deleteBranchOnDeleteWorktree = false); delete it separately.
+#
+# Usage:
+#   wt-rm [--force] <branch>
+
+set -euo pipefail
+
+# Resolve this script's real directory even when invoked via a PATH symlink,
+# then source the shared worktree helpers (kept in claude/common/).
+self=${BASH_SOURCE[0]}
+while [ -L "$self" ]; do
+  target=$(readlink "$self")
+  case $target in
+  /*) self=$target ;;
+  *) self=$(dirname "$self")/$target ;;
+  esac
+done
+script_dir=$(cd "$(dirname "$self")" && pwd)
+# shellcheck source=/dev/null
+. "$script_dir/../../../common/worktree.sh"
+# shellcheck source=/dev/null
+. "$script_dir/../../../common/worktree-audit.sh"
+
+force=0
+if [ "${1:-}" = "--force" ]; then
+  force=1
+  shift
+fi
+
+if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "Usage: wt-rm [--force] <branch>" >&2
+  exit 1
+fi
+
+branch=$1
+
+wt_detect_app
+wt_resolve_repo
+
+target=$(wt_target_path "$branch")
+
+if [ ! -e "$target" ]; then
+  echo "wt-rm: no worktree directory at '$target'." >&2
+  echo "  (Expected the Tower-pattern folder for branch '$branch'.)" >&2
+  exit 1
+fi
+
+if [ "$target" = "$WT_MAIN_ROOT" ]; then
+  echo "wt-rm: refusing to remove the main worktree ('$target')." >&2
+  exit 1
+fi
+
+# Same audit the Delete Script hook runs, shown before anything is asked of the app.
+if ! "$script_dir/wt-guard" --check "$target"; then
+  if [ "$force" -eq 0 ]; then
+    echo
+    if [ ! -t 0 ]; then
+      echo "wt-rm: not deleting (no terminal to ask). Re-run with --force to delete anyway." >&2
+      exit 1
+    fi
+    printf 'wt-guard found work that exists nowhere else (above). Force the deletion? [y/N] '
+    read -r answer
+    case $answer in
+    [yY] | [yY][eE][sS]) force=1 ;;
+    *)
+      echo "wt-rm: not deleting."
+      exit 1
+      ;;
+    esac
+  fi
+  touch "$target/$WTA_ALLOW_MARKER"
+  echo "wt-rm: forcing — deleting despite the findings above."
+fi
+
+# herdr and git refuse to remove a worktree holding modified or untracked files, so for them ask
+# before forcing. wt-guard has already run, and its INFO lines say which of these are safe copies.
+# Supacode's own delete has no such check, so it is not asked. Nothing is logged until this passes.
+force_remove=
+if [ "$WT_APP" != supacode ]; then
+  # The --force marker is wt-rm's own file, not the user's work, so leave it out of the list.
+  dirty=$(git -C "$target" status --porcelain --untracked-files=all 2>/dev/null | grep -v "^?? $WTA_ALLOW_MARKER\$" || true)
+  if [ "$force" -eq 1 ]; then
+    force_remove=1
+  elif [ -n "$dirty" ]; then
+    echo
+    echo "I found uncommitted or untracked changes in $target:"
+    printf '%s\n' "$dirty" | head -20
+    [ "$(printf '%s\n' "$dirty" | wc -l)" -gt 20 ] && echo "  ... (more not shown)"
+    if [ ! -t 0 ]; then
+      echo "wt-rm: not deleting (no terminal to ask). Re-run with --force to delete anyway." >&2
+      exit 1
+    fi
+    printf 'Force the deletion? [y/N] '
+    read -r answer
+    case $answer in
+    [yY] | [yY][eE][sS]) force_remove=1 ;;
+    *)
+      echo "wt-rm: not deleting."
+      exit 1
+      ;;
+    esac
+  fi
+fi
+
+# herdr's remove takes a workspace ID only; find the one herdr has open at this exact path.
+# Resolved before logging so a failed lookup never leaves a deletion on record.
+if [ "$WT_APP" = herdr ]; then
+  workspace_id=$(herdr worktree list --cwd "$WT_MAIN_ROOT" |
+    python3 -I -c 'import json,sys
+for w in json.load(sys.stdin)["result"]["worktrees"]:
+    if w["path"] == sys.argv[1] and w.get("open_workspace_id"):
+        print(w["open_workspace_id"])
+        break' "$target")
+  if [ -z "$workspace_id" ]; then
+    echo "wt-rm: herdr has no open workspace for '$target'; open it in herdr first (herdr worktree open --path ...)." >&2
+    exit 1
+  fi
+fi
+
+# Supacode runs the repo's Delete Script (wt-guard) itself, which writes the log line. herdr and
+# plain git have no such hook, so log here; so does Supacode when the Delete Script isn't wt-guard.
+# Either way ~/.claude/deleted-refs.log records every removal.
+delete_script=''
+if [ "$WT_APP" = supacode ]; then
+  delete_script=$(wta_supacode_delete_script "$WT_MAIN_ROOT" || true)
+fi
+# Deferred: the line is built now (the worktree must still exist) but written only after the app has
+# really removed it, so a failed removal never leaves a "removed" entry behind.
+WTA_DEFER=1
+case $delete_script in
+*wt-guard*) ;;
+*)
+  if [ "$force" -eq 1 ]; then
+    wta_log_deletion "$target" "FORCED via wt-rm ($WT_APP); no wt-guard Delete Script ran"
+  else
+    wta_log_deletion "$target" "nothing unique; removed via wt-rm ($WT_APP); no wt-guard Delete Script ran"
+  fi
+  ;;
+esac
+
+# After the worktree is gone, offer to delete its branch. Each option is offered only when safe:
+#   local:  the tip is on some remote branch (so no commits are lost) and no worktree has it checked out
+#   remote: origin/<branch> is fully merged into the mainline (it may be shared; unmerged work is refused)
+# Never the mainline itself. Every deletion is logged to ~/.claude/deleted-refs.log before it runs.
+wt_branch_cleanup() {
+  local tip=$1 mainline short default_short default_ref ref cherry_out remote_ref='' rtip='' contained='' local_ok=0 remote_ok=0 local_note='' remote_note='' options answer
+  mainline=$(wta_mainline "$WT_MAIN_ROOT")
+  short=${mainline#origin/}
+  rtip=$(git -C "$WT_MAIN_ROOT" rev-parse -q --verify "refs/remotes/origin/$branch" 2>/dev/null || true)
+  if [ -z "$tip" ] && [ -z "$rtip" ]; then
+    return 0
+  fi
+  default_short=$(git -C "$WT_MAIN_ROOT" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)
+  default_short=${default_short#origin/}
+  if [ "$branch" = "$short" ] || [ "$branch" = "$default_short" ] || [ "$branch" = main ] || [ "$branch" = master ]; then
+    echo "Branch '$branch' is the mainline; not offering to delete it."
+    return 0
+  fi
+  if ! git -C "$WT_MAIN_ROOT" fetch -q origin 2>/dev/null; then
+    echo "  (could not fetch origin; remote information below may be stale)"
+    rtip=$(git -C "$WT_MAIN_ROOT" rev-parse -q --verify "refs/remotes/origin/$branch" 2>/dev/null || true)
+  fi
+
+  if [ -z "$tip" ]; then
+    local_note="no local branch"
+  elif git -C "$WT_MAIN_ROOT" worktree list --porcelain | grep -qx "branch refs/heads/$branch"; then
+    local_note="still checked out in a worktree"
+  else
+    contained=$(wta_contained_in "$WT_MAIN_ROOT" "$tip" || true)
+    if [ -n "$contained" ]; then local_ok=1; local_note="on $contained"; else local_note="REFUSED: commits on no remote branch"; fi
+  fi
+  if [ -z "$rtip" ]; then
+    remote_note="no origin/$branch"
+  else
+    # Safe to delete when everything on it is already in the mainline or in origin/HEAD (the default
+    # branch, e.g. branch-development): either it is an ancestor, or every commit has an equivalent
+    # patch there (squash/rebase merges), which is what an empty `git cherry` without '+' lines means.
+    default_ref=$(git -C "$WT_MAIN_ROOT" symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)
+    for ref in "$mainline" "$default_ref"; do
+      [ -n "$ref" ] || continue
+      git -C "$WT_MAIN_ROOT" rev-parse -q --verify "$ref" >/dev/null || continue
+      # A failed cherry must not count as "nothing missing", and `grep -q` in a pipe could turn a SIGPIPE
+      # into a false "safe" under pipefail, so capture the output first and read all of it.
+      cherry_out=$(git -C "$WT_MAIN_ROOT" cherry "$ref" "$rtip" 2>/dev/null) || continue
+      if [ -z "$(printf '%s\n' "$cherry_out" | grep '^+' || true)" ]; then
+        remote_ok=1
+        remote_ref=$ref
+        remote_note="everything on it is already in $ref"
+        break
+      fi
+    done
+    [ "$remote_ok" -eq 1 ] || remote_note="REFUSED: origin/$branch has commits that are in neither $mainline nor ${default_ref:-origin/HEAD}"
+  fi
+
+  echo
+  echo "Branch '$branch':"
+  echo "  local:  $local_note"
+  echo "  remote: $remote_note"
+  [ "$local_ok" -eq 1 ] || [ "$remote_ok" -eq 1 ] || return 0
+  if [ ! -t 0 ]; then
+    echo "  (no terminal to ask; branch kept)"
+    return 0
+  fi
+
+  options=''
+  [ "$local_ok" -eq 1 ] && options="$options[l]ocal / "
+  [ "$remote_ok" -eq 1 ] && options="$options[r]emote / "
+  [ "$local_ok" -eq 1 ] && [ "$remote_ok" -eq 1 ] && options="$options[b]oth / "
+  printf 'Delete branch? %s[N]o: ' "$options"
+  read -r answer
+  case $answer in
+  l | L) [ "$local_ok" -eq 1 ] || return 0; wt_delete_branch local ;;
+  r | R) [ "$remote_ok" -eq 1 ] || return 0; wt_delete_branch remote ;;
+  b | B) [ "$local_ok" -eq 1 ] && [ "$remote_ok" -eq 1 ] || return 0; wt_delete_branch local; wt_delete_branch remote ;;
+  *) echo "Branches kept." ;;
+  esac
+}
+
+# Delete one side of the branch. The remote side asks once more, naming the ref, since it affects
+# everyone. Relies on tip/rtip/contained/remote_ref from wt_branch_cleanup (bash dynamic scope).
+wt_delete_branch() {
+  if [ "$1" = local ]; then
+    wta_log_branch local "$WT_MAIN_ROOT" "$branch" "$tip" "$contained"
+    git -C "$WT_MAIN_ROOT" branch -D "$branch"
+  else
+    printf "Delete origin/%s on the remote? Others may be using it. [y/N] " "$branch"
+    read -r answer
+    case $answer in
+    [yY] | [yY][eE][sS])
+      wta_log_branch remote "$WT_MAIN_ROOT" "$branch" "$rtip" "$remote_ref"
+      git -C "$WT_MAIN_ROOT" push origin --delete "$branch"
+      ;;
+    *) echo "Remote branch kept." ;;
+    esac
+  fi
+}
+
+# The branch tip, read before the worktree goes away; used by the branch cleanup afterwards.
+branch_tip=$(git -C "$WT_MAIN_ROOT" rev-parse -q --verify "refs/heads/$branch" 2>/dev/null || true)
+
+echo "Removing worktree"
+echo "  branch: $branch"
+echo "  path:   $target"
+echo "  app:    $WT_APP"
+
+# A worktree made by Supacode (or wt-new under Supacode) carries a Supacode lock, and herdr/git refuse to
+# remove a locked worktree. Unlock it for the removal and try to put the same lock back if the removal fails
+# (best effort: git may already have dropped the registration by then, and the re-lock then fails).
+lock_reason=''
+if [ "$WT_APP" != supacode ]; then
+  lock_file="$(git -C "$target" rev-parse --absolute-git-dir 2>/dev/null)/locked"
+  if [ -f "$lock_file" ] && grep -q '"owner":"supacode"' "$lock_file"; then
+    lock_reason=$(cat "$lock_file")
+    echo "  lock:   Supacode lock removed for the deletion"
+    git worktree unlock "$target"
+  fi
+fi
+
+rc=0
+case $WT_APP in
+supacode) supacode worktree delete -w "$(wt_percent_encode "$target")" || rc=$? ;;
+herdr) herdr worktree remove --workspace "$workspace_id" ${force_remove:+--force} || rc=$? ;;
+*) git worktree remove ${force_remove:+--force} "$target" || rc=$? ;;
+esac
+if [ "$rc" -ne 0 ]; then
+  if [ -n "$lock_reason" ] && [ -d "$target" ]; then
+    git worktree lock --reason "$lock_reason" "$target" && echo "wt-rm: removal failed; Supacode lock restored." >&2
+  fi
+  [ "$WT_APP" = supacode ] && echo "wt-rm: if Supacode has not loaded this worktree yet, press Cmd-Shift-R in Supacode and re-run." >&2
+  exit "$rc"
+fi
+wta_flush_log
+
+# Supacode may finish the delete after the CLI returns, and a branch checked out in a still-registered
+# worktree cannot be deleted. Wait (up to ~15s) until the worktree is really gone before the branch step.
+if [ "$WT_APP" = supacode ]; then
+  for _ in $(seq 1 30); do
+    git -C "$WT_MAIN_ROOT" worktree list --porcelain | grep -qx "worktree $target" || break
+    sleep 0.5
+  done
+fi
+
+wt_branch_cleanup "$branch_tip"

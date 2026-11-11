@@ -1,0 +1,379 @@
+
+/* ============================================================================
+   report-base.css
+   Default stylesheet for standalone HTML documents (reports, dashboards, notes).
+
+   Design tokens are lifted verbatim from
+   data-consumption-platform/src/styles/variables.css (the --color-cuboid-*
+   block), so anything built with this file reads as the same product as the
+   Cuboid Optimizer page in Insights.
+
+   Light mode is the :root default and uses the DARKER text hexes for contrast
+   against white. html.dark swaps to the lighter steps for contrast against the
+   dark card surface. Both modes are chosen, not an automatic inversion.
+
+   Colour grammar, kept from the Cuboid Optimizer:
+     CYAN    navigation and links (tabs, ink bar, rdar links, chip buttons)
+     status  danger / warning / info / success / neutral, reserved for meaning
+   Status colours always ship with a text label, never colour alone.
+
+   Usage: inline this whole file inside a single <style> block so the document
+   stays self-contained with no external requests. Set <html class="dark"> and
+   let the prefers-color-scheme snippet at the bottom of your script strip it
+   for light-mode users.
+   ========================================================================= */
+
+:root {
+  --surface:            #fff;
+  --surface-2:          #f8f9fa;
+  --surface-3:          #f3f4f6;
+  --page:               #f8f9fa;
+  --ink:                #111827;
+  --ink-2:              #6b7280;
+  --border:             #e5e7eb;
+  --border-strong:      #d1d5db;
+
+  --success:            #059669;
+  --success-bg:         rgb(16 185 129 / 12%);
+  --success-border:     rgb(16 185 129 / 40%);
+  --danger:             #dc2626;
+  --danger-bg:          rgb(239 68 68 / 10%);
+  --danger-border:      rgb(239 68 68 / 40%);
+  --warning:            #b45309;
+  --warning-bg:         rgb(245 158 11 / 15%);
+  --warning-border:     rgb(245 158 11 / 50%);
+  --info:               #1d4ed8;
+  --info-bg:            rgb(59 130 246 / 12%);
+  --info-border:        rgb(59 130 246 / 40%);
+  --neutral:            #4b5563;
+  --neutral-bg:         rgb(107 114 128 / 8%);
+  --neutral-border:     rgb(107 114 128 / 35%);
+  --nav:                #0891b2;
+  --nav-bg:             rgb(8 145 178 / 12%);
+  --nav-border:         rgb(8 145 178 / 40%);
+  --nav-hover:          #22d3ee;
+  --purple:             #6b21a8;
+  --purple-bg:          rgb(114 46 209 / 12%);
+  --purple-border:      rgb(114 46 209 / 55%);
+
+  --shadow: 0 1px 2px rgb(0 0 0 / 6%), 0 1px 3px rgb(0 0 0 / 4%);
+}
+
+html.dark {
+  --surface:            #1f2937;
+  --surface-2:          #2d2d2d;
+  --surface-3:          #1f1f1f;
+  --page:               #1c1917;
+  --ink:                #f9fafb;
+  --ink-2:              #d1d5db;
+  --border:             #363b3d;
+  --border-strong:      #4b5563;
+
+  --success:            #34d399;
+  --success-bg:         rgb(16 185 129 / 15%);
+  --success-border:     rgb(16 185 129 / 45%);
+  --danger:             #f87171;
+  --danger-bg:          rgb(239 68 68 / 15%);
+  --danger-border:      rgb(239 68 68 / 45%);
+  --warning:            #fbbf24;
+  --warning-bg:         rgb(245 158 11 / 15%);
+  --warning-border:     rgb(245 158 11 / 50%);
+  --info:               #60a5fa;
+  --info-bg:            rgb(59 130 246 / 15%);
+  --info-border:        rgb(59 130 246 / 45%);
+  --neutral:            #9ca3af;
+  --neutral-bg:         rgb(107 114 128 / 10%);
+  --neutral-border:     rgb(107 114 128 / 30%);
+  --nav:                #58d1c9;
+  --nav-bg:             rgb(88 209 201 / 15%);
+  --nav-border:         rgb(88 209 201 / 45%);
+  --nav-hover:          #b5f5ec;
+  --purple:             #d3adf7;
+  --purple-bg:          #5b21b6;
+  --purple-border:      #a855f7;
+
+  --shadow: 0 6px 24px rgb(0 0 0 / 45%), 0 2px 8px rgb(0 0 0 / 30%);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Viewport-based fluid scaling, same rationale as .cuboid-root: identical pixel
+   sizes read as tiny on a large monitor because the viewer sits further away.
+   CSS zoom scales the whole subtree proportionally, text and padding and
+   borders alike. Non-standard but supported in Chrome, Safari, Edge and
+   Firefox 126+; older Firefox falls back to unscaled, degraded but usable. */
+.root { max-width: 1560px; margin: 0 auto; padding: 20px 24px 64px; }
+@media (width >= 1920px) { .root { zoom: 1.05; } }
+@media (width >= 2400px) { .root { zoom: 1.2; } }
+@media (width >= 3200px) { .root { zoom: 1.4; } }
+
+/* Narrow variant for prose-led documents: caps the measure near 90 characters.
+   Use .root.prose instead of .root when the page is mostly text. */
+.root.prose { max-width: 980px; }
+
+/* ---------- document typography ---------- */
+h1 { font-size: 19px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; letter-spacing: -0.01em; }
+h3 { font-size: 13px; font-weight: 600; margin: 18px 0 6px; }
+p { margin: 0 0 10px; }
+ul, ol { margin: 0 0 10px; padding-left: 20px; }
+li { margin-bottom: 3px; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 22px 0; }
+a { color: var(--nav); }
+a:hover { color: var(--nav-hover); }
+/* Links inside table cells stay clean: a column of underlined IDs reads as
+   visual noise. The cyan already signals "link"; underline on hover confirms it. */
+td a { text-decoration: none; }
+td a:hover { text-decoration: underline; }
+strong, b { font-weight: 600; }
+small, .muted { color: var(--ink-2); }
+.sub { color: var(--ink-2); }
+td .sub { font-size: 11px; }
+
+code, kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px; background: var(--surface-3); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 5px; color: var(--ink-2);
+}
+pre {
+  background: var(--surface-3); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px; overflow: auto; margin: 0 0 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px;
+  line-height: 1.5;
+}
+pre code { background: none; border: 0; padding: 0; font-size: inherit; color: var(--ink); }
+blockquote {
+  margin: 0 0 12px; padding: 8px 14px;
+  border-left: 3px solid var(--nav-border); background: var(--nav-bg);
+  border-radius: 0 6px 6px 0;
+}
+
+/* ---------- header ---------- */
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.crumb { font-size: 12px; color: var(--ink-2); }
+
+/* ---------- buttons: 24px tall, 12px text, cyan chip (.cuboid-cyan-chip) ---------- */
+.btn {
+  height: 24px; padding-inline: 10px; font-size: 12px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--nav-bg); border: 1px solid var(--nav-border);
+  color: var(--nav); border-radius: 6px; cursor: pointer;
+  font-family: inherit; white-space: nowrap;
+}
+.btn:hover { color: var(--nav-hover); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+/* Icon-only theme switch. Both glyphs ship in the markup and CSS picks one, so
+   there is no flash of the wrong icon before script runs. Sun shows in dark
+   mode (click for light); moon shows in light mode (click for dark).
+   Markup: <button class="icon-btn"><svg class="sun">..</svg><svg class="moon">..</svg></button> */
+.icon-btn {
+  width: 30px; height: 30px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--nav-bg); border: 1px solid var(--nav-border);
+  color: var(--nav); border-radius: 8px; cursor: pointer;
+}
+.icon-btn:hover { color: var(--nav-hover); }
+.icon-btn svg { display: block; width: 15px; height: 15px; }
+.icon-btn .sun { display: none; }
+html.dark .icon-btn .sun { display: block; }
+html.dark .icon-btn .moon { display: none; }
+
+/* ---------- KPI row and stat tiles ----------
+   dataviz choosing-a-form.md: a handful of headline numbers is a KPI row of
+   stat tiles, never a grouped bar chart; a single value is a stat tile, never a
+   one-bar chart. Hero figure uses the same sans as body text (a display or
+   serif face reads as off-brand decoration) and proportional figures, since
+   tabular-nums makes large standalone numbers look loose. */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 18px 0 16px; }
+.kpis.lead-hero { grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; }
+@media (width < 1000px) { .kpis, .kpis.lead-hero { grid-template-columns: repeat(2, 1fr); } }
+.tile {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow);
+}
+.tile .lab { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-2); }
+.tile .val { font-size: 26px; font-weight: 600; margin-top: 2px; letter-spacing: -0.02em; }
+.tile.hero .val { font-size: 46px; line-height: 1.05; }
+.tile .sub { font-size: 11px; color: var(--ink-2); margin-top: 2px; }
+/* Accent strip on a tile: add .accent-<status> alongside .tile */
+.tile.accent-danger  { box-shadow: var(--shadow), inset 3px 0 0 var(--danger); }
+.tile.accent-warning { box-shadow: var(--shadow), inset 3px 0 0 var(--warning); }
+.tile.accent-info    { box-shadow: var(--shadow), inset 3px 0 0 var(--info); }
+.tile.accent-success { box-shadow: var(--shadow), inset 3px 0 0 var(--success); }
+.tile.accent-neutral { box-shadow: var(--shadow), inset 3px 0 0 var(--neutral); }
+.tile.accent-nav     { box-shadow: var(--shadow), inset 3px 0 0 var(--nav); }
+
+/* ---------- callouts ---------- */
+.callout {
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 12px;
+  background: var(--warning-bg); border: 1px solid var(--warning-border);
+}
+.callout b { color: var(--warning); }
+.callout.info    { background: var(--info-bg);    border-color: var(--info-border); }
+.callout.info b  { color: var(--info); }
+.callout.danger  { background: var(--danger-bg);  border-color: var(--danger-border); }
+.callout.danger b { color: var(--danger); }
+.callout.ok      { background: var(--success-bg); border-color: var(--success-border); }
+.callout.ok b    { color: var(--success); }
+
+/* ---------- filter row ----------
+   dataviz interaction.md: ONE filter row above everything it scopes. Never a
+   per-table filter, never a filter inside a card. */
+.filters {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; box-shadow: var(--shadow);
+}
+input[type=search], input[type=text], select {
+  height: 24px; font-size: 12px; font-family: inherit;
+  background: var(--surface-3); color: var(--ink);
+  border: 1px solid var(--border-strong); border-radius: 6px; padding-inline: 8px;
+}
+input[type=search] { min-width: 250px; }
+input:focus, select:focus { outline: none; border-color: var(--nav); }
+.count { font-size: 12px; color: var(--ink-2); margin-left: auto; }
+.count b { color: var(--ink); }
+
+/* ---------- tab bar ----------
+   Every tab carries identical padding and weight so switching never reflows the
+   bar; only background and text colour change on active. The 2px cyan ink bar
+   is the underline. Gap is 12px, not AntD's 32px, so the chips read as one bar. */
+.tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.tab {
+  padding: 6px 10px; font-size: 13px; font-weight: 400;
+  background: none; border: 0; cursor: pointer; color: var(--ink-2);
+  font-family: inherit; border-radius: 6px 6px 0 0; position: relative;
+}
+.tab:hover { background: var(--nav-bg); color: var(--nav-hover); }
+.tab.on { background: var(--nav-bg); color: var(--nav); }
+.tab.on::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 2px; background: var(--nav); border-radius: 2px 2px 0 0;
+}
+.tab .n { font-size: 11px; color: var(--ink-2); margin-left: 4px; }
+.tab.on .n { color: var(--nav); }
+
+/* ---------- cards and tables ----------
+   12px cells everywhere so numbers, dates and chips sit at one visual size; the
+   AntD 14px default made values look larger than the tags beside them. Table
+   background is transparent against the card so tinted chips blend the same on
+   every surface, and the card's rounded corners are not clipped by a darker
+   table background. */
+.sec { margin-bottom: 22px; }
+.sec h2 { font-size: 13px; font-weight: 600; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.sec h2 .n { font-size: 11px; font-weight: 400; color: var(--ink-2); }
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; box-shadow: var(--shadow); overflow: hidden;
+}
+.card.pad { padding: 14px 16px; }
+table { width: 100%; border-collapse: collapse; background: transparent; }
+th, td { font-size: 12px; text-align: left; padding: 7px 10px; vertical-align: top; }
+thead th {
+  background: var(--surface-3); color: var(--ink-2); font-weight: 500;
+  white-space: nowrap; user-select: none;
+  border-bottom: 1px solid var(--border);
+}
+thead th[data-k] { cursor: pointer; }
+thead th[data-k]:hover { color: var(--nav); }
+thead th .ar { opacity: 0.5; font-size: 9px; }
+tbody tr.r { border-top: 1px solid var(--border); }
+tbody tr.r:first-child { border-top: 0; }
+tbody tr.r:hover { background: var(--nav-bg); }
+tbody td { background: transparent; }
+/* Round the last row so the card's 8px radius does not stop at the header. */
+tbody tr:last-child td:first-child { border-bottom-left-radius: 8px; }
+tbody tr:last-child td:last-child { border-bottom-right-radius: 8px; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.who { white-space: nowrap; }
+.empty { padding: 28px; text-align: center; color: var(--ink-2); font-size: 12px; }
+
+/* Row accent strip, from the Cuboid Optimizer freshness strip: an inset
+   box-shadow on the row's first cell, because border-left on a td inside a
+   collapsed table fights the table's own borders. Always pair the strip with a
+   text label in the row, so colour is never the only encoding. */
+tr.s-danger  > td:first-child { box-shadow: inset 3px 0 0 var(--danger); }
+tr.s-warning > td:first-child { box-shadow: inset 3px 0 0 var(--warning); }
+tr.s-info    > td:first-child { box-shadow: inset 3px 0 0 var(--info); }
+tr.s-success > td:first-child { box-shadow: inset 3px 0 0 var(--success); }
+tr.s-nav     > td:first-child { box-shadow: inset 3px 0 0 var(--nav); }
+tr.s-neutral > td:first-child { box-shadow: inset 3px 0 0 var(--neutral); }
+
+/* ---------- chips ----------
+   The recipe behind every tag in the Cuboid Optimizer: low-opacity tinted
+   background, saturated border, saturated text. Slim, and it blends correctly
+   over any surface because the fill is rgba rather than opaque. */
+.chip {
+  display: inline-flex; align-items: center; font-size: 11px; line-height: 1.4;
+  padding: 0 6px; border-radius: 4px; border: 1px solid; white-space: nowrap;
+}
+.c-danger  { background: var(--danger-bg);  border-color: var(--danger-border);  color: var(--danger); }
+.c-warning { background: var(--warning-bg); border-color: var(--warning-border); color: var(--warning); }
+.c-info    { background: var(--info-bg);    border-color: var(--info-border);    color: var(--info); }
+.c-nav     { background: var(--nav-bg);     border-color: var(--nav-border);     color: var(--nav); }
+.c-neutral { background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--neutral); }
+.c-success { background: var(--success-bg); border-color: var(--success-border); color: var(--success); }
+.c-purple  { background: var(--purple-bg);  border-color: var(--purple-border);  color: var(--purple); }
+
+/* ---------- expandable detail row ----------
+   Markup pattern:
+     <tr class="r" data-id="X"><td class="tog"><button class="tw" data-id="X"><span>&#9654;</span></button></td>...</tr>
+     <tr class="det" data-det="X"><td colspan="N"><div class="detail">...</div></td></tr>
+   Toggle .show on the .det row and .open on the .r row. Toggle in place rather
+   than re-rendering, or a full re-render loses scroll position mid-read. */
+td.tog { width: 26px; padding-right: 0; }
+.tw {
+  width: 18px; height: 18px; padding: 0; margin-top: -1px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: 0; cursor: pointer; color: var(--ink-2);
+  border-radius: 4px; font-family: inherit; font-size: 9px; line-height: 1;
+}
+.tw:hover { color: var(--nav); background: var(--nav-bg); }
+.tw span { display: block; transition: transform 0.12s ease; }
+tr.r.open .tw { color: var(--nav); }
+tr.r.open .tw span { transform: rotate(90deg); }
+.tw.none { opacity: 0.25; cursor: default; }
+.tw.none:hover { background: none; color: var(--ink-2); }
+
+tr.det { display: none; }
+tr.det.show { display: table-row; }
+tr.det > td {
+  padding: 0 10px 12px 36px;
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--border);
+}
+/* Cap the measure: body text stretched across a full-width table is
+   unreadable. 980px keeps lines near the 90-character comfort range, and the
+   max-height stops a pathologically long entry from owning the page. */
+.detail {
+  max-height: 340px; max-width: 980px; overflow: auto; padding: 10px 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+}
+.detail .who2 { font-size: 11px; color: var(--ink-2); margin-bottom: 4px; }
+.detail .body { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.55; }
+.detail .entry + .entry { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.detail a { color: var(--nav); overflow-wrap: anywhere; }
+.detail .none { color: var(--ink-2); font-style: italic; }
+
+footer { margin-top: 28px; font-size: 11px; color: var(--ink-2); line-height: 1.7; }
+
+@media print {
+  .filters, .tabs, .icon-btn, .tw, .no-print { display: none !important; }
+  body { background: #fff; }
+  .card, .tile { box-shadow: none; break-inside: avoid; }
+  .sec { break-inside: avoid; }
+  tr.det { display: table-row !important; }
+  .detail { max-height: none; overflow: visible; }
+}
+
