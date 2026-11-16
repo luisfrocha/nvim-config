@@ -299,3 +299,49 @@ if [ "$WT_APP" = supacode ]; then
 fi
 
 wt_branch_cleanup "$branch_tip"
+
+# Closing a worktree's terminals leaves the app on whatever it picks next, which may be another repo.
+# Move to this repo's first remaining worktree instead; with none left, notify so the closure is known.
+# Best effort: a failure here never changes wt-rm's exit status.
+wt_notify() {
+  osascript -e 'on run argv' -e 'display notification (item 1 of argv) with title "wt-rm"' -e 'end run' "$1" >/dev/null 2>&1 || true
+}
+
+wt_focus_next() {
+  local next='' id path
+  case $WT_APP in
+  supacode)
+    # Supacode lists every repo's worktrees (percent-encoded paths); keep only this repo's, per git.
+    local repo_paths
+    repo_paths=$(git -C "$WT_MAIN_ROOT" worktree list --porcelain | sed -n 's/^worktree //p')
+    while IFS= read -r id; do
+      [ -n "$id" ] || continue
+      path=$(wt_percent_decode "$id")
+      path=${path%/}
+      [ "$path" != "$target" ] || continue
+      if printf '%s\n' "$repo_paths" | grep -qxF "$path"; then
+        next=$id
+        break
+      fi
+    done < <(supacode worktree list --not-archived 2>/dev/null || true)
+    [ -z "$next" ] || supacode worktree focus -w "$next" >/dev/null 2>&1 || true
+    ;;
+  herdr)
+    next=$(herdr worktree list --cwd "$WT_MAIN_ROOT" 2>/dev/null |
+      python3 -I -c 'import json,sys
+for w in json.load(sys.stdin)["result"]["worktrees"]:
+    if w["path"] != sys.argv[1] and w.get("open_workspace_id"):
+        print(w["open_workspace_id"])
+        break' "$target" 2>/dev/null || true)
+    [ -z "$next" ] || herdr workspace focus "$next" >/dev/null 2>&1 || true
+    ;;
+  *) return 0 ;;
+  esac
+  if [ -n "$next" ]; then
+    echo "Switched to this repo's next worktree."
+  else
+    wt_notify "All sessions and terminals in repo $WT_REPO_NAME have been closed"
+  fi
+}
+
+wt_focus_next
